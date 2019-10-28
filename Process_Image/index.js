@@ -12,11 +12,12 @@ exports.Process = (req, res) => {
     if (req.method !== "POST" || req.body.loc === undefined) {
         res.status(400).end;
     }
-    client.documentTextDetection("gs://report-cards-6290-uploads/"+req.body.loc).then(response => {
-        ([response].labelAnnotations).forEach(label => console.log(label.description));
+    client.documentTextDetection("gs://report-cards-6290-uploads/" + req.body.loc).then(response => {
+        const fullTextAnnotation = response.fullTextAnnotation;
+        console.log(fullTextAnnotation.text);
         res.status(201).end();
-    }).catch (err=>{
-        console.log("error:"+err.toString());
+    }).catch(err => {
+        console.log("error:" + err.toString());
         res.status(500).end();
     });
 };
