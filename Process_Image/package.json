@@ -4,5 +4,5 @@
     "keywords": ["util", "functional", "server", "client", "browser"],
     "author": "Luke",
     "contributors": [],
-    "dependencies": {}
+    "dependencies": {"@google-cloud/datastore": "1.4.1"}
 }
