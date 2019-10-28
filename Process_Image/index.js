@@ -9,10 +9,13 @@ exports.Process = (req, res) => {
         res.status(400).end;
     }
     bucket.getFiles({prefix: req.body.loc}, (err, files) => {
-        if (err)
-            return reject(err);
-        //resolve(files);
-        console.log(files[0].toString());
-        res.status(200).end();
+        if (err){return reject(err);}
+        if(files[0]){
+            console.log(files[0].name);
+            res.status(201).end();
+            //run into vision
+        }else{
+            res.status(500).end();
+        }
     });
 };
