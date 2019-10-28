@@ -13,10 +13,10 @@ exports.Process = (req, res) => {
         res.status(400).end;
     }
     client.documentTextDetection("gs://report-cards-6290-uploads/"+req.body.loc).then(response => {
-        response.labelAnnotations.forEach(label => console.log(label.description));
+        (response.labelAnnotations).forEach(label => console.log(label.description));
         res.status(201).end();
     }).catch (err=>{
         console.log("error:"+err.toString());
         res.status(500).end();
     });
-}
+};
