@@ -7,12 +7,17 @@ var fulltext;
 var Info=new Object();
 
 function ExtractBarcode(){
-    Info["Barcode"]=fulltext.match(/[0-9]{5}/g);
+    Info.Barcode=fulltext.match(/[0-9]{5}/g);
     console.log(Info.Barcode);
 }
 
 function ExtractLevel(){
-    
+    if(fulltext.match(/PRESCHOOL [1-5]/g)){
+        Info.Level=fulltext.match(/PRESCHOOL [1-5]/g);
+    }else if(fulltext.match(/SWIMMER [1-6]/g)){
+        Info.Level=fulltext.match(/SWIMMER [1-6]/g);
+    }
+    console.log()
 }
 
 function ExtractNames(){
