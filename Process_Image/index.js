@@ -3,12 +3,12 @@ const {Storage} = require('@google-cloud/storage');
 const storage = new Storage();
 const bucket = storage.bucket('report-cards-6290-uploads');
 //vision API
-const vision = require('@google-cloud/vision');
-const client = new vision.ImageAnnotatorClient();
 
 async function getText(location) {
-    const [result] = await client.documentTextDetection("gs://report-cards-6290-uploads/" + location);
-    const fullTextAnnotation = result.fullTextAnnotation;
+    const vision = require('@google-cloud/vision');
+    const client = new vision.ImageAnnotatorClient();
+    var [result] = await client.documentTextDetection("gs://report-cards-6290-uploads/" + location);
+    var fullTextAnnotation = result.fullTextAnnotation;
     console.log(fullTextAnnotation.text);
     return fullTextAnnotation.text;
 }
