@@ -13,8 +13,9 @@ exports.Process = (req, res) => {
         res.status(400).end;
     }
     client.documentTextDetection("gs://report-cards-6290-uploads/" + req.body.loc).then(response => {
-        const fullTextAnnotation = response.responses.fullTextAnnotation.text;;
-        console.log(fullTextAnnotation);
+        for (var i = 0; i < response.length; i++) {
+            console.log(response[i].toString());
+        }
         res.status(201).end();
     }).catch(err => {
         console.log("error:" + err.toString());
