@@ -1,3 +1,3 @@
-function Process(){
-    
-}
+exports.Process=(req,res)=>{
+    res.send("Hello");
+};
