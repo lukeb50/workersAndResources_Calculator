@@ -1,6 +1,10 @@
+//Storage Bucket
 const {Storage} = require('@google-cloud/storage');
 const storage = new Storage();
 const bucket = storage.bucket('report-cards-6290-uploads');
+//vision API
+const vision = require('@google-cloud/vision');
+const client = new vision.ImageAnnotatorClient();
 
 exports.Process = (req, res) => {
     res.set('Access-Control-Allow-Origin', "*");
@@ -8,14 +12,11 @@ exports.Process = (req, res) => {
     if (req.method !== "POST" || req.body.loc === undefined) {
         res.status(400).end;
     }
-    bucket.getFiles({prefix: req.body.loc}, (err, files) => {
-        if (err){return reject(err);}
-        if(files[0]){
-            console.log(files[0].name);
-            res.status(201).end();
-            //run into vision
-        }else{
-            res.status(500).end();
-        }
+    client.documentTextDetection(`gs://report-cards-6290-uploads/${req.body.loc}`).then(response => {
+        console.log(response.toString());
+        res.status(201).end();
+    }).catch (err=>{
+        console.log("error");
+        res.status(500).end();
     });
-};
+}
