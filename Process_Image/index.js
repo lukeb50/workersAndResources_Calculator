@@ -12,10 +12,14 @@ function ExtractBarcode(){
 }
 
 function ExtractLevel(){
-    if(fulltext.match(/PRESCHOOL [1-5]/g)){
+    if(fulltext.match(/PRESCHOOL [1-5]/g)!==null){
+        console.log("preschool")
         Info.Level=fulltext.match(/PRESCHOOL [1-5]/g);
-    }else if(fulltext.match(/SWIMMER [1-6]/g)){
+    }else if(fulltext.match(/SWIMMER [1-6]/g)!==null){
+        console.log("Swimmer");
         Info.Level=fulltext.match(/SWIMMER [1-6]/g);
+    }else{
+        Info.Level="Unknown";
     }
     console.log(Info.Level);
 }
