@@ -17,7 +17,7 @@ function ExtractLevel(){
     }else if(fulltext.match(/SWIMMER [1-6]/g)){
         Info.Level=fulltext.match(/SWIMMER [1-6]/g);
     }
-    console.log()
+    console.log(Info.Level);
 }
 
 function ExtractNames(){
