@@ -4,10 +4,10 @@ const storage = new Storage();
 const bucket = storage.bucket('report-cards-6290-uploads');
 //vision API
 var fulltext;
-var Info=[];
+var Info=new Object();
 
 function ExtractBarcode(){
-    Info.push("Barcode",fulltext.match(/[0-9]{5}/g));
+    Info["Barcode"]=fulltext.match(/[0-9]{5}/g);
     console.log(Info.Barcode);
 }
 
