@@ -36,6 +36,8 @@ async function getText(location) {
     console.log(fullTextAnnotation.text);
     fulltext=fullTextAnnotation.text;
     ExtractBarcode();
+    ExtractLevel();
+    ExtractNames();
 }
 
 exports.Process = (req, res) => {
