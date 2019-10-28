@@ -11,8 +11,8 @@ exports.Process = (req, res) => {
     bucket.getFiles({prefix: req.body.loc}, (err, files) => {
         if (err)
             return reject(err);
-        resolve(files);
-        console.log(files.toString());
+        //resolve(files);
+        console.log(files[0].toString());
         res.status(200).end();
     });
 };
