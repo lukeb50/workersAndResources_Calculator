@@ -13,8 +13,8 @@ exports.Process = (req, res) => {
         res.status(400).end;
     }
     client.documentTextDetection("gs://report-cards-6290-uploads/" + req.body.loc).then(response => {
-        for (var i = 0; i < response.length; i++) {
-            console.log(response[i].toString());
+        for (var i = 0; i < response[0].length; i++) {
+            console.log(response[0][i].toString());
         }
         res.status(201).end();
     }).catch(err => {
