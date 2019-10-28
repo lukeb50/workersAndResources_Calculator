@@ -12,11 +12,11 @@ exports.Process = (req, res) => {
     if (req.method !== "POST" || req.body.loc === undefined) {
         res.status(400).end;
     }
-    client.documentTextDetection(`gs://report-cards-6290-uploads/${req.body.loc}`).then(response => {
+    client.documentTextDetection("gs://report-cards-6290-uploads/"+req.body.loc).then(response => {
         console.log(response.toString());
         res.status(201).end();
     }).catch (err=>{
-        console.log("error");
+        console.log("error:"+err.toString());
         res.status(500).end();
     });
 }
