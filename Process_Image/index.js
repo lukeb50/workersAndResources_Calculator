@@ -6,8 +6,8 @@ const bucket = storage.bucket('report-cards-6290-uploads');
 const vision = require('@google-cloud/vision');
 const client = new vision.ImageAnnotatorClient();
 
-async function getText() {
-    const [result] = await client.documentTextDetection("gs://report-cards-6290-uploads/" + req.body.loc);
+async function getText(location) {
+    const [result] = await client.documentTextDetection("gs://report-cards-6290-uploads/" +location);
     const fullTextAnnotation = result.fullTextAnnotation;
     console.log(fullTextAnnotation.text);
     return fullTextAnnotation.text;
@@ -19,7 +19,7 @@ exports.Process = (req, res) => {
     if (req.method !== "POST" || req.body.loc === undefined) {
         res.status(400).end;
     }
-    data=getText();
+    data=getText(req.body.loc);
     console.log(data);
     res.status(202).end();
 };
