@@ -3,6 +3,21 @@ const {Storage} = require('@google-cloud/storage');
 const storage = new Storage();
 const bucket = storage.bucket('report-cards-6290-uploads');
 //vision API
+var fulltext;
+var Info=[];
+
+function ExtractBarcode(){
+    Info.push("Barcode",fulltext.match(/[0-9]{5}/g));
+    console.log(Info.Barcode);
+}
+
+function ExtractLevel(){
+    
+}
+
+function ExtractNames(){
+    
+}
 
 async function getText(location) {
     const vision = require('@google-cloud/vision');
@@ -10,17 +25,17 @@ async function getText(location) {
     var [result] = await client.documentTextDetection("gs://report-cards-6290-uploads/" + location);
     var fullTextAnnotation = result.fullTextAnnotation;
     console.log(fullTextAnnotation.text);
-    return fullTextAnnotation.text;
+    fulltext=fullTextAnnotation.text;
+    ExtractBarcode();
 }
 
 exports.Process = (req, res) => {
     res.set('Access-Control-Allow-Origin', "*");
     res.set('Access-Control-Allow-Methods', 'POST');
     if (req.method !== "POST" || req.body.loc === undefined) {
-        res.status(400).end;
+        res.status(400).end();
     }
     getText(req.body.loc).then(res => {
-        console.log(res.toString());
         res.status(201).end();
     }).catch(err => {
         console.log("error:"+err.toString());
