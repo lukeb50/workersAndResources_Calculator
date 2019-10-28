@@ -10,6 +10,7 @@ async function getText() {
     const [result] = await client.documentTextDetection("gs://report-cards-6290-uploads/" + req.body.loc);
     const fullTextAnnotation = result.fullTextAnnotation;
     console.log(fullTextAnnotation.text);
+    return fullTextAnnotation.text;
 }
 
 exports.Process = (req, res) => {
@@ -18,13 +19,7 @@ exports.Process = (req, res) => {
     if (req.method !== "POST" || req.body.loc === undefined) {
         res.status(400).end;
     }
-    client.documentTextDetection("gs://report-cards-6290-uploads/" + req.body.loc).then(response => {
-        for (var i = 0; i < response[0].fullTextAnnotations.length; i++) {
-            console.log(response[0].fullTextAnnotations[i]);
-        }
-        res.status(201).end();
-    }).catch(err => {
-        console.log("error:" + err.toString());
-        res.status(500).end();
-    });
+    data=getText();
+    console.log(data);
+    res.status(202).end();
 };
