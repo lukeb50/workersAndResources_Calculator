@@ -35,7 +35,7 @@ exports.Process = (req, res) => {
     if (req.method !== "POST" || req.body.loc === undefined) {
         res.status(400).end();
     }
-    getText(req.body.loc).then(res => {
+    getText(req.body.loc).then(re => {
         res.status(201).end();
     }).catch(err => {
         console.log("error:"+err.toString());
