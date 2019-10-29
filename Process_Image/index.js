@@ -68,7 +68,7 @@ function condensePositions(pos) {
         }
         console.log("Low Y:"+lowesty);
         //found current lowest point;
-        var onrow={};
+        var onrow=[];
         for (var i = 0; i < pos.length; i++) {
             if(lowesty-25<pos[i][2] && lowesty+25>pos[i][2]){
                 onrow.push(pos[i]);
