@@ -41,13 +41,12 @@ function getCrossPoint() {
                             console.log("found previous");
                             var lowestx = 10000;
                             var lowesty = 10000;
-                            console.log("length:"+word.boundingBox.vertices.length);
                             for (var x = 0; x < word.boundingBox.vertices.length; x++) {
                                 //check each bounding box
                                 if (word.boundingBox.vertices[x].x < lowestx) {
                                     lowestx = word.boundingBox.vertices[x].x;
                                 }
-                                if (word.boundingBox[x].y < lowesty) {
+                                if (word.boundingBox.vertices[x].y < lowesty) {
                                     lowesty = word.boundingBox.vertices[x].y;
                                 }
                             }
