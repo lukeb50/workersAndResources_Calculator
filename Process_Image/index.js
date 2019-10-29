@@ -79,8 +79,9 @@ function condensePositions(pos) {
         while(onrow.length>0){
             var lowestx=10000;
             for (var x = 0; x < onrow.length; x++) {
-                if(onrow[x][1]<lowestx){line=line+onrow[x][0];lowestx=onrow[x][1];onrow.pop(x);}
+                if(onrow[x][1]<lowestx){lowestx=onrow[x][1];}
             }
+            //next element pos found
         }
         console.log("Line:"+line);
     }
@@ -117,7 +118,8 @@ function ExtractNames() {
         });
     });
     //condense into seperated rows and return everything in that row
-    condensePositions(Positions);
+    console.log(Positions.length);
+    //condensePositions(Positions);
     return Names;
 }
 
