@@ -38,7 +38,7 @@ function getCrossPoint() {
                         const wordText = word.symbols.map(s => s.text).join('');
                         if (wordText.match(/Previous/g) !== null) {
                             var lowestx = 10000;
-                            var lowesty = 10000;
+                            var lowesty = 0;
                             for (var x = 0; x < word.boundingBox.vertices.length; x++) {
                                 //check each bounding box
                                 if (word.boundingBox.vertices[x].x < lowestx) {
