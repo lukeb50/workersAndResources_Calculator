@@ -8,7 +8,7 @@ var detailedtext;
 var Info = new Object();
 
 function ExtractBarcode() {
-    Info.Barcode = fulltext.match(/[0-9]{5}/g);
+    Info.Barcode = fulltext.match(new RegExp("[0-9]{"+process.env.Barcode_Length+"}","g"));
     console.log(Info.Barcode);
 }
 
@@ -41,7 +41,7 @@ function getCrossPoint() {
                             console.log("found previous");
                             var lowestx = 10000;
                             var lowesty = 10000;
-                            for (var x = 0; x < word.boundingBox.length; i++) {
+                            for (var x = 0; x < word.boundingBox.length; x++) {
                                 //check each bounding box
                                 if (word.boundingBox[x].x < lowestx) {
                                     lowestx = word.boundingBox[x].x;
