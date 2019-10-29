@@ -119,7 +119,7 @@ function ExtractNames() {
                         var wordText2=wordText.replace(/\d+/g,"");
                         if(wordText2!==""){
                             console.log(wordText2);
-                            Positions.push({word, x, y});
+                            Positions.push([word, x, y]);
                         }
                     }
                 });
