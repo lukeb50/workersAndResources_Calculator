@@ -44,7 +44,7 @@ function getCrossPoint() {
                                 if (word.boundingBox.vertices[x].x < lowestx) {
                                     lowestx = word.boundingBox.vertices[x].x;
                                 }
-                                if (word.boundingBox.vertices[x].y < lowesty) {
+                                if (word.boundingBox.vertices[x].y > lowesty) {
                                     lowesty = word.boundingBox.vertices[x].y;
                                 }
                             }
@@ -67,7 +67,7 @@ function ExtractNames() {
             block.paragraphs.forEach(paragraph => {
                 paragraph.words.forEach(word => {
                     const wordText = word.symbols.map(s => s.text).join('');
-                    if(word.boundingBox.vertices[0].x<point[0] && word.boundingBox.vertices[0].y<point[1]){
+                    if(word.boundingBox.vertices[0].x<point[0] && word.boundingBox.vertices[0].y>point[1]){
                         //is within name area.
                         console.log("Word:"+wordText);
                     }
