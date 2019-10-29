@@ -8,7 +8,7 @@ var detailedtext;
 var Info = new Object();
 
 function ExtractBarcode() {
-    Info.Barcode = fulltext.match(new RegExp("[0-9]{"+process.env.Barcode_Length+"}","g"));
+    Info.Barcode = fulltext.match(new RegExp("[0-9]{" + process.env.Barcode_Length + "}", "g"));
     console.log(Info.Barcode);
 }
 
@@ -47,10 +47,10 @@ function getCrossPoint() {
                                     lowestx = word.boundingBox.vertices[x].x;
                                 }
                                 if (word.boundingBox.vertices[x].y < lowesty) {
-                                    lowesty = word.boundingBox.vertices[x].y;
+                                    lowesty = word.boundingBox.vertices[y].y;
                                 }
                             }
-                            console.log(lowestx+":COORDINATES:"+lowesty);
+                            console.log(lowestx + ":COORDINATES:" + lowesty);
                             return [lowestx, lowesty];
                         }
                     });
@@ -58,12 +58,25 @@ function getCrossPoint() {
             });
         });
     });
-    return [0, 0];
+    return [1000, 1000];
 }
 
 function ExtractNames() {
-    var point = getCrossPoint();
-    console.log(point[0], point[1]);
+    var point = getCrossPoint(); //Point where -x and -y will only contain names
+    //check if each word is within box. If yes and not single Letter, add to array based on Y
+    detailedtext.pages.forEach(page => {
+        page.blocks.forEach(block => {
+            block.paragraphs.forEach(paragraph => {
+                paragraph.words.forEach(word => {
+                    const wordText = word.symbols.map(s => s.text).join('');
+                    if(word.boundingBox.vertices[0].x<point[0] && word.boundingBox.vertices[0].y<point[1]){
+                        //is within name area.
+                        console.log("Word:"+wordText);
+                    }
+                });
+            });
+        });
+    });
 }
 
 async function getText(location) {
