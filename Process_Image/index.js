@@ -62,8 +62,8 @@ function condensePositions(pos) {
     for (var z = 0; z < 12; z++){
         var lowesty = 10000;
         for (var loc in pos) {
-            if (loc[1] < lowesty) {
-                lowesty = loc[1];
+            if (loc[2] < lowesty) {
+                lowesty = loc[2];
             }
         }
         console.log("Low Y:"+lowesty);
@@ -88,21 +88,6 @@ function condensePositions(pos) {
             //next element pos found
         }
         console.log("Line:"+line);
-    }
-    return;
-}
-
-function condenseTest(pos) {
-    for (var z = 0; z < 12; i++){
-        var lowesty = 10000;
-        for (var loc in pos) {
-            console.log(loc.toString());
-            if (loc[1] < lowesty) {
-                lowesty = loc[1];
-            }
-        }
-        console.log("Low Y:"+lowesty);
-        //found current lowest point;
     }
     return;
 }
