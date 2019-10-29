@@ -111,7 +111,12 @@ function ExtractNames() {
                                 y = word.boundingBox.vertices[i].y;
                             }
                         }
-                        Positions.push({word, x, y});
+                        word=word.match(/\d+/g);
+                        word=word.match(/\s+/g);
+                        console.log("New Word:"+word);
+                        if(word!==""){
+                            Positions.push({word, x, y});
+                        }
                     }
                 });
             });
