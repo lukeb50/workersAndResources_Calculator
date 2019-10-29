@@ -77,7 +77,7 @@ function condensePositions(pos) {
         }
         //got all words on the row, sort by X
         var line="";
-        while(onrow.length>0){
+        for (var v = 0; v < onrow.length; v++){
             var lowestx=10000;
             var lowestword=null;
             for (var x = 0; x < onrow.length; x++) {
@@ -86,8 +86,8 @@ function condensePositions(pos) {
             line=[line,lowestword.text].join(" ");
             onrow.pop(x);
             //next element pos found
-        }        console.log("Line:"+line);
-
+        }        
+        console.log("Line:"+line);
     }
 }
 
