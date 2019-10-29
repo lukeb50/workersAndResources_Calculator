@@ -34,7 +34,7 @@ function getCrossPoint(){
                     WordHolder.push(word);
                     para=para+" "+wordText;
                 });
-                if(para.toLowerCase()==="pevious level"){
+                if(para.toLowerCase()==="previous level"){
                     //find word "Previous as it is lower
                     for (var i = 0; i < WordHolder.length; i++) {
                         if(WordHolder[i].sybols.map(s=>s.text).join('').toLowerCase()==="previous"){
@@ -46,7 +46,6 @@ function getCrossPoint(){
                                 if(WordHolder[i].boundingBox[x].y<lowesty){lowesty=WordHolder[i].boundingBox[x].y;}
                             }
                             return [lowestx,lowesty];
-                            break;
                         }
                     }
                 }
