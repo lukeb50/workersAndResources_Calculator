@@ -59,7 +59,7 @@ function getCrossPoint() {
 }
 
 function condensePositions(pos) {
-    for (var z = 0; z < 12; i++){
+    for (var z = 0; z < 12; z++){
         var lowesty = 10000;
         for (var loc in pos) {
             if (loc[1] < lowesty) {
@@ -96,21 +96,13 @@ function condenseTest(pos) {
     for (var z = 0; z < 12; i++){
         var lowesty = 10000;
         for (var loc in pos) {
+            console.log(loc.toString());
             if (loc[1] < lowesty) {
                 lowesty = loc[1];
             }
         }
         console.log("Low Y:"+lowesty);
         //found current lowest point;
-        var onrow={};
-        for (var i = 0; i < pos.length; i++) {
-            if(lowesty-25<pos[i][2] && lowesty+25>pos[i][2]){
-                onrow.push(pos[i]);
-                pos.pop(i);
-            };
-        }
-        console.log(onrow.toString());
-        //got all words on the row, sort by X
     }
     return;
 }
@@ -148,9 +140,9 @@ function ExtractNames() {
             });
         });
     });
-    //condense into seperated rows and return everything in that row
+    // into seperated rows and return everything in that row
     console.log(Positions.length);
-    condenseTest(Positions);
+    condensePositions(Positions);
     return Names;
 }
 
