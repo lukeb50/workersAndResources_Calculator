@@ -83,7 +83,8 @@ function condensePositions(pos) {
             for (var x = 0; x < onrow.length; x++) {
                 if(onrow[x][1]<lowestx){lowestx=onrow[x][1];lowestword=onrow[x][0];}
             }
-            line=[line,lowestword.text].join(" ");
+            console.log(lowestword.symbols.map(s => s.text).join(''));
+            line=[line,lowestword.symbols.map(s => s.text).join('')].join(" ");
             onrow.pop(x);
             //next element pos found
         }
