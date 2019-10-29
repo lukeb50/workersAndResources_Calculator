@@ -24,6 +24,7 @@ function ExtractLevel() {
 }
 
 function getCrossPoint(){
+    var WordHolder;
     detailedtext.pages.forEach(page => {
         page.blocks.forEach(block => {
             block.paragraphs.forEach(paragraph => {
@@ -35,7 +36,6 @@ function getCrossPoint(){
                     para=para+" "+wordText;
                 });
                 console.log(para);
-                console.log("Correct:"+para.match(/Previous Level/g));
                 if(para.match(/Previous Level/g)!==null){
                     //find word "Previous as it is lower
                     console.log("found previous");
