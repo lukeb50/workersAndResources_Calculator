@@ -79,13 +79,15 @@ function condensePositions(pos) {
         var line="";
         while(onrow.length>0){
             var lowestx=10000;
+            var lowestword=null;
             for (var x = 0; x < onrow.length; x++) {
-                if(onrow[x][1]<lowestx){lowestx=onrow[x][1];}
+                if(onrow[x][1]<lowestx){lowestx=onrow[x][1];lowestword=onrow[x];}
             }
-            console.log("Low X:"+lowestx);
+            line=[line,lowestword.text].join(" ");
+            onrow.pop(x);
             //next element pos found
-        }
-        console.log("Line:"+line);
+        }        console.log("Line:"+line);
+
     }
 }
 
