@@ -59,7 +59,7 @@ function getCrossPoint() {
 }
 
 function condensePositions(pos) {
-    while (pos.length>0) {
+    for (var z = 0; z < 12; i++){
         var lowesty = 10000;
         for (var loc in pos) {
             if (loc[1] < lowesty) {
