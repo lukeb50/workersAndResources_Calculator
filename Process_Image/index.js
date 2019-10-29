@@ -61,8 +61,8 @@ function getCrossPoint() {
 function condensePositions(pos) {
     for (var z = 0; z < 12; z++){
         var lowesty = 10000;
-        for (var loc in pos) {
-            console.log(loc[2]);
+        for (var loc in pos) { //loc has no values
+            console.log(loc.toString());
             if (loc[2] < lowesty) {
                 lowesty = loc[2];
             }
