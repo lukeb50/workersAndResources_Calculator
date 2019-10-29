@@ -24,7 +24,7 @@ function ExtractLevel(){
 }
 
 function ExtractNames(){
-    console.log(detailedtext.toString());
+    console.log(detailedtext[0].toString());
 }
 
 async function getText(location) {
