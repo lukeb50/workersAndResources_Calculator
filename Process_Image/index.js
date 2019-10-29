@@ -59,12 +59,11 @@ function getCrossPoint() {
 }
 
 function condensePositions(pos) {
-    console.log(pos[1].toString());
     for (var z = 0; z < 12; z++){
         var lowesty = 10000;
-        for (var loc in pos) { //loc has no values
-            if (loc[2] < lowesty) {
-                lowesty = loc[2];
+        for (var a = 0; a < pos.length; a++) {
+            if (pos[a][2] < lowesty) {
+                lowesty = pos[a][2];
             }
         }
         console.log("Low Y:"+lowesty);
