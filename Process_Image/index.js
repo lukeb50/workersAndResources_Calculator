@@ -111,8 +111,7 @@ function ExtractNames() {
                                 y = word.boundingBox.vertices[i].y;
                             }
                         }
-                        var wordText2=wordText.match(/\d+/g);
-                        wordText2=wordText2.match(/\s+/g);
+                        var wordText2=wordText.match(/\d+\s+/g);
                         console.log("New Word:"+wordText2);
                         if(wordText2!==""){
                             Positions.push({word, x, y});
