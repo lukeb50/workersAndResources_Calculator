@@ -23,21 +23,42 @@ function ExtractLevel() {
     console.log(Info.Level);
 }
 
-function ExtractNames() {
+function getCrossPoint(){
     detailedtext.pages.forEach(page => {
         page.blocks.forEach(block => {
             block.paragraphs.forEach(paragraph => {
-                console.log(`Paragraph confidence: ${paragraph.confidence}`);
                 var para="";
+                WordHolder=[];
                 paragraph.words.forEach(word => {
                     const wordText = word.symbols.map(s => s.text).join('');
-                    console.log(`Word text: ${wordText}`);
-                    para=para+wordText;
+                    WordHolder.push(word);
+                    para=para+" "+wordText;
                 });
-                console.log(para);
+                if(para.toLowerCase()==="pevious level"){
+                    //find word "Previous as it is lower
+                    for (var i = 0; i < WordHolder.length; i++) {
+                        if(WordHolder[i].sybols.map(s=>s.text).join('').toLowerCase()==="previous"){
+                            var lowestx=10000;
+                            var lowesty=10000;
+                            for (var x = 0; x < WordHolder[i].boundingBox.length; i++) {
+                                //check each bounding box
+                                if(WordHolder[i].boundingBox[x].x<lowestx){lowestx=WordHolder[i].boundingBox[x].x;}
+                                if(WordHolder[i].boundingBox[x].y<lowesty){lowesty=WordHolder[i].boundingBox[x].y;}
+                            }
+                            return [lowestx,lowesty];
+                            break;
+                        }
+                    }
+                }
             });
         });
     });
+    return [0,0];
+}
+
+function ExtractNames() {
+    var point=getCrossPoint();
+    console.log(point[0],point[1]);
 }
 
 async function getText(location) {
