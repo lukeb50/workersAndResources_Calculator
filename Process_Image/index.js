@@ -81,7 +81,7 @@ function condensePositions(pos) {
             var lowestx=10000;
             var lowestword=null;
             for (var x = 0; x < onrow.length; x++) {
-                if(onrow[x][1]<lowestx){lowestx=onrow[x][1];lowestword=onrow[x];}
+                if(onrow[x][1]<lowestx){lowestx=onrow[x][1];lowestword=onrow[x][0];}
             }
             line=[line,lowestword.text].join(" ");
             onrow.pop(x);
