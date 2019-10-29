@@ -26,7 +26,18 @@ function ExtractLevel() {
 function ExtractNames() {
     detailedtext.pages.forEach(page => {
         page.blocks.forEach(block => {
-            console.log(block.text);
+            console.log("A new Block");
+            block.paragraphs.forEach(paragraph => {
+                console.log(`Paragraph confidence: ${paragraph.confidence}`);
+                paragraph.words.forEach(word => {
+                    const wordText = word.symbols.map(s => s.text).join('');
+                    console.log(`Word text: ${wordText}`);
+                    console.log(`Word confidence: ${word.confidence}`);
+                    word.symbols.forEach(symbol => {
+                        console.log(`Symbol text: ${symbol.text}`);
+                    });
+                });
+            });
         });
     });
 }
