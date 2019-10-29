@@ -66,6 +66,7 @@ function condensePositions(pos) {
                 lowesty = loc[1];
             }
         }
+        console.log("Low Y:"+lowesty);
         //found current lowest point;
         var onrow={};
         for (var i = 0; i < pos.length; i++) {
@@ -81,6 +82,7 @@ function condensePositions(pos) {
             for (var x = 0; x < onrow.length; x++) {
                 if(onrow[x][1]<lowestx){lowestx=onrow[x][1];}
             }
+            console.log("Low X:"+lowestx);
             //next element pos found
         }
         console.log("Line:"+line);
@@ -99,7 +101,6 @@ function ExtractNames() {
                     const wordText = word.symbols.map(s => s.text).join('');
                     if (word.boundingBox.vertices[0].x < point[0] && word.boundingBox.vertices[0].y > point[1]) {
                         //is within name area.
-                        console.log("Word:" + wordText);
                         //get top-left position and load it into array
                         var x = 10000;
                         var y = 10000;
@@ -112,8 +113,8 @@ function ExtractNames() {
                             }
                         }
                         var wordText2=wordText.replace(/\d+/g,"");
-                        console.log("New Word:"+wordText2);
                         if(wordText2!==""){
+                            console.log(wordText2);
                             Positions.push({word, x, y});
                         }
                     }
@@ -123,7 +124,7 @@ function ExtractNames() {
     });
     //condense into seperated rows and return everything in that row
     console.log(Positions.length);
-    //condensePositions(Positions);
+    condensePositions(Positions);
     return Names;
 }
 
