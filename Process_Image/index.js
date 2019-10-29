@@ -89,6 +89,7 @@ function condensePositions(pos) {
         }        
         console.log("Line:"+line);
     }
+    return;
 }
 
 function ExtractNames() {
