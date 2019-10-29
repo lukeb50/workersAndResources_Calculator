@@ -48,7 +48,6 @@ function getCrossPoint() {
                                     lowesty = word.boundingBox.vertices[x].y;
                                 }
                             }
-                            console.log(lowestx + ":COORDINATES:" + lowesty);
                             return [lowestx, lowesty];
                         }
                     });
@@ -59,7 +58,37 @@ function getCrossPoint() {
     return [1000, 1000];
 }
 
+function condensePositions(pos) {
+    while (true) {
+        var lowesty = 10000;
+        for (var loc in pos) {
+            if (loc[1] < lowesty) {
+                lowesty = loc[1];
+            }
+        }
+        //found current lowest point;
+        var onrow={};
+        for (var i = 0; i < pos.length; i++) {
+            if(lowesty-25<pos[i][2] && lowesty+25>pos[i][2]){
+                onrow.push(pos[i]);
+                pos.pop(i);
+            };
+        }
+        //got all words on the row, sort by X
+        var line="";
+        while(onrow.length>0){
+            var lowestx=10000;
+            for (var x = 0; x < onrow.length; x++) {
+                if(onrow[x][1]<lowestx){line=line+onrow[x][0];lowestx=onrow[x][1];}
+            }
+        }
+        console.log("Line:"+line);
+    }
+}
+
 function ExtractNames() {
+    var Names = [];
+    var Positions = [];
     var point = getCrossPoint(); //Point where -x and -y will only contain names
     //check if each word is within box. If yes and not single Letter, add to array based on Y
     detailedtext.pages.forEach(page => {
@@ -67,14 +96,29 @@ function ExtractNames() {
             block.paragraphs.forEach(paragraph => {
                 paragraph.words.forEach(word => {
                     const wordText = word.symbols.map(s => s.text).join('');
-                    if(word.boundingBox.vertices[0].x<point[0] && word.boundingBox.vertices[0].y>point[1]){
+                    if (word.boundingBox.vertices[0].x < point[0] && word.boundingBox.vertices[0].y > point[1]) {
                         //is within name area.
-                        console.log("Word:"+wordText);
+                        console.log("Word:" + wordText);
+                        //get top-left position and load it into array
+                        var x = 10000;
+                        var y = 10000;
+                        for (var i = 0; i < word.boundingBox.vertices.length; i++) {
+                            if (word.boundingBox.vertices[i].x < x) {
+                                x = word.boundingBox.vertices[i].x;
+                            }
+                            if (word.boundingBox.vertices[i].y < y) {
+                                y = word.boundingBox.vertices[i].y;
+                            }
+                        }
+                        Positions.push({word, x, y});
                     }
                 });
             });
         });
     });
+    //condense into seperated rows and return everything in that row
+    condensePositions(Positions);
+    return Names;
 }
 
 async function getText(location) {
