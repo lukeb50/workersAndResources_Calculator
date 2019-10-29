@@ -50,6 +50,7 @@ function getCrossPoint() {
                                     lowesty = word.boundingBox[x].y;
                                 }
                             }
+                            console.log(lowestx+":COORDINATES:"+lowesty);
                             return [lowestx, lowesty];
                         }
                     });
