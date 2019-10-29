@@ -5,26 +5,30 @@ const bucket = storage.bucket('report-cards-6290-uploads');
 //vision API
 var fulltext;
 var detailedtext;
-var Info=new Object();
+var Info = new Object();
 
-function ExtractBarcode(){
-    Info.Barcode=fulltext.match(/[0-9]{5}/g);
+function ExtractBarcode() {
+    Info.Barcode = fulltext.match(/[0-9]{5}/g);
     console.log(Info.Barcode);
 }
 
-function ExtractLevel(){
-    if(fulltext.match(/PRESCHOOL [1-5]/g)!==null){
-        Info.Level=fulltext.match(/PRESCHOOL [1-5]/g);
-    }else if(fulltext.match(/SWIMMER [1-6]/g)!==null){
-        Info.Level=fulltext.match(/SWIMMER [1-6]/g);
-    }else{
-        Info.Level="Unknown";
+function ExtractLevel() {
+    if (fulltext.match(/PRESCHOOL [1-5]/g) !== null) {
+        Info.Level = fulltext.match(/PRESCHOOL [1-5]/g);
+    } else if (fulltext.match(/SWIMMER [1-6]/g) !== null) {
+        Info.Level = fulltext.match(/SWIMMER [1-6]/g);
+    } else {
+        Info.Level = "Unknown";
     }
     console.log(Info.Level);
 }
 
-function ExtractNames(){
-    console.log(detailedtext[0].toString());
+function ExtractNames() {
+    detailedtext.pages.forEach(page => {
+        page.blocks.forEach(block => {
+            console.log(block.text);
+        });
+    });
 }
 
 async function getText(location) {
@@ -33,8 +37,8 @@ async function getText(location) {
     var [result] = await client.documentTextDetection("gs://report-cards-6290-uploads/" + location);
     var fullTextAnnotation = result.fullTextAnnotation;
     console.log(fullTextAnnotation.text);
-    fulltext=fullTextAnnotation.text;
-    detailedtext=result;
+    fulltext = fullTextAnnotation.text;
+    detailedtext = fullTextAnnotation;
     ExtractBarcode();
     ExtractLevel();
     ExtractNames();
@@ -49,7 +53,7 @@ exports.Process = (req, res) => {
     getText(req.body.loc).then(re => {
         res.status(201).end();
     }).catch(err => {
-        console.log("error:"+err.toString());
+        console.log("error:" + err.toString());
         res.status(500).end();
-    })
+    });
 };
