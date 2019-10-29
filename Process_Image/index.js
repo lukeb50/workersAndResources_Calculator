@@ -23,44 +23,46 @@ function ExtractLevel() {
     console.log(Info.Level);
 }
 
-function getCrossPoint(){
-    var WordHolder;
+function getCrossPoint() {
     detailedtext.pages.forEach(page => {
         page.blocks.forEach(block => {
             block.paragraphs.forEach(paragraph => {
-                var para="";
-                WordHolder=[];
+                var para = "";
                 paragraph.words.forEach(word => {
                     const wordText = word.symbols.map(s => s.text).join('');
-                    WordHolder.push(word);
-                    para=para+" "+wordText;
+                    para = para + " " + wordText;
                 });
                 console.log(para);
-                if(para.match(/Previous Level/g)!==null){
-                    //find word "Previous as it is lower
-                    console.log("found previous");
-                    for (var i = 0; i < WordHolder.length; i++) {
-                        if(WordHolder[i].sybols.map(s=>s.text).join('').toLowerCase()==="previous"){
-                            var lowestx=10000;
-                            var lowesty=10000;
-                            for (var x = 0; x < WordHolder[i].boundingBox.length; i++) {
+                if (para.match(/Previous Level/g) !== null) {
+                    //find word "Previous" as it is lower
+                    paragraph.words.forEach(word => {
+                        const wordText = word.symbols.map(s => s.text).join('');
+                        if (wordText.match(/Previous/g) !== null) {
+                            console.log("found previous");
+                            var lowestx = 10000;
+                            var lowesty = 10000;
+                            for (var x = 0; x < word.boundingBox.length; i++) {
                                 //check each bounding box
-                                if(WordHolder[i].boundingBox[x].x<lowestx){lowestx=WordHolder[i].boundingBox[x].x;}
-                                if(WordHolder[i].boundingBox[x].y<lowesty){lowesty=WordHolder[i].boundingBox[x].y;}
+                                if (word.boundingBox[x].x < lowestx) {
+                                    lowestx = word.boundingBox[x].x;
+                                }
+                                if (word.boundingBox[x].y < lowesty) {
+                                    lowesty = word.boundingBox[x].y;
+                                }
                             }
-                            return [lowestx,lowesty];
+                            return [lowestx, lowesty];
                         }
-                    }
+                    });
                 }
             });
         });
     });
-    return [0,0];
+    return [0, 0];
 }
 
 function ExtractNames() {
-    var point=getCrossPoint();
-    console.log(point[0],point[1]);
+    var point = getCrossPoint();
+    console.log(point[0], point[1]);
 }
 
 async function getText(location) {
