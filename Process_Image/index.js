@@ -111,10 +111,10 @@ function ExtractNames() {
                                 y = word.boundingBox.vertices[i].y;
                             }
                         }
-                        wordText=wordText.match(/\d+/g);
-                        wordText=wordText.match(/\s+/g);
-                        console.log("New Word:"+wordText);
-                        if(wordText!==""){
+                        var wordText2=wordText2.match(/\d+/g);
+                        wordText2=wordText2.match(/\s+/g);
+                        console.log("New Word:"+wordText2);
+                        if(wordText2!==""){
                             Positions.push({word, x, y});
                         }
                     }
