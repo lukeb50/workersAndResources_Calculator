@@ -32,13 +32,11 @@ function getCrossPoint() {
                     const wordText = word.symbols.map(s => s.text).join('');
                     para = para + " " + wordText;
                 });
-                console.log(para);
                 if (para.match(/Previous Level/g) !== null) {
                     //find word "Previous" as it is lower
                     paragraph.words.forEach(word => {
                         const wordText = word.symbols.map(s => s.text).join('');
                         if (wordText.match(/Previous/g) !== null) {
-                            console.log("found previous");
                             var lowestx = 10000;
                             var lowesty = 10000;
                             for (var x = 0; x < word.boundingBox.vertices.length; x++) {
@@ -47,7 +45,7 @@ function getCrossPoint() {
                                     lowestx = word.boundingBox.vertices[x].x;
                                 }
                                 if (word.boundingBox.vertices[x].y < lowesty) {
-                                    lowesty = word.boundingBox.vertices[y].y;
+                                    lowesty = word.boundingBox.vertices[x].y;
                                 }
                             }
                             console.log(lowestx + ":COORDINATES:" + lowesty);
