@@ -79,7 +79,7 @@ function condensePositions(pos) {
         while(onrow.length>0){
             var lowestx=10000;
             for (var x = 0; x < onrow.length; x++) {
-                if(onrow[x][1]<lowestx){line=line+onrow[x][0];lowestx=onrow[x][1];}
+                if(onrow[x][1]<lowestx){line=line+onrow[x][0];lowestx=onrow[x][1];onrow.pop(x);}
             }
         }
         console.log("Line:"+line);
