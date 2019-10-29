@@ -4,6 +4,7 @@ const storage = new Storage();
 const bucket = storage.bucket('report-cards-6290-uploads');
 //vision API
 var fulltext;
+var detailedtext;
 var Info=new Object();
 
 function ExtractBarcode(){
@@ -13,10 +14,8 @@ function ExtractBarcode(){
 
 function ExtractLevel(){
     if(fulltext.match(/PRESCHOOL [1-5]/g)!==null){
-        console.log("preschool")
         Info.Level=fulltext.match(/PRESCHOOL [1-5]/g);
     }else if(fulltext.match(/SWIMMER [1-6]/g)!==null){
-        console.log("Swimmer");
         Info.Level=fulltext.match(/SWIMMER [1-6]/g);
     }else{
         Info.Level="Unknown";
@@ -25,7 +24,7 @@ function ExtractLevel(){
 }
 
 function ExtractNames(){
-    
+    console.log(detailedtext.toString());
 }
 
 async function getText(location) {
@@ -35,6 +34,7 @@ async function getText(location) {
     var fullTextAnnotation = result.fullTextAnnotation;
     console.log(fullTextAnnotation.text);
     fulltext=fullTextAnnotation.text;
+    detailedtext=result;
     ExtractBarcode();
     ExtractLevel();
     ExtractNames();
