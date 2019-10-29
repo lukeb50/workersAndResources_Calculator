@@ -36,6 +36,7 @@ function getCrossPoint(){
                 });
                 if(para.toLowerCase()==="previous level"){
                     //find word "Previous as it is lower
+                    console.log("found previous")
                     for (var i = 0; i < WordHolder.length; i++) {
                         if(WordHolder[i].sybols.map(s=>s.text).join('').toLowerCase()==="previous"){
                             var lowestx=10000;
