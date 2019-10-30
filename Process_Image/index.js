@@ -80,7 +80,7 @@ function condensePositions(pos) {
         //got all words on the row with , sort by X
         var line="";
         var iter=0;
-        while(iter<onrow.length+1){
+        while(iter<onrow.length+1){//NOT RUNNING
             var lowestx=10000;
             var lowestindex=-1;
             for (var t = 0; t < onrow.length; t++){
@@ -92,7 +92,7 @@ function condensePositions(pos) {
             iter++;
         }
         console.log("Searching");
-        for (var b = 0; b < onrowcopy.length; b++) {
+        for (var b = 0; b < onrowcopy.length; b++){
             for (var z = 0; z < pos.length; z++) {
                 if(pos[z]===onrowcopy[b]){
                     console.log("Popping "+z);
@@ -103,6 +103,7 @@ function condensePositions(pos) {
         console.log("Line:"+line);
         console.log("Remaining Items:"+pos.length);
     }
+    console.log("Finishing");
     return;
 }
 
