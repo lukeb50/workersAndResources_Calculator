@@ -69,10 +69,12 @@ function condensePositions(pos) {
         console.log("Low Y:"+lowesty);
         //found current lowest point;
         var onrow=[];
+        var onrowcopy=[];
         for (var i = 0; i < pos.length; i++) {
             if(lowesty-25<pos[i][2] && lowesty+25>pos[i][2]){
                 console.log("Adding "+pos[i][0].symbols.map(s => s.text).join('')+" to onrow");
                 onrow.push(pos[i]);
+                onrowcopy.push(pos[i]);
             };
         }
         //got all words on the row with , sort by X
@@ -86,12 +88,13 @@ function condensePositions(pos) {
             }
             //found first word, add it.
             line=line+onrow[lowestindex][0].symbols.map(s => s.text).join('');
+            onrow.pop(lowestindex);
             iter++;
         }
-        print("Searching");
-        for (var b = 0; b < onrow.length; b++) {
+        console.log("Searching");
+        for (var b = 0; b < onrowcopy.length; b++) {
             for (var z = 0; z < pos.length; z++) {
-                if(pos[z]===onrow[b]){
+                if(pos[z]===onrowcopy[b]){
                     console.log("Popping "+z);
                     pos.pop[z];
                 }
