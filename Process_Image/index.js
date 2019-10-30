@@ -59,49 +59,54 @@ function getCrossPoint() {
 }
 
 function condensePositions(pos) {
-    for (var z = 0; z < 12; z++){
+    for (var z = 0; z < 12; z++) {
+        console.log(z);
         var lowesty = 10000;
         for (var a = 0; a < pos.length; a++) {
             if (pos[a][2] < lowesty) {
                 lowesty = pos[a][2];
             }
         }
-        console.log("Low Y:"+lowesty);
+        console.log("Low Y:" + lowesty);
         //found current lowest point;
-        var onrow=[];
-        var onrowcopy=[];
+        var onrow = [];
+        var onrowcopy = [];
         for (var i = 0; i < pos.length; i++) {
-            if(lowesty-25<pos[i][2] && lowesty+25>pos[i][2]){
-                console.log("Adding "+pos[i][0].symbols.map(s => s.text).join('')+" to onrow");
+            if (lowesty - 25 < pos[i][2] && lowesty + 25 > pos[i][2]) {
+                console.log("Adding " + pos[i][0].symbols.map(s => s.text).join('') + " to onrow");
                 onrow.push(pos[i]);
                 onrowcopy.push(pos[i]);
-            };
+            }
+            ;
         }
         //got all words on the row with , sort by X
-        var line="";
-        var iter=0;
-        while(iter<onrow.length+1){//NOT RUNNING
-            var lowestx=10000;
-            var lowestindex=-1;
-            for (var t = 0; t < onrow.length; t++){
-                if(onrow[t][1]<lowestx){lowestx=onrow[t][1];lowestindex=t;}
+        var line = "";
+        var iter = 0;
+        while (iter < onrow.length + 1) {//NOT RUNNING
+            var lowestx = 10000;
+            var lowestindex = -1;
+            for (var t = 0; t < onrow.length; t++) {
+                if (onrow[t][1] < lowestx) {
+                    lowestx = onrow[t][1];
+                    lowestindex = t;
+                }
             }
             //found first word, add it.
-            line=line+onrow[lowestindex][0].symbols.map(s => s.text).join('');
+            line = line + onrow[lowestindex][0].symbols.map(s => s.text).join('');
             onrow.pop(lowestindex);
             iter++;
         }
         console.log("Searching");
-        for (var b = 0; b < onrowcopy.length; b++){
+        for (var b = 0; b < onrowcopy.length; b++) {
             for (var z = 0; z < pos.length; z++) {
-                if(pos[z]===onrowcopy[b]){
-                    console.log("Popping "+z);
+                if (pos[z] === onrowcopy[b]) {
+                    console.log("Popping " + z);
                     pos.pop[z];
                 }
             }
         }
-        console.log("Line:"+line);
-        console.log("Remaining Items:"+pos.length);
+        console.log("Line:" + line);
+        console.log("Remaining Items:" + pos.length);
     }
     console.log("Finishing");
     return;
@@ -130,8 +135,8 @@ function ExtractNames() {
                                 y = word.boundingBox.vertices[i].y;
                             }
                         }
-                        var wordText2=wordText.replace(/\d+/g,"");
-                        if(wordText2!==""){
+                        var wordText2 = wordText.replace(/\d+/g, "");
+                        if (wordText2 !== "") {
                             Positions.push([word, x, y]);
                         }
                     }
