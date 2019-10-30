@@ -80,12 +80,18 @@ function condensePositions(pos) {
         for (var v = 0; v < onrow.length; v++){
             var lowestx=10000;
             var lowestword=null;
+            var lowestindex=-1;
             for (var x = 0; x < onrow.length; x++) {
-                if(onrow[x][1]<lowestx){lowestx=onrow[x][1];lowestword=onrow[x][0];}
+                if(onrow[x][1]<lowestx){lowestx=onrow[x][1];lowestword=onrow[x][0];lowestindex=x;}
             }
             console.log(lowestword.symbols.map(s => s.text).join(''));
             line=[line,lowestword.symbols.map(s => s.text).join('')].join(" ");
-            onrow.pop(x);
+            onrow.pop(lowestindex);//right spot?
+            for (var m = 0; m < pos.length; m++) {//remove from pos
+                if(pos[m]===onrow[lowestindex]){
+                    pos.pop(m);
+                }
+            }
             //next element pos found
         }
         console.log("Line:"+line);
