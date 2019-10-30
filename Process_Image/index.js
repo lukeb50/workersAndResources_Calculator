@@ -84,7 +84,7 @@ function condensePositions(pos) {
                 if(onrow[t][1]<lowestx){lowestx=onrow[t][1];lowestindex=t;}
             }
             //found first word, add it.
-            line=line+onrow[lowestindex].symbols.map(s => s.text).join('');
+            line=line+onrow[lowestindex][0].symbols.map(s => s.text).join('');
             iter++;
         }
         for (var b = 0; b < onrow.length; b++) {
