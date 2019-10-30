@@ -62,7 +62,7 @@ function condensePositions(pos) {
     for (var z = 0; z < 12; z++){
         var lowesty = 10000;
         for (var a = 0; a < pos.length; a++) {
-            pos[i][3]=a;
+            pos[a][3]=a;
             if (pos[a][2] < lowesty) {
                 lowesty = pos[a][2];
             }
