@@ -87,8 +87,8 @@ function condensePositions(pos) {
             }
             console.log(lowestword.symbols.map(s => s.text).join(''));
             line=[line,lowestword.symbols.map(s => s.text).join('')].join(" ");
+             pos.pop(onrow[lowestindex][3]);
             onrow.pop(lowestindex);//right spot?
-            pos.pop(onrow[lowestindex][3]);
             //next element pos found
         }
         console.log("Line:"+line);
@@ -121,7 +121,6 @@ function ExtractNames() {
                         }
                         var wordText2=wordText.replace(/\d+/g,"");
                         if(wordText2!==""){
-                            console.log(wordText2);
                             Positions.push([word, x, y]);
                         }
                     }
