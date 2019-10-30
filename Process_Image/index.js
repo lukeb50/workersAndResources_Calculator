@@ -62,7 +62,6 @@ function condensePositions(pos) {
     for (var z = 0; z < 12; z++){
         var lowesty = 10000;
         for (var a = 0; a < pos.length; a++) {
-            pos[a][3]=a;
             if (pos[a][2] < lowesty) {
                 lowesty = pos[a][2];
             }
@@ -73,23 +72,28 @@ function condensePositions(pos) {
         for (var i = 0; i < pos.length; i++) {
             if(lowesty-25<pos[i][2] && lowesty+25>pos[i][2]){
                 onrow.push(pos[i]);
-                pos.pop(i);
             };
         }
-        //got all words on the row, sort by X
+        //got all words on the row with , sort by X
         var line="";
-        for (var v = 0; v < onrow.length; v++){
+        var iter=0;
+        while(iter<onrow.length+1 || onrow.length>0){
             var lowestx=10000;
-            var lowestword=null;
             var lowestindex=-1;
-            for (var x = 0; x < onrow.length; x++) {
-                if(onrow[x][1]<lowestx){lowestx=onrow[x][1];lowestword=onrow[x][0];lowestindex=x;}
+            for (var t = 0; t < onrow.length; t++){
+                if(onrow[t][1]<lowestx){lowestx=onrow[t][1];lowestindex=t;}
             }
-            console.log(lowestword.symbols.map(s => s.text).join(''));
-            line=[line,lowestword.symbols.map(s => s.text).join('')].join(" ");
-             pos.pop(onrow[lowestindex][3]);
-            onrow.pop(lowestindex);//right spot?
-            //next element pos found
+            //found first word, add it.
+            line=line+onrow[lowestindex].symbols.map(s => s.text).join('');
+            iter++;
+        }
+        for (var b = 0; b < onrow.length; b++) {
+            for (var z = 0; z < pos.length; z++) {
+                if(pos[z][1]===onrow[b][1] && pos[z][1]===onrow[b][1]){//same X and Y pos, delete
+                    pos.pop[z];
+                    break;
+                }
+            }
         }
         console.log("Line:"+line);
     }
