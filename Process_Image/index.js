@@ -96,6 +96,7 @@ function condensePositions(pos) {
             }
         }
         console.log("Line:"+line);
+        console.log("Remaining Items:"+pos.length);
     }
     return;
 }
