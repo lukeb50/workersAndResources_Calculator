@@ -71,6 +71,7 @@ function condensePositions(pos) {
         var onrow=[];
         for (var i = 0; i < pos.length; i++) {
             if(lowesty-25<pos[i][2] && lowesty+25>pos[i][2]){
+                console.log("Adding "+pos[i][0].symbols.map(s => s.text).join('')+" to onrow");
                 onrow.push(pos[i]);
             };
         }
@@ -87,11 +88,12 @@ function condensePositions(pos) {
             line=line+onrow[lowestindex][0].symbols.map(s => s.text).join('');
             iter++;
         }
+        print("Searching");
         for (var b = 0; b < onrow.length; b++) {
             for (var z = 0; z < pos.length; z++) {
-                if(pos[z][1]===onrow[b][1] && pos[z][1]===onrow[b][1]){//same X and Y pos, delete
+                if(pos[z]===onrow[b]){
+                    console.log("Popping "+z);
                     pos.pop[z];
-                    break;
                 }
             }
         }
