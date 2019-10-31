@@ -79,10 +79,10 @@ function condenseLine(pos,namelist) {
     }
     //got all words on the row with , sort by X
     var line = "";
-    for(var o=0;o<10;o++){
+    for(var o=0;o<onrowcopy.length;o++){
         var lowestx = 10000;
         var lowestindex = -1;
-        for (var t = 0; t < onrowcopy.length; t++) {
+        for (var t = 0; t < onrow.length; t++) {
             if (onrow[t][1] < lowestx) {
                 lowestx = onrow[t][1];
                 lowestindex = t;
