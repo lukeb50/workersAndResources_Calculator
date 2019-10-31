@@ -79,7 +79,6 @@ function condenseLine(pos,namelist) {
     }
     //got all words on the row with , sort by X
     var line = "";
-    var iter = 0;
     for(var o=0;o<10;o++){
         var lowestx = 10000;
         var lowestindex = -1;
@@ -93,7 +92,6 @@ function condenseLine(pos,namelist) {
         line =[line,onrow[lowestindex][0].symbols.map(s => s.text).join('')].join(" ");
         onrow.splice(lowestindex,1);
         console.log("Building line:"+line);
-        iter++;
     }
     namelist.push(line);
     console.log("Line:" + line);
@@ -106,6 +104,7 @@ function Condense(pos){
     for (var i = 0; i < pos.length; i++) {
         var x=condenseLine(pos,namelist);
         pos=x[0];
+        console.log("Setting namelist");
         namelist=x[1];
         for (var c = 0; c < x[2].length; c++) {
             for (var z = 0; z < pos.length; z++) {
@@ -114,6 +113,7 @@ function Condense(pos){
                 }
             }
         }
+        console.log("Finished removing");
         if(pos.length===0){break;};
     }
     return namelist;
