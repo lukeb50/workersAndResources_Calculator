@@ -80,7 +80,7 @@ function condenseLine(pos,namelist) {
     //got all words on the row with , sort by X
     var line = "";
     var iter = 0;
-    while (iter < onrow.length + 1) {
+    while (iter < onrowcopy.length + 1) {//not long enough for longer words.
         var lowestx = 10000;
         var lowestindex = -1;
         for (var t = 0; t < onrow.length; t++) {
@@ -95,7 +95,6 @@ function condenseLine(pos,namelist) {
         console.log("Building line:"+line);
         iter++;
     }
-    line = line.replace(/,/g, "");
     namelist.push(line);
     console.log("Line:" + line);
     console.log("Remaining Items:" + pos.length);
@@ -154,7 +153,7 @@ function ExtractNames() {
     });
     // into seperated rows and return everything in that row
     console.log(Positions.length);
-    Condense(Positions);
+    Names=Condense(Positions);
     return Names;
 }
 
