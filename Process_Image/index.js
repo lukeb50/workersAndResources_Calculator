@@ -94,26 +94,10 @@ function condenseLine(pos,namelist) {
         onrow.splice(lowestindex,1);
         iter++;
     }
-    console.log("Searching");
-    var postoremove=-1;
-    for (var b = 0; b < onrowcopy.length; b++) {
-        for (var z = 0; z < pos.length; z++) {
-            if (pos[z] === onrowcopy[b]) {
-                postoremove=z;
-                break;
-            }
-        }
-    }
-    if(postoremove!==-1){
-        pos.splice(postoremove,1);
-        console.log("New Length:"+pos.length);
-    }else{
-        console.log("-1 spot");
-    }
     namelist.push(line);
     console.log("Line:" + line);
     console.log("Remaining Items:" + pos.length);
-    return [pos,namelist];
+    return [pos,namelist,onrowcopy];
 }
 
 function Condense(pos){
@@ -122,6 +106,13 @@ function Condense(pos){
         var x=condenseLine(pos,namelist);
         pos=x[0];
         namelist=x[1];
+        for (var c = 0; c < x[2].length; c++) {
+            for (var z = 0; z < pos.length; z++) {
+                if(pos[z]===x[2][c]){
+                    pos.splice(z,1);
+                }
+            }
+        }
         if(pos.length===0){break;};
     }
     console.log("Names:"+namelist.toString());
