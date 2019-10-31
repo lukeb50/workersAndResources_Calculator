@@ -95,15 +95,20 @@ function condenseLine(pos,namelist) {
         iter++;
     }
     console.log("Searching");
+    var postoremove=-1;
     for (var b = 0; b < onrowcopy.length; b++) {
         for (var z = 0; z < pos.length; z++) {
             if (pos[z] === onrowcopy[b]) {
-                console.log("Popping " + z);
-                pos.splice[z,1];//not popping
-                console.log("Length in loop:"+pos.length);
+                postoremove=z;
                 break;
             }
         }
+    }
+    if(postoremove!==-1){
+        pos.splice(postoremove,1);
+        console.log("New Length:"+pos.length);
+    }else{
+        console.log("-1 spot");
     }
     namelist.push(line);
     console.log("Line:" + line);
