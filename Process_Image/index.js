@@ -89,9 +89,10 @@ function condenseLine(pos,namelist) {
                 lowestindex = t;
             }
         }
-        //found first word, add it.
+        //found first word, add it.      
         line =[line,onrow[lowestindex][0].symbols.map(s => s.text).join('')].join(" ");
         onrow.splice(lowestindex,1);
+        console.log("Building line:"+line);
         iter++;
     }
     line = line.replace(/,/g, "");
@@ -116,7 +117,6 @@ function Condense(pos){
         }
         if(pos.length===0){break;};
     }
-    console.log("Names:"+namelist.toString());
     return namelist;
 }
 
@@ -168,7 +168,11 @@ async function getText(location) {
     detailedtext = fullTextAnnotation;
     ExtractBarcode();
     ExtractLevel();
-    ExtractNames();
+    var names=ExtractNames();
+    console.log("Names:");
+    for (var i = 0; i < names.length; i++) {
+        console.log(names[i]);
+    }
 }
 
 exports.Process = (req, res) => {
