@@ -58,58 +58,67 @@ function getCrossPoint() {
     return [1000, 1000];
 }
 
-function condensePositions(pos) {
-    for (var z = 0; z < 12; z++) {
-        console.log(z);
-        var lowesty = 10000;
-        for (var a = 0; a < pos.length; a++) {
-            if (pos[a][2] < lowesty) {
-                lowesty = pos[a][2];
-            }
+function condenseLine(pos,namelist) {
+    console.log(z);
+    var lowesty = 10000;
+    for (var a = 0; a < pos.length; a++) {
+        if (pos[a][2] < lowesty) {
+            lowesty = pos[a][2];
         }
-        console.log("Low Y:" + lowesty);
-        //found current lowest point;
-        var onrow = [];
-        var onrowcopy = [];
-        for (var i = 0; i < pos.length; i++) {
-            if (lowesty - 25 < pos[i][2] && lowesty + 25 > pos[i][2]) {
-                console.log("Adding " + pos[i][0].symbols.map(s => s.text).join('') + " to onrow");
-                onrow.push(pos[i]);
-                onrowcopy.push(pos[i]);
-            }
-            ;
-        }
-        //got all words on the row with , sort by X
-        var line = "";
-        var iter = 0;
-        while (iter < onrow.length + 1) {//NOT RUNNING
-            var lowestx = 10000;
-            var lowestindex = -1;
-            for (var t = 0; t < onrow.length; t++) {
-                if (onrow[t][1] < lowestx) {
-                    lowestx = onrow[t][1];
-                    lowestindex = t;
-                }
-            }
-            //found first word, add it.
-            line = line + onrow[lowestindex][0].symbols.map(s => s.text).join('');
-            onrow.pop(lowestindex);
-            iter++;
-        }
-        console.log("Searching");
-        for (var b = 0; b < onrowcopy.length; b++) {
-            for (var z = 0; z < pos.length; z++) {
-                if (pos[z] === onrowcopy[b]) {
-                    console.log("Popping " + z);
-                    pos.pop[z];
-                }
-            }
-        }
-        console.log("Line:" + line);
-        console.log("Remaining Items:" + pos.length);
     }
-    console.log("Finishing");
-    return;
+    console.log("Low Y:" + lowesty);
+    //found current lowest point;
+    var onrow = [];
+    var onrowcopy = [];
+    for (var i = 0; i < pos.length; i++) {
+        if (lowesty - 25 < pos[i][2] && lowesty + 25 > pos[i][2]) {
+            console.log("Adding " + pos[i][0].symbols.map(s => s.text).join('') + " to onrow");
+            onrow.push(pos[i]);
+            onrowcopy.push(pos[i]);
+        }
+        ;
+    }
+    //got all words on the row with , sort by X
+    var line = "";
+    var iter = 0;
+    while (iter < onrow.length + 1) {//NOT RUNNING
+        var lowestx = 10000;
+        var lowestindex = -1;
+        for (var t = 0; t < onrow.length; t++) {
+            if (onrow[t][1] < lowestx) {
+                lowestx = onrow[t][1];
+                lowestindex = t;
+            }
+        }
+        //found first word, add it.
+        line = line + onrow[lowestindex][0].symbols.map(s => s.text).join('');
+        onrow.pop(lowestindex);
+        iter++;
+    }
+    console.log("Searching");
+    for (var b = 0; b < onrowcopy.length; b++) {
+        for (var z = 0; z < pos.length; z++) {
+            if (pos[z] === onrowcopy[b]) {
+                console.log("Popping " + z);
+                pos.pop[z];
+            }
+        }
+    }
+    namelist.push(line);
+    console.log("Line:" + line);
+    console.log("Remaining Items:" + pos.length);
+    return [pos,namelist];
+}
+
+function Condense(pos){
+    var namelist=[];
+    for (var i = 0; i < 12; i++) {
+        var x=condenseLine(pos,namelist);
+        pos=x[0];
+        namelist=x[1];
+    }
+    print("Names:"+namelist.toString());
+    return namelist;
 }
 
 function ExtractNames() {
@@ -146,7 +155,7 @@ function ExtractNames() {
     });
     // into seperated rows and return everything in that row
     console.log(Positions.length);
-    condensePositions(Positions);
+    Condense(Positions);
     return Names;
 }
 
