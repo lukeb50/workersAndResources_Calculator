@@ -91,7 +91,7 @@ function condenseLine(pos,namelist) {
         }
         //found first word, add it.
         line = line + onrow[lowestindex][0].symbols.map(s => s.text).join('');
-        onrow.pop(lowestindex);
+        onrow.splice(lowestindex,1);
         iter++;
     }
     console.log("Searching");
@@ -99,7 +99,7 @@ function condenseLine(pos,namelist) {
         for (var z = 0; z < pos.length; z++) {
             if (pos[z] === onrowcopy[b]) {
                 console.log("Popping " + z);
-                var poppedval=pos.pop[z];//not popping
+                var poppedval=pos.splice[z,1];//not popping
                 console.log("Popped:"+poppedval);
                 break;
             }
@@ -118,7 +118,7 @@ function Condense(pos){
         pos=x[0];
         namelist=x[1];
     }
-    print("Names:"+namelist.toString());
+    console.log("Names:"+namelist.toString());
     return namelist;
 }
 
