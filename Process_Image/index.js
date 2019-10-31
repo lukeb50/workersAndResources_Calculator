@@ -118,10 +118,11 @@ function condenseLine(pos,namelist) {
 
 function Condense(pos){
     var namelist=[];
-    for (var i = 0; i < 12; i++) {
+    for (var i = 0; i < pos.length; i++) {
         var x=condenseLine(pos,namelist);
         pos=x[0];
         namelist=x[1];
+        if(pos.length===0){break;};
     }
     console.log("Names:"+namelist.toString());
     return namelist;
