@@ -80,7 +80,7 @@ function condenseLine(pos,namelist) {
     //got all words on the row with , sort by X
     var line = "";
     var iter = 0;
-    while (iter < ((onrowcopy.length)+ 1)) {//not long enough for longer words.
+    while (iter < onrowcopy.length) {//not long enough for longer words.
         var lowestx = 10000;
         var lowestindex = -1;
         for (var t = 0; t < onrowcopy.length; t++) {
