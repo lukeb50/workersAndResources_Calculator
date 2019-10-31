@@ -80,7 +80,7 @@ function condenseLine(pos,namelist) {
     //got all words on the row with , sort by X
     var line = "";
     var iter = 0;
-    while (iter < onrow.length + 1) {
+    while (iter < onrowcopy.length + 1) {//not long enough for longer words.
         var lowestx = 10000;
         var lowestindex = -1;
         for (var t = 0; t < onrow.length; t++) {
@@ -89,9 +89,10 @@ function condenseLine(pos,namelist) {
                 lowestindex = t;
             }
         }
-        //found first word, add it.
-        line = line + onrow[lowestindex][0].symbols.map(s => s.text).join('');
+        //found first word, add it.      
+        line =[line,onrow[lowestindex][0].symbols.map(s => s.text).join('')].join(" ");
         onrow.splice(lowestindex,1);
+        console.log("Building line:"+line);
         iter++;
     }
     namelist.push(line);
@@ -115,7 +116,6 @@ function Condense(pos){
         }
         if(pos.length===0){break;};
     }
-    console.log("Names:"+namelist.toString());
     return namelist;
 }
 
@@ -153,7 +153,7 @@ function ExtractNames() {
     });
     // into seperated rows and return everything in that row
     console.log(Positions.length);
-    Condense(Positions);
+    Names=Condense(Positions);
     return Names;
 }
 
@@ -167,7 +167,11 @@ async function getText(location) {
     detailedtext = fullTextAnnotation;
     ExtractBarcode();
     ExtractLevel();
-    ExtractNames();
+    var names=ExtractNames();
+    console.log("Names:");
+    for (var i = 0; i < names.length; i++) {
+        console.log(names[i]);
+    }
 }
 
 exports.Process = (req, res) => {
