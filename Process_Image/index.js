@@ -59,7 +59,6 @@ function getCrossPoint() {
 }
 
 function condenseLine(pos,namelist) {
-    console.log(z);
     var lowesty = 10000;
     for (var a = 0; a < pos.length; a++) {
         if (pos[a][2] < lowesty) {
@@ -100,7 +99,9 @@ function condenseLine(pos,namelist) {
         for (var z = 0; z < pos.length; z++) {
             if (pos[z] === onrowcopy[b]) {
                 console.log("Popping " + z);
-                pos.pop[z];
+                var poppedval=pos.pop[z];//not popping
+                console.log("Popped:"+poppedval);
+                break;
             }
         }
     }
