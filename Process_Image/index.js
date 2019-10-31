@@ -92,7 +92,7 @@ function condenseLine(pos,namelist) {
         //found first word, add it.
         line = line + onrow[lowestindex][0].symbols.map(s => s.text).join('');
         onrow.splice(lowestindex,1);
-        console.log("Onrow:"+nrow.length);
+        console.log("Onrow:"+onrow.length);
         iter++;
     }
     console.log("Searching");
