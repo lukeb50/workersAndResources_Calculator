@@ -59,22 +59,21 @@ function getCrossPoint() {
 }
 
 function condenseLine(pos,namelist) {
-    var position=new Array(pos);
     var lowesty = 10000;
-    for (var a = 0; a < position.length; a++) {
-        if (position[a][2] < lowesty) {
-            lowesty = position[a][2];
+    for (var a = 0; a < pos.length; a++) {
+        if (pos[a][2] < lowesty) {
+            lowesty = pos[a][2];
         }
     }
     console.log("Low Y:" + lowesty);
     //found current lowest point;
     var onrow = [];
     var onrowcopy = [];
-    for (var i = 0; i < position.length; i++) {
-        if (lowesty - 25 < position[i][2] && lowesty + 25 > position[i][2]) {
-            console.log("Adding " + position[i][0].symbols.map(s => s.text).join('') + " to onrow");
-            onrow.push(position[i]);
-            onrowcopy.push(position[i]);
+    for (var i = 0; i < pos.length; i++) {
+        if (lowesty - 25 < pos[i][2] && lowesty + 25 > pos[i][2]) {
+            console.log("Adding " + pos[i][0].symbols.map(s => s.text).join('') + " to onrow");
+            onrow.push(pos[i]);
+            onrowcopy.push(pos[i]);
         }
         ;
     }
@@ -97,18 +96,19 @@ function condenseLine(pos,namelist) {
     }
     console.log("Searching");
     for (var b = 0; b < onrowcopy.length; b++) {
-        for (var z = 0; z < position.length; z++) {
-            if (position[z] === onrowcopy[b]) {
+        for (var z = 0; z < pos.length; z++) {
+            if (pos[z] === onrowcopy[b]) {
                 console.log("Popping " + z);
-                position.splice[z,1];//not popping
+                pos.splice[z,1];//not popping
+                console.log("Length in loop:"+pos.length);
                 break;
             }
         }
     }
     namelist.push(line);
     console.log("Line:" + line);
-    console.log("Remaining Items:" + position.length);
-    return [position,namelist];
+    console.log("Remaining Items:" + pos.length);
+    return [pos,namelist];
 }
 
 function Condense(pos){
