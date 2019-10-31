@@ -90,10 +90,11 @@ function condenseLine(pos,namelist) {
             }
         }
         //found first word, add it.
-        line = line + onrow[lowestindex][0].symbols.map(s => s.text).join('');
+        line =[line,onrow[lowestindex][0].symbols.map(s => s.text).join('')].join(" ");
         onrow.splice(lowestindex,1);
         iter++;
     }
+    line = line.replace(/,/g, "");
     namelist.push(line);
     console.log("Line:" + line);
     console.log("Remaining Items:" + pos.length);
