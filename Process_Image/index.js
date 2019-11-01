@@ -169,6 +169,7 @@ function ExtractMarks() {
                     const wordText = word.symbols.map(s => s.text).join('');
                     if (word.boundingBox.vertices[0].x > point[0] && word.boundingBox.vertices[0].y > point[1] + 50) {
                         word.symbols.forEach(symbol=>{
+                            console.log("Attempting read");
                             var txt=symbol.text;
                             if(txt.toUpperCase()==="W"){
                                 console.log(txt.toUpperCase());
