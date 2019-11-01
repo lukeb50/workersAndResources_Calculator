@@ -168,27 +168,13 @@ function ExtractMarks() {
                 paragraph.words.forEach(word => {
                     const wordText = word.symbols.map(s => s.text).join('');
                     if (word.boundingBox.vertices[0].x > point[0] && word.boundingBox.vertices[0].y > point[1] + 50) {
-                        //is within name area.
-                        //get top-left position and load it into array
-                        var x = 10000;
-                        var y = 10000;
-                        for (var i = 0; i < word.boundingBox.vertices.length; i++) {
-                            if (word.boundingBox.vertices[i].x < x) {
-                                x = word.boundingBox.vertices[i].x;
+                        word.symbols.forEach(symbol=>{
+                            var txt=symbol.text;
+                            if(txt.toUpperCase()==="W"){
+                                console.log(txt.toUpperCase());
+                                Positions.push([Math.max(symbol.bounding_box.vertices[0].x,symbol.bounding_box.vertices[1].x,symbol.bounding_box.vertices[2].x,symbol.bounding_box.vertices[3].x),Math.max(symbol.bounding_box.vertices[0].y,symbol.bounding_box.vertices[1].y,symbol.bounding_box.vertices[2].y,symbol.bounding_box.vertices[3].y)]);
                             }
-                            if (word.boundingBox.vertices[i].y < y) {
-                                y = word.boundingBox.vertices[i].y;
-                            }
-                        }
-                        wordText2 = wordText.match(/w/gi);
-                        if (wordText2 !== null) {
-                            word.symbols.forEach(symbol => {
-                                if ((symbol.text).toUpperCase() === "W") {
-                                    console.log(symbol.text);
-                                    Positions.push([symbol.text, x, y]);
-                                }
-                            });
-                        }
+                        })
                     }
                 });
             });
