@@ -104,7 +104,6 @@ function Condense(pos){
     for (var i = 0; i < pos.length; i++) {
         var x=condenseLine(pos,namelist);
         pos=x[0];
-        console.log("Setting namelist");
         namelist=x[1];
         for (var c = 0; c < x[2].length; c++) {
             for (var z = 0; z < pos.length; z++) {
@@ -113,7 +112,7 @@ function Condense(pos){
                 }
             }
         }
-        console.log("Finished removing");
+        console.log("Finished removing. Left:"+pos.length+" iderator:"+i);
         if(pos.length===0){break;};
     }
     return namelist;
