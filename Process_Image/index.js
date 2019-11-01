@@ -189,13 +189,13 @@ async function getText(location) {
     const client = new vision.ImageAnnotatorClient();
     var [result] = await client.documentTextDetection("gs://report-cards-6290-uploads/" + location);
     var fullTextAnnotation = result.fullTextAnnotation;
-    //console.log(fullTextAnnotation.text);
+    console.log(fullTextAnnotation.text);
     fulltext = fullTextAnnotation.text;
     detailedtext = fullTextAnnotation;
     ExtractBarcode();
     ExtractLevel();
     ExtractNames();
-    //ExtractMarks();
+    ExtractMarks();
 }
 
 exports.Process = (req, res) => {
@@ -207,8 +207,8 @@ exports.Process = (req, res) => {
     getText(req.body.loc);
     getText(req.body.loc).then(re => {
         res.status(201).end();
-    });//.catch(err => {
-        //console.log("error:" + err.toString());
-        //res.status(500).end();
-    //});
+    }).catch(err => {
+        console.log("error:" + err.toString());
+        res.status(500).end();
+    });
 };
