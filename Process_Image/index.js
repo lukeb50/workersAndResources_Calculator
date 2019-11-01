@@ -181,7 +181,7 @@ function ExtractMarks() {
                             }
                         }
                         wordText2 = wordText.match(/w/gi);
-                        if (wordText2!=="") {
+                        if (wordText2!==null) {
                             console.log(wordText2);
                             word.symbols.forEach(symbol => {
                                 Positions.push([symbol.text, x, y]);
