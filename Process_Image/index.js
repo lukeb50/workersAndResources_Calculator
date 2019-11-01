@@ -101,7 +101,8 @@ function condenseLine(pos,namelist) {
 
 function Condense(pos){
     var namelist=[];
-    for (var i = 0; i < pos.length; i++) {
+    var len=pos.length;
+    for (var i = 0; i < len; i++) {
         var x=condenseLine(pos,namelist);
         pos=x[0];
         namelist=x[1];
