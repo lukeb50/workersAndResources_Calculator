@@ -189,7 +189,7 @@ async function getText(location) {
     const client = new vision.ImageAnnotatorClient();
     var [result] = await client.documentTextDetection("gs://report-cards-6290-uploads/" + location);
     var fullTextAnnotation = result.fullTextAnnotation;
-    console.log(fullTextAnnotation.text);
+    //console.log(fullTextAnnotation.text);
     fulltext = fullTextAnnotation.text;
     detailedtext = fullTextAnnotation;
     ExtractBarcode();
