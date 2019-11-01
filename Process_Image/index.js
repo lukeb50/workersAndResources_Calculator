@@ -178,7 +178,7 @@ function ExtractMarks(){
                             }
                         }
                         wordText2=wordText.replace(/[0-9]/g,"");
-                        if (wordText2!== "") {
+                        if (wordText2!== "" && wordText2!==".") {
                             console.log(wordText2);
                             Positions.push([word, x, y]);
                         }
