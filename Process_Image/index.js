@@ -59,7 +59,7 @@ function getCrossPoint() {
     return [1000, 1000];
 }
 
-function condenseLine(pos,namelist) {
+function condenseLine(pos, namelist) {
     var lowesty = 10000;
     for (var a = 0; a < pos.length; a++) {
         if (pos[a][2] < lowesty) {
@@ -78,7 +78,7 @@ function condenseLine(pos,namelist) {
     }
     //got all words on the row with , sort by X
     var line = "";
-    for(var o=0;o<onrowcopy.length;o++){
+    for (var o = 0; o < onrowcopy.length; o++) {
         var lowestx = 10000;
         var lowestindex = -1;
         for (var t = 0; t < onrow.length; t++) {
@@ -88,31 +88,34 @@ function condenseLine(pos,namelist) {
             }
         }
         //found first word, add it.      
-        line =[line,onrow[lowestindex][0].symbols.map(s => s.text).join('')].join(" ");
-        onrow.splice(lowestindex,1);
+        line = [line, onrow[lowestindex][0].symbols.map(s => s.text).join('')].join(" ");
+        onrow.splice(lowestindex, 1);
     }
-    if(line.match(/Location/gi)===null && line.match(/Previous/gi)===null && line.toUpperCase()!==line){
-        namelist.push((line.replace(/,/g,"")));
-        internalPositions.push([(line.replace(/,/g,"")),lowesty]);
+    if (line.match(/Location/gi) === null && line.match(/Previous/gi) === null && line.toUpperCase() !== line) {
+        namelist.push((line.replace(/,/g, "")));
+        internalPositions.push([(line.replace(/,/g, "")), lowesty]);
     }
-    return [pos,namelist,onrowcopy];
+    return [pos, namelist, onrowcopy];
 }
 
-function Condense(pos){
-    var namelist=[];
-    var len=pos.length;
+function Condense(pos) {
+    var namelist = [];
+    var len = pos.length;
     for (var i = 0; i < len; i++) {
-        var x=condenseLine(pos,namelist);
-        pos=x[0];
-        namelist=x[1];
+        var x = condenseLine(pos, namelist);
+        pos = x[0];
+        namelist = x[1];
         for (var c = 0; c < x[2].length; c++) {
             for (var z = 0; z < pos.length; z++) {
-                if(pos[z]===x[2][c]){
-                    pos.splice(z,1);
+                if (pos[z] === x[2][c]) {
+                    pos.splice(z, 1);
                 }
             }
         }
-        if(pos.length===0){break;};
+        if (pos.length === 0) {
+            break;
+        }
+        ;
     }
     return namelist;
 }
@@ -150,11 +153,11 @@ function ExtractNames() {
         });
     });
     // Break into rows and return each valid row.
-    Names=Condense(Positions);
-    Info.Names=Names;
+    Names = Condense(Positions);
+    Info.Names = Names;
 }
 
-function ExtractMarks(){
+function ExtractMarks() {
     var Positions = [];
     var point = getCrossPoint();
     //for each absolute length to each line,find closest
@@ -164,7 +167,7 @@ function ExtractMarks(){
             block.paragraphs.forEach(paragraph => {
                 paragraph.words.forEach(word => {
                     const wordText = word.symbols.map(s => s.text).join('');
-                    if (word.boundingBox.vertices[0].x > point[0] && word.boundingBox.vertices[0].y > point[1]+50) {
+                    if (word.boundingBox.vertices[0].x > point[0] && word.boundingBox.vertices[0].y > point[1] + 50) {
                         //is within name area.
                         //get top-left position and load it into array
                         var x = 10000;
@@ -177,12 +180,12 @@ function ExtractMarks(){
                                 y = word.boundingBox.vertices[i].y;
                             }
                         }
-                        wordText2=wordText.match(/w/gi);
-                        if (wordText) {
+                        wordText2 = wordText.match(/w/gi);
+                        if (wordText!=="") {
                             console.log(wordText2);
-                            word.symbols.forEach(symbol=>{
+                            word.symbols.forEach(symbol => {
                                 Positions.push([symbol.text, x, y]);
-                            })
+                            });
                         }
                     }
                 });
