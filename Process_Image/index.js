@@ -177,10 +177,12 @@ function ExtractMarks(){
                                 y = word.boundingBox.vertices[i].y;
                             }
                         }
-                        wordText2=wordText.replace(/[0-9]/g,"");
-                        if (wordText2!== "" && wordText2!==".") {
+                        wordText2=wordText.match(/w/gi);
+                        if (wordText) {
                             console.log(wordText2);
-                            Positions.push([word, x, y]);
+                            word.symbols.forEach(symbol=>{
+                                Positions.push([symbol.text, x, y]);
+                            })
                         }
                     }
                 });
