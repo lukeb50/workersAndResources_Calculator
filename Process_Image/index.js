@@ -182,8 +182,8 @@ function ExtractMarks() {
                         }
                         wordText2 = wordText.match(/w/gi);
                         if (wordText2 !== null) {
-                            wordText2.symbols.forEach(symbol => {
-                                if (symbol.toUpperCase() === "W") {
+                            word.symbols.forEach(symbol => {
+                                if ((symbol.text).toUpperCase() === "W") {
                                     console.log(symbol.text);
                                     Positions.push([symbol.text, x, y]);
                                 }
