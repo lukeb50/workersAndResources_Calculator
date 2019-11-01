@@ -177,7 +177,9 @@ function ExtractMarks(){
                                 y = word.boundingBox.vertices[i].y;
                             }
                         }
-                        if (wordText!== "") {
+                        wordText2=wordText.replace(/[0-9]/gi,"");
+                        wordText2=wordText2.replace(/./gi,"");
+                        if (wordText2!== "") {
                             console.log(wordText);
                             Positions.push([word, x, y]);
                         }
