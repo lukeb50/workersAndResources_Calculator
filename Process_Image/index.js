@@ -94,7 +94,7 @@ function condenseLine(pos,namelist) {
         console.log("Building line:"+line);
     }
     if(line.match(/Location/gi)===null && line.match(/Previous/gi)===null){
-        namelist.push(line);
+        namelist.push(line.replace(/,/g),"");
         console.log("Line:" + line);
         console.log("Remaining Items:" + pos.length);
     }
