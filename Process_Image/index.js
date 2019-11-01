@@ -155,7 +155,37 @@ function ExtractNames() {
 }
 
 function ExtractMarks(){
-    
+    var Positions = [];
+    var point = getCrossPoint();
+    //for each absolute length to each line,find closest
+    //match to closest skill,read in and store in position
+    detailedtext.pages.forEach(page => {
+        page.blocks.forEach(block => {
+            block.paragraphs.forEach(paragraph => {
+                paragraph.words.forEach(word => {
+                    const wordText = word.symbols.map(s => s.text).join('');
+                    if (word.boundingBox.vertices[0].x < point[0] && word.boundingBox.vertices[0].y > point[1]) {
+                        //is within name area.
+                        //get top-left position and load it into array
+                        var x = 10000;
+                        var y = 10000;
+                        for (var i = 0; i < word.boundingBox.vertices.length; i++) {
+                            if (word.boundingBox.vertices[i].x > x) {
+                                x = word.boundingBox.vertices[i].x;
+                            }
+                            if (word.boundingBox.vertices[i].y < y) {
+                                y = word.boundingBox.vertices[i].y;
+                            }
+                        }
+                        if (wordText!== "") {
+                            console.log(wordText);
+                            Positions.push([word, x, y]);
+                        }
+                    }
+                });
+            });
+        });
+    });
 }
 
 async function getText(location) {
