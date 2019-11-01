@@ -164,7 +164,7 @@ function ExtractMarks(){
             block.paragraphs.forEach(paragraph => {
                 paragraph.words.forEach(word => {
                     const wordText = word.symbols.map(s => s.text).join('');
-                    if (word.boundingBox.vertices[0].x > point[0] && word.boundingBox.vertices[0].y > point[1]) {
+                    if (word.boundingBox.vertices[0].x > point[0] && word.boundingBox.vertices[0].y > point[1]+50) {
                         //is within name area.
                         //get top-left position and load it into array
                         var x = 10000;
