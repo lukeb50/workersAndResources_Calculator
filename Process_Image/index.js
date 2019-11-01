@@ -166,15 +166,13 @@ function ExtractMarks() {
         page.blocks.forEach(block => {
             block.paragraphs.forEach(paragraph => {
                 paragraph.words.forEach(word => {
-                    console.log("Starting loop");
                     const wordText = word.symbols.map(s => s.text).join('');
                     if (word.boundingBox.vertices[0].x > point[0] && word.boundingBox.vertices[0].y > point[1] + 50) {
                         word.symbols.forEach(symbol=>{
-                            console.log("Attempting read");
                             var txt=symbol.text;
                             if(txt.toUpperCase()==="W"){
                                 console.log(txt.toUpperCase());
-                                Positions.push([Math.max(symbol.bounding_box.vertices[0].x,symbol.bounding_box.vertices[1].x,symbol.bounding_box.vertices[2].x,symbol.bounding_box.vertices[3].x),Math.max(symbol.bounding_box.vertices[0].y,symbol.bounding_box.vertices[1].y,symbol.bounding_box.vertices[2].y,symbol.bounding_box.vertices[3].y)]);
+                                Positions.push([Math.max(symbol.boundingBox.vertices[0].x,symbol.boundingBox.vertices[1].x,symbol.boundingBox.vertices[2].x,symbol.boundingBox.vertices[3].x),Math.max(symbol.boundingBox.vertices[0].y,symbol.boundingBox.vertices[1].y,symbol.boundingBox.vertices[2].y,symbol.boundingBox.vertices[3].y)]);
                             }
                         });
                     }
@@ -204,7 +202,6 @@ exports.Process = (req, res) => {
     if (req.method !== "POST" || req.body.loc === undefined) {
         res.status(400).end();
     }
-    getText(req.body.loc);
     getText(req.body.loc).then(re => {
         res.status(201).end();
     }).catch(err => {
