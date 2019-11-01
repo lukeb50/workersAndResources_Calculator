@@ -195,7 +195,7 @@ async function getText(location) {
     ExtractBarcode();
     ExtractLevel();
     ExtractNames();
-    ExtractMarks();
+    //ExtractMarks();
 }
 
 exports.Process = (req, res) => {
