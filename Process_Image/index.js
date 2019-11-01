@@ -6,6 +6,7 @@ const bucket = storage.bucket('report-cards-6290-uploads');
 var fulltext;
 var detailedtext;
 var Info = new Object();
+var LevelDetails = {"PRESCHOOL 1": 12, "PRESCHOOL 2": 13, "PRESCHOOL 3": 16, "PRESCHOOL 4": 15, "PRESCHOOL 5": 12, "SWIMMER 1": 21, "SWIMMER 2": 17, "SWIMMER 3": 17, "SWIMMER 4": 15, "SWIMMER 5": 19, "SWIMMER 6": 18};
 var internalPositions = [];
 
 function ExtractBarcode() {
@@ -157,6 +158,26 @@ function ExtractNames() {
     Info.Names = Names;
 }
 
+function getYRelations() {
+    console.log("Positions:");
+    var point = getCrossPoint();
+    detailedtext.pages.forEach(page => {
+        page.blocks.forEach(block => {
+            block.paragraphs.forEach(paragraph => {
+                paragraph.words.forEach(word => {
+                    const wordText = word.symbols.map(s => s.text).join('');
+                    if(Math.max(word.boundingBox.vertices[0].x, word.boundingBox.vertices[1].x, word.boundingBox.vertices[2].x, word.boundingBox.vertices[3].x)>point[0] && Math.max(word.boundingBox.vertices[0].y, word.boundingBox.vertices[1].y, word.boundingBox.vertices[2].y, word.boundingBox.vertices[3].y)<point[1]){
+                        if(wordText.match(/[0-9]+./g)!==null){
+                            console.log(wordText);
+                            //It's a position, use it
+                        }
+                    }
+                });
+            });
+        });
+    });
+}
+
 function ExtractMarks() {
     var Positions = [];
     var point = getCrossPoint();
@@ -168,11 +189,11 @@ function ExtractMarks() {
                 paragraph.words.forEach(word => {
                     const wordText = word.symbols.map(s => s.text).join('');
                     if (word.boundingBox.vertices[0].x > point[0] && word.boundingBox.vertices[0].y > point[1] + 50) {
-                        word.symbols.forEach(symbol=>{
-                            var txt=symbol.text;
-                            if(txt.toUpperCase()==="W"){
+                        word.symbols.forEach(symbol => {
+                            var txt = symbol.text;
+                            if (txt.toUpperCase() === "W") {
                                 console.log(txt.toUpperCase());
-                                Positions.push([Math.max(symbol.boundingBox.vertices[0].x,symbol.boundingBox.vertices[1].x,symbol.boundingBox.vertices[2].x,symbol.boundingBox.vertices[3].x),Math.max(symbol.boundingBox.vertices[0].y,symbol.boundingBox.vertices[1].y,symbol.boundingBox.vertices[2].y,symbol.boundingBox.vertices[3].y)]);
+                                Positions.push([Math.max(symbol.boundingBox.vertices[0].x, symbol.boundingBox.vertices[1].x, symbol.boundingBox.vertices[2].x, symbol.boundingBox.vertices[3].x), Math.max(symbol.boundingBox.vertices[0].y, symbol.boundingBox.vertices[1].y, symbol.boundingBox.vertices[2].y, symbol.boundingBox.vertices[3].y)]);
                             }
                         });
                     }
@@ -180,6 +201,12 @@ function ExtractMarks() {
             });
         });
     });
+    var Marks = new Array(Info.Names.length);
+    for (var i = 0; i < Marks.length; i++) {
+        Marks[i] = new Array(LevelDetails[Info.Level]);
+    }
+    getYRelations();
+
 }
 
 async function getText(location) {
