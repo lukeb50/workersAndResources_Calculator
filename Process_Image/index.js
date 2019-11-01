@@ -166,6 +166,7 @@ function ExtractMarks() {
         page.blocks.forEach(block => {
             block.paragraphs.forEach(paragraph => {
                 paragraph.words.forEach(word => {
+                    console.log("Starting loop");
                     const wordText = word.symbols.map(s => s.text).join('');
                     if (word.boundingBox.vertices[0].x > point[0] && word.boundingBox.vertices[0].y > point[1] + 50) {
                         word.symbols.forEach(symbol=>{
