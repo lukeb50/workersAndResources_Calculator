@@ -48,7 +48,7 @@ function getCrossPoint() {
                                     lowesty = word.boundingBox.vertices[x].y;
                                 }
                             }
-                            return [lowestx+100, lowesty+100];
+                            return [lowestx, lowesty];
                         }
                     });
                 }
@@ -93,9 +93,11 @@ function condenseLine(pos,namelist) {
         onrow.splice(lowestindex,1);
         console.log("Building line:"+line);
     }
-    namelist.push(line);
-    console.log("Line:" + line);
-    console.log("Remaining Items:" + pos.length);
+    if(line.match(/Location/gi)===null && line.match(/Previous/gi)===null){
+        namelist.push(line);
+        console.log("Line:" + line);
+        console.log("Remaining Items:" + pos.length);
+    }
     return [pos,namelist,onrowcopy];
 }
 
