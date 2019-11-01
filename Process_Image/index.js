@@ -65,13 +65,11 @@ function condenseLine(pos,namelist) {
             lowesty = pos[a][2];
         }
     }
-    console.log("Low Y:" + lowesty);
     //found current lowest point;
     var onrow = [];
     var onrowcopy = [];
     for (var i = 0; i < pos.length; i++) {
         if (lowesty - 25 < pos[i][2] && lowesty + 25 > pos[i][2]) {
-            console.log("Adding " + pos[i][0].symbols.map(s => s.text).join('') + " to onrow");
             onrow.push(pos[i]);
             onrowcopy.push(pos[i]);
         }
@@ -91,12 +89,9 @@ function condenseLine(pos,namelist) {
         //found first word, add it.      
         line =[line,onrow[lowestindex][0].symbols.map(s => s.text).join('')].join(" ");
         onrow.splice(lowestindex,1);
-        console.log("Building line:"+line);
     }
-    if(line.match(/Location/gi)===null && line.match(/Previous/gi)===null){
+    if(line.match(/Location/gi)===null && line.match(/Previous/gi)===null && line.toUpperCase()!==line){
         namelist.push((line.replace(/,/g,"")));
-        console.log("Line:" + line);
-        console.log("Remaining Items:" + pos.length);
     }
     return [pos,namelist,onrowcopy];
 }
@@ -115,7 +110,6 @@ function Condense(pos){
                 }
             }
         }
-        console.log("Finished removing. Left:"+pos.length+" iderator:"+i);
         if(pos.length===0){break;};
     }
     return namelist;
@@ -153,10 +147,9 @@ function ExtractNames() {
             });
         });
     });
-    // into seperated rows and return everything in that row
-    console.log(Positions.length);
+    // Break into rows and return each valid row.
     Names=Condense(Positions);
-    return Names;
+    Info.Names=Names;
 }
 
 async function getText(location) {
