@@ -6,6 +6,7 @@ const bucket = storage.bucket('report-cards-6290-uploads');
 var fulltext;
 var detailedtext;
 var Info = new Object();
+var internalPositions = [];
 
 function ExtractBarcode() {
     Info.Barcode = fulltext.match(new RegExp("[0-9]{" + process.env.Barcode_Length + "}", "g"));
@@ -92,6 +93,7 @@ function condenseLine(pos,namelist) {
     }
     if(line.match(/Location/gi)===null && line.match(/Previous/gi)===null && line.toUpperCase()!==line){
         namelist.push((line.replace(/,/g,"")));
+        internalPositions.push([(line.replace(/,/g,"")),lowesty]);
     }
     return [pos,namelist,onrowcopy];
 }
@@ -152,6 +154,10 @@ function ExtractNames() {
     Info.Names=Names;
 }
 
+function ExtractMarks(){
+    
+}
+
 async function getText(location) {
     const vision = require('@google-cloud/vision');
     const client = new vision.ImageAnnotatorClient();
@@ -162,11 +168,8 @@ async function getText(location) {
     detailedtext = fullTextAnnotation;
     ExtractBarcode();
     ExtractLevel();
-    var names=ExtractNames();
-    console.log("Names:");
-    for (var i = 0; i < names.length; i++) {
-        console.log(names[i]);
-    }
+    ExtractNames();
+    ExtractMarks();
 }
 
 exports.Process = (req, res) => {
