@@ -48,7 +48,7 @@ function getCrossPoint() {
                                     lowesty = word.boundingBox.vertices[x].y;
                                 }
                             }
-                            return [lowestx, lowesty];
+                            return [lowestx-50, lowesty-50];
                         }
                     });
                 }
