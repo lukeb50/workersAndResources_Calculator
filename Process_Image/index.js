@@ -176,7 +176,7 @@ function ExtractMarks() {
                                 console.log(txt.toUpperCase());
                                 Positions.push([Math.max(symbol.bounding_box.vertices[0].x,symbol.bounding_box.vertices[1].x,symbol.bounding_box.vertices[2].x,symbol.bounding_box.vertices[3].x),Math.max(symbol.bounding_box.vertices[0].y,symbol.bounding_box.vertices[1].y,symbol.bounding_box.vertices[2].y,symbol.bounding_box.vertices[3].y)]);
                             }
-                        })
+                        });
                     }
                 });
             });
@@ -207,8 +207,8 @@ exports.Process = (req, res) => {
     getText(req.body.loc);
     getText(req.body.loc).then(re => {
         res.status(201).end();
-    }).catch(err => {
-        console.log("error:" + err.toString());
-        res.status(500).end();
-    });
+    });//.catch(err => {
+        //console.log("error:" + err.toString());
+        //res.status(500).end();
+    //});
 };
