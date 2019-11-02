@@ -166,9 +166,10 @@ function getYRelations() {
             block.paragraphs.forEach(paragraph => {
                 paragraph.words.forEach(word => {
                     const wordText = word.symbols.map(s => s.text).join('');
-                    if(Math.min(word.boundingBox.vertices[0].x, word.boundingBox.vertices[1].x, word.boundingBox.vertices[2].x, word.boundingBox.vertices[3].x)>point[0] && Math.max(word.boundingBox.vertices[0].y, word.boundingBox.vertices[1].y, word.boundingBox.vertices[2].y, word.boundingBox.vertices[3].y)<point[1]){
+                    if(Math.min(word.boundingBox.vertices[0].x, word.boundingBox.vertices[1].x, word.boundingBox.vertices[2].x, word.boundingBox.vertices[3].x)>point[0] && Math.min(word.boundingBox.vertices[0].y, word.boundingBox.vertices[1].y, word.boundingBox.vertices[2].y, word.boundingBox.vertices[3].y)<point[1]){
+                        console.log("Potential Word:"+wordText);
                         if(wordText.match(/[0-9]{1,2}./g)!==null){
-                            console.log(wordText);
+                            console.log("Added:"+wordText);
                             //It's a position, use it
                         }
                     }
