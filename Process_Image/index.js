@@ -160,28 +160,22 @@ function ExtractNames() {
 
 function getYOffset() {
     var point = getCrossPoint();
-    var lastword="";
-    point[1]=point[1]+75;
+    var lastword = "";
+    var calc=100;
+    point[1] = point[1] + 75;
     detailedtext.pages.forEach(page => {
         page.blocks.forEach(block => {
             block.paragraphs.forEach(paragraph => {
+                var paraword="";
                 paragraph.words.forEach(word => {
                     const wordText = word.symbols.map(s => s.text).join('');
-                    if(Math.min(word.boundingBox.vertices[0].x, word.boundingBox.vertices[1].x, word.boundingBox.vertices[2].x, word.boundingBox.vertices[3].x)>point[0] && Math.min(word.boundingBox.vertices[0].y, word.boundingBox.vertices[1].y, word.boundingBox.vertices[2].y, word.boundingBox.vertices[3].y)<point[1]){
-                        var combined=[lastword,wordText].join("");
-                        if(combined.match(/\d[.]/g)!==null){
-                            console.log(combined);
-                            var calc=(Math.min(word.boundingBox.vertices[0].x, word.boundingBox.vertices[1].x, word.boundingBox.vertices[2].x, word.boundingBox.vertices[3].x)-point[0])/parseInt(combined.charAt(0));
-                            console.log("Calc:"+calc);
-                            return calc;
-                        }
-                        lastword=wordText;
-                    }
+                    paraword=[paraword,wordText].join("");
                 });
+                console.log(paraword);
             });
         });
     });
-    return 75;
+    return calc;
 }
 
 function ExtractMarks() {
@@ -210,7 +204,7 @@ function ExtractMarks() {
     for (var i = 0; i < Marks.length; i++) {
         Marks[i] = new Array(LevelDetails[Info.Level]);
     }
-    var offset=getYOffset();
+    var offset = getYOffset();
     console.log(offset);
 }
 
