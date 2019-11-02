@@ -170,10 +170,8 @@ function getYOffset() {
                     const wordText = word.symbols.map(s => s.text).join('');
                     if(Math.min(word.boundingBox.vertices[0].x, word.boundingBox.vertices[1].x, word.boundingBox.vertices[2].x, word.boundingBox.vertices[3].x)>point[0] && Math.min(word.boundingBox.vertices[0].y, word.boundingBox.vertices[1].y, word.boundingBox.vertices[2].y, word.boundingBox.vertices[3].y)<point[1]){
                         var combined=[lastword,wordText].join("");
-                        console.log("Potential Word:"+combined);
                         if(combined.match(/\d[.]/g)!==null){
-                            console.log("Added:"+combined);
-                            //It's a position, use it
+                            return Math.min(word.boundingBox.vertices[0].x, word.boundingBox.vertices[1].x, word.boundingBox.vertices[2].x, word.boundingBox.vertices[3].x)-point[0]/parseInt(combined.match(/[0-9]/g));
                         }
                         lastword=wordText;
                     }
@@ -210,8 +208,8 @@ function ExtractMarks() {
     for (var i = 0; i < Marks.length; i++) {
         Marks[i] = new Array(LevelDetails[Info.Level]);
     }
-    getYOffset();
-
+    var offset=getYOffset();
+    console.log(offset);
 }
 
 async function getText(location) {
