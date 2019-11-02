@@ -167,7 +167,7 @@ function getYOffset() {
         page.blocks.forEach(block => {
             block.paragraphs.forEach(paragraph => {
                 var paraword="";
-                if(Math.min(paragraph.boundingBox.vertices[0].x, paragraph.boundingBox.vertices[1].x, paragraph.boundingBox.vertices[2].x, paragraph.boundingBox.vertices[3].x)>point[0] && Math.max(paragraph.boundingBox.vertices[0].y, paragraph.boundingBox.vertices[1].y, paragraph.boundingBox.vertices[2].y, paragraph.boundingBox.vertices[3].y)<point[1])
+                if(Math.min(paragraph.boundingBox.vertices[0].x, paragraph.boundingBox.vertices[1].x, paragraph.boundingBox.vertices[2].x, paragraph.boundingBox.vertices[3].x)>point[0] && Math.max(paragraph.boundingBox.vertices[0].y, paragraph.boundingBox.vertices[1].y, paragraph.boundingBox.vertices[2].y, paragraph.boundingBox.vertices[3].y)+75<point[1])
                 paragraph.words.forEach(word => {
                     const wordText = word.symbols.map(s => s.text).join('');
                     paraword=[paraword,wordText].join("");
