@@ -160,24 +160,21 @@ function ExtractNames() {
 
 function getYOffset() {
     var point = getCrossPoint();
-    var lastword = "";
+    var points=[];
+    points.push(point);
     var counter=1;
     point[1] = point[1] + 75;
     detailedtext.pages.forEach(page => {
         page.blocks.forEach(block => {
             block.paragraphs.forEach(paragraph => {
-                var paraword = "";
                 if (Math.min(paragraph.boundingBox.vertices[0].x, paragraph.boundingBox.vertices[1].x, paragraph.boundingBox.vertices[2].x, paragraph.boundingBox.vertices[3].x) > point[0] && Math.max(paragraph.boundingBox.vertices[0].y, paragraph.boundingBox.vertices[1].y, paragraph.boundingBox.vertices[2].y, paragraph.boundingBox.vertices[3].y) - 75 < point[1] && counter<=LevelDetails[Info.Level]-1){
-                    paragraph.words.forEach(word => {
-                        const wordText = word.symbols.map(s => s.text).join('');
-                        paraword = [paraword, wordText].join("");
-                    });
+                    points.push([Math.min(paragraph.boundingBox.vertices[0].x, paragraph.boundingBox.vertices[1].x, paragraph.boundingBox.vertices[2].x, paragraph.boundingBox.vertices[3].x),Math.max(paragraph.boundingBox.vertices[0].y, paragraph.boundingBox.vertices[1].y, paragraph.boundingBox.vertices[2].y, paragraph.boundingBox.vertices[3].y)]);
                     counter+=1;
-                    console.log(paraword);
                 }
             });
         });
     });
+    console.log(points.length);
 }
 
 function ExtractMarks() {
