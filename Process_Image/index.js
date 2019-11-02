@@ -161,20 +161,20 @@ function ExtractNames() {
 function getYOffset() {
     var point = getCrossPoint();
     var points=[];
-    points.push(point);
+    points.push(point[0]);
     var counter=1;
     point[1] = point[1] + 75;
     detailedtext.pages.forEach(page => {
         page.blocks.forEach(block => {
             block.paragraphs.forEach(paragraph => {
                 if (Math.min(paragraph.boundingBox.vertices[0].x, paragraph.boundingBox.vertices[1].x, paragraph.boundingBox.vertices[2].x, paragraph.boundingBox.vertices[3].x) > point[0] && Math.max(paragraph.boundingBox.vertices[0].y, paragraph.boundingBox.vertices[1].y, paragraph.boundingBox.vertices[2].y, paragraph.boundingBox.vertices[3].y) - 75 < point[1] && counter<=LevelDetails[Info.Level]-1){
-                    points.push([Math.min(paragraph.boundingBox.vertices[0].x, paragraph.boundingBox.vertices[1].x, paragraph.boundingBox.vertices[2].x, paragraph.boundingBox.vertices[3].x),Math.max(paragraph.boundingBox.vertices[0].y, paragraph.boundingBox.vertices[1].y, paragraph.boundingBox.vertices[2].y, paragraph.boundingBox.vertices[3].y)]);
+                    points.push(Math.min(paragraph.boundingBox.vertices[0].x, paragraph.boundingBox.vertices[1].x, paragraph.boundingBox.vertices[2].x, paragraph.boundingBox.vertices[3].x));
                     counter+=1;
                 }
             });
         });
     });
-    console.log(points.length);
+    return points;
 }
 
 function ExtractMarks() {
@@ -204,7 +204,7 @@ function ExtractMarks() {
         Marks[i] = new Array(LevelDetails[Info.Level]);
     }
     var offset = getYOffset();
-    console.log(offset);
+    console.log(offset.toString());
 }
 
 async function getText(location) {
