@@ -170,7 +170,7 @@ function getYRelations() {
                     const wordText = word.symbols.map(s => s.text).join('');
                     if(Math.min(word.boundingBox.vertices[0].x, word.boundingBox.vertices[1].x, word.boundingBox.vertices[2].x, word.boundingBox.vertices[3].x)>point[0] && Math.min(word.boundingBox.vertices[0].y, word.boundingBox.vertices[1].y, word.boundingBox.vertices[2].y, word.boundingBox.vertices[3].y)<point[1]){
                         console.log("Potential Word:"+wordText);
-                        var combined=[wordText+lastword].join("");
+                        var combined=[wordText,lastword].join("");
                         if(combined.match(/[.]\d\d/g)!==null){
                             console.log("Added:"+combined);
                             //It's a position, use it
