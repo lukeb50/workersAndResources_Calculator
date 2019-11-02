@@ -161,6 +161,7 @@ function ExtractNames() {
 function getYRelations() {
     console.log("Positions:");
     var point = getCrossPoint();
+    point[0]=point[0]+50;
     detailedtext.pages.forEach(page => {
         page.blocks.forEach(block => {
             block.paragraphs.forEach(paragraph => {
@@ -168,7 +169,7 @@ function getYRelations() {
                     const wordText = word.symbols.map(s => s.text).join('');
                     if(Math.min(word.boundingBox.vertices[0].x, word.boundingBox.vertices[1].x, word.boundingBox.vertices[2].x, word.boundingBox.vertices[3].x)>point[0] && Math.min(word.boundingBox.vertices[0].y, word.boundingBox.vertices[1].y, word.boundingBox.vertices[2].y, word.boundingBox.vertices[3].y)<point[1]){
                         console.log("Potential Word:"+wordText);
-                        if(wordText.match(/[0-9]{1,2}./g)!==null){
+                        if(wordText.match(/[.]\d\d/g)!==null){
                             console.log("Added:"+wordText);
                             //It's a position, use it
                         }
