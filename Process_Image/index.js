@@ -159,7 +159,6 @@ function ExtractNames() {
 }
 
 function getYOffset() {
-    console.log("Positions:");
     var point = getCrossPoint();
     var lastword="";
     point[1]=point[1]+75;
@@ -171,7 +170,7 @@ function getYOffset() {
                     if(Math.min(word.boundingBox.vertices[0].x, word.boundingBox.vertices[1].x, word.boundingBox.vertices[2].x, word.boundingBox.vertices[3].x)>point[0] && Math.min(word.boundingBox.vertices[0].y, word.boundingBox.vertices[1].y, word.boundingBox.vertices[2].y, word.boundingBox.vertices[3].y)<point[1]){
                         var combined=[lastword,wordText].join("");
                         if(combined.match(/\d[.]/g)!==null){
-                            return Math.min(word.boundingBox.vertices[0].x, word.boundingBox.vertices[1].x, word.boundingBox.vertices[2].x, word.boundingBox.vertices[3].x)-point[0]/parseInt(combined.match(/[0-9]/g));
+                            return Math.min(word.boundingBox.vertices[0].x, word.boundingBox.vertices[1].x, word.boundingBox.vertices[2].x, word.boundingBox.vertices[3].x)-point[0]/parseInt(combined.charAt(0));
                         }
                         lastword=wordText;
                     }
@@ -179,6 +178,7 @@ function getYOffset() {
             });
         });
     });
+    return 75;
 }
 
 function ExtractMarks() {
@@ -195,7 +195,6 @@ function ExtractMarks() {
                         word.symbols.forEach(symbol => {
                             var txt = symbol.text;
                             if (txt.toUpperCase() === "W") {
-                                console.log(txt.toUpperCase());
                                 Positions.push([Math.max(symbol.boundingBox.vertices[0].x, symbol.boundingBox.vertices[1].x, symbol.boundingBox.vertices[2].x, symbol.boundingBox.vertices[3].x), Math.max(symbol.boundingBox.vertices[0].y, symbol.boundingBox.vertices[1].y, symbol.boundingBox.vertices[2].y, symbol.boundingBox.vertices[3].y)]);
                             }
                         });
