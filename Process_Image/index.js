@@ -170,7 +170,8 @@ function getYOffset() {
                     if(Math.min(word.boundingBox.vertices[0].x, word.boundingBox.vertices[1].x, word.boundingBox.vertices[2].x, word.boundingBox.vertices[3].x)>point[0] && Math.min(word.boundingBox.vertices[0].y, word.boundingBox.vertices[1].y, word.boundingBox.vertices[2].y, word.boundingBox.vertices[3].y)<point[1]){
                         var combined=[lastword,wordText].join("");
                         if(combined.match(/\d[.]/g)!==null){
-                            var calc=Math.min(word.boundingBox.vertices[0].x, word.boundingBox.vertices[1].x, word.boundingBox.vertices[2].x, word.boundingBox.vertices[3].x)-point[0]/parseInt(combined.charAt(0));
+                            console.log(combined);
+                            var calc=(Math.min(word.boundingBox.vertices[0].x, word.boundingBox.vertices[1].x, word.boundingBox.vertices[2].x, word.boundingBox.vertices[3].x)-point[0])/parseInt(combined.charAt(0));
                             console.log("Calc:"+calc);
                             return calc;
                         }
