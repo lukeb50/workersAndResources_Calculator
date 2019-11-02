@@ -161,7 +161,7 @@ function ExtractNames() {
 function getYRelations() {
     console.log("Positions:");
     var point = getCrossPoint();
-    point[0]=point[0]+50;
+    point[0]=point[0]+100;
     detailedtext.pages.forEach(page => {
         page.blocks.forEach(block => {
             block.paragraphs.forEach(paragraph => {
