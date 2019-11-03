@@ -213,7 +213,7 @@ function ExtractMarks() {
             var diff=Positions[i][1]-internalPositions[i][1];
             if(diff<lowestdiff){lowestdiff=diff;lowestiderator=x;}
         }
-        console.log(internalPositions[lowestiderator][lowestiderator]);
+        console.log(internalPositions[lowestiderator][0]);
     }
 }
 
