@@ -199,9 +199,13 @@ function ExtractMarks() {
             });
         });
     });
+    //generate grid for storing
     var Marks = new Array(Info.Names.length);
     for (var i = 0; i < Marks.length; i++) {
         Marks[i] = new Array(LevelDetails[Info.Level]);
+        for (var v = 0; v < Marks[i].length; v++) {
+            Marks[i][v]=true;
+        }
     }
     var offset = getYOffset();
     //internalPositions[i][1] has Y for name, offset[i] has X for skill, Positions contains x & y of weaks
@@ -209,12 +213,27 @@ function ExtractMarks() {
         //for each Weak, find lowest difference in Y values with names.
         var lowestdiff=10000;
         var lowestiderator=-1;
-        //console.log(Positions[i][0]+":"+Positions[i][1]);
         for (var x = 0; x < internalPositions.length; x++) {
             var diff=Math.abs(Positions[i][1]-internalPositions[x][1]);
             if(diff<lowestdiff){lowestdiff=diff;lowestiderator=x;}
         }
-        console.log(internalPositions[lowestiderator][0]);
+        //internalPositions[lowestiderator][0] has name of person, lowestiderator is pos of person
+        lowestdiff=10000;
+        var lowestiderator2=-1;
+        for (var x = 0; x < offset.length; x++) {
+            var diff=Math.abs(offset[x]-Positions[i][0]);
+            if(diff<lowestdiff){lowestdiff=diff;lowestiderator2=x;}
+        }
+        //set mark position to false
+        Marks[lowestiderator][lowestiderator2]=false;
+    }
+    //print off all marks.
+    for (var i = 0; i < Marks.length; i++) {
+        var txt="";
+        for (var b = 0; b < Marks[i].length; b++) {
+            txt=txt+Marks[i][b].toString();+"   ";
+        }
+        console.log(txt);
     }
 }
 
