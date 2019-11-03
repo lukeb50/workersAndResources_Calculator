@@ -210,7 +210,7 @@ function ExtractMarks() {
         var lowestdiff=10000;
         var lowestiderator=-1;
         for (var x = 0; x < internalPositions.length; x++) {
-            var diff=internalPositions[i][2]-Positions[i][1];
+            var diff=Positions[i][1]-internalPositions[i][1];
             if(diff<lowestdiff){lowestdiff=diff;lowestiderator=x;}
         }
         console.log(internalPositions[lowestiderator][lowestiderator]);
