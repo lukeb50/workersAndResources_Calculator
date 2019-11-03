@@ -190,7 +190,7 @@ function ExtractMarks() {
                     if (word.boundingBox.vertices[0].x > point[0] && word.boundingBox.vertices[0].y > point[1] + 50) {
                         word.symbols.forEach(symbol => {
                             var txt = symbol.text;
-                            if ((txt.toUpperCase() === "W" || txt.toUpperCase()==="N") && wordText.match(/sw/gi)===null) {
+                            if ((txt.toUpperCase() === "W" || txt.toUpperCase()==="N") && (wordText.toUpperCase().match(/SW/gi)===null)) {
                                 Positions.push([Math.min(symbol.boundingBox.vertices[0].x, symbol.boundingBox.vertices[1].x, symbol.boundingBox.vertices[2].x, symbol.boundingBox.vertices[3].x), Math.min(symbol.boundingBox.vertices[0].y, symbol.boundingBox.vertices[1].y, symbol.boundingBox.vertices[2].y, symbol.boundingBox.vertices[3].y)]);
                             }
                         });
@@ -231,7 +231,7 @@ function ExtractMarks() {
     for (var i = 0; i < Marks.length; i++) {
         var txt="";
         for (var b = 0; b < Marks[i].length; b++) {
-            txt=txt+Marks[i][b].toString();+"   ";
+            txt=txt+Marks[i][b].toString()+"   ";
         }
         console.log(txt);
     }
