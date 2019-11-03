@@ -204,7 +204,17 @@ function ExtractMarks() {
         Marks[i] = new Array(LevelDetails[Info.Level]);
     }
     var offset = getYOffset();
-    console.log(offset.toString());
+    //internalPositions[i][1] has Y for name, offset[i] has X for skill, Positions contains x & y of weaks
+    for (var i = 0; i < Positions.length; i++) {
+        //for each Weak, find lowest difference in Y values with names.
+        var lowestdiff=10000;
+        var lowestiderator=-1;
+        for (var x = 0; x < internalPositions.length; x++) {
+            var diff=internalPositions[i][2]-Positions[i][1];
+            if(diff<lowestdiff){lowestdiff=diff;lowestiderator=x;}
+        }
+        console.log(internalPositions[lowestiderator][lowestiderator]);
+    }
 }
 
 async function getText(location) {
