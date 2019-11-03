@@ -191,7 +191,7 @@ function ExtractMarks() {
                         word.symbols.forEach(symbol => {
                             var txt = symbol.text;
                             if (txt.toUpperCase() === "W") {
-                                Positions.push([Math.min(symbol.boundingBox.vertices[0].x, symbol.boundingBox.vertices[1].x, symbol.boundingBox.vertices[2].x, symbol.boundingBox.vertices[3].x), Math.max(symbol.boundingBox.vertices[0].y, symbol.boundingBox.vertices[1].y, symbol.boundingBox.vertices[2].y, symbol.boundingBox.vertices[3].y)]);
+                                Positions.push([Math.min(symbol.boundingBox.vertices[0].x, symbol.boundingBox.vertices[1].x, symbol.boundingBox.vertices[2].x, symbol.boundingBox.vertices[3].x), Math.min(symbol.boundingBox.vertices[0].y, symbol.boundingBox.vertices[1].y, symbol.boundingBox.vertices[2].y, symbol.boundingBox.vertices[3].y)]);
                             }
                         });
                     }
