@@ -209,7 +209,7 @@ function ExtractMarks() {
         //for each Weak, find lowest difference in Y values with names.
         var lowestdiff=10000;
         var lowestiderator=-1;
-        console.log(Positions[i].toString());
+        console.log(Positions[i][1]);
         for (var x = 0; x < internalPositions.length; x++) {
             var diff=Math.abs(Positions[i][1]-internalPositions[x][1]);
             if(diff<lowestdiff){lowestdiff=diff;lowestiderator=x;}
