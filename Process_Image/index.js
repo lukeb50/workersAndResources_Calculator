@@ -211,6 +211,7 @@ function ExtractMarks() {
         var lowestiderator=-1;
         for (var x = 0; x < internalPositions.length; x++) {
             var diff=Positions[i][1]-internalPositions[i][1];
+            console.log(diff);
             if(diff<lowestdiff){lowestdiff=diff;lowestiderator=x;}
         }
         console.log(internalPositions[lowestiderator][0]);
