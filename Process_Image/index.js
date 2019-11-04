@@ -225,7 +225,7 @@ function ExtractMarks() {
             if(diff<lowestdiff){lowestdiff=diff;lowestiderator2=x;}
         }
         //set mark position to false
-        Marks[lowestiderator][lowestiderator2]=false;
+        Marks[lowestiderator][lowestiderator2+1]=false;
     }
     //print off all marks.
     for (var i = 0; i < Marks.length; i++) {
