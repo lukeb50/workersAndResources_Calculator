@@ -231,11 +231,13 @@ function ExtractMarks() {
     //print off all marks.
     for (var i = 0; i < Marks.length; i++) {
         var txt="";
+        Marks[i][Marks.length]=true;
         for (var b = 0; b < Marks[i].length; b++) {
             txt=txt+Marks[i][b].toString()+"   ";
         }
         console.log(txt);
     }
+    Info.Marks=Marks;
 }
 
 async function getText(location) {
@@ -259,7 +261,7 @@ exports.Process = (req, res) => {
         res.status(400).end();
     }
     getText(req.body.loc).then(re => {
-        res.status(201).end();
+        res.status(200).send(Info);
     }).catch(err => {
         console.log("error:" + err.toString());
         res.status(500).end();
