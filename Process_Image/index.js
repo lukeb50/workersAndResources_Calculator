@@ -221,7 +221,7 @@ function ExtractMarks() {
         //internalPositions[lowestiderator][0] has name of person, lowestiderator is pos of person
         lowestdiff=10000;
         var lowestiderator2=-1;
-        for (var x = 0; x < offset.length; x++) {
+        for (var x = 0; x < offset.length-1; x++) {
             var diff=Math.abs(offset[x]-Positions[i][0]);
             if(diff<lowestdiff){lowestdiff=diff;lowestiderator2=x;}
         }
