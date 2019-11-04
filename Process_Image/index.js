@@ -208,6 +208,7 @@ function ExtractMarks() {
         }
     }
     var offset = getYOffset();
+    console.log(offset.length);
     //internalPositions[i][1] has Y for name, offset[i] has X for skill, Positions contains x & y of weaks
     for (var i = 0; i < Positions.length; i++) {
         //for each Weak, find lowest difference in Y values with names.
