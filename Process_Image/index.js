@@ -262,8 +262,8 @@ exports.Process = (req, res) => {
     }
     getText(req.body.loc).then(re => {
         res.status(200).send(Info);
-    }).catch(err => {
-        console.log("error:" + err.toString());
-        res.status(500).end();
-    });
+    });//.catch(err => {
+        //console.log("error:" + err.toString());
+        //res.status(500).end();
+    //});
 };
