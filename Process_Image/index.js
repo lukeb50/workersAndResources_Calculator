@@ -10,7 +10,7 @@ var LevelDetails = {"PRESCHOOL 1": 12, "PRESCHOOL 2": 13, "PRESCHOOL 3": 16, "PR
 var internalPositions = [];
 
 function ExtractBarcode() {
-    Info.Barcode = fulltext.match(new RegExp("[0-9]{" + process.env.Barcode_Length + "}", "g"));
+    Info.Barcode = fulltext.match(new RegExp("[0-9]{" + process.env.Barcode_Length + "}", "g"))[0];
     console.log(Info.Barcode);
 }
 
@@ -160,16 +160,16 @@ function ExtractNames() {
 
 function getYOffset() {
     var point = getCrossPoint();
-    var points=[];
+    var points = [];
     points.push(point[0]);
-    var counter=1;
+    var counter = 1;
     point[1] = point[1] + 75;
     detailedtext.pages.forEach(page => {
         page.blocks.forEach(block => {
             block.paragraphs.forEach(paragraph => {
-                if (Math.min(paragraph.boundingBox.vertices[0].x, paragraph.boundingBox.vertices[1].x, paragraph.boundingBox.vertices[2].x, paragraph.boundingBox.vertices[3].x) > point[0] && Math.max(paragraph.boundingBox.vertices[0].y, paragraph.boundingBox.vertices[1].y, paragraph.boundingBox.vertices[2].y, paragraph.boundingBox.vertices[3].y) - 75 < point[1] && counter<=LevelDetails[Info.Level]-1){
+                if (Math.min(paragraph.boundingBox.vertices[0].x, paragraph.boundingBox.vertices[1].x, paragraph.boundingBox.vertices[2].x, paragraph.boundingBox.vertices[3].x) > point[0] && Math.max(paragraph.boundingBox.vertices[0].y, paragraph.boundingBox.vertices[1].y, paragraph.boundingBox.vertices[2].y, paragraph.boundingBox.vertices[3].y) - 75 < point[1] && counter <= LevelDetails[Info.Level] - 1) {
                     points.push(Math.min(paragraph.boundingBox.vertices[0].x, paragraph.boundingBox.vertices[1].x, paragraph.boundingBox.vertices[2].x, paragraph.boundingBox.vertices[3].x));
-                    counter+=1;
+                    counter += 1;
                 }
             });
         });
@@ -190,7 +190,7 @@ function ExtractMarks() {
                     if (word.boundingBox.vertices[0].x > point[0] && word.boundingBox.vertices[0].y > point[1] + 50) {
                         word.symbols.forEach(symbol => {
                             var txt = symbol.text;
-                            if ((txt.toUpperCase() === "W" || txt.toUpperCase()==="N") && (wordText.toUpperCase().match(/SW/gi)===null)) {
+                            if ((txt.toUpperCase() === "W" || txt.toUpperCase() === "N") && (wordText.toUpperCase().match(/SW/gi) === null)) {
                                 Positions.push([Math.min(symbol.boundingBox.vertices[0].x, symbol.boundingBox.vertices[1].x, symbol.boundingBox.vertices[2].x, symbol.boundingBox.vertices[3].x), Math.min(symbol.boundingBox.vertices[0].y, symbol.boundingBox.vertices[1].y, symbol.boundingBox.vertices[2].y, symbol.boundingBox.vertices[3].y)]);
                             }
                         });
@@ -204,7 +204,7 @@ function ExtractMarks() {
     for (var i = 0; i < Marks.length; i++) {
         Marks[i] = new Array(LevelDetails[Info.Level]);
         for (var v = 0; v < Marks[i].length; v++) {
-            Marks[i][v]=true;
+            Marks[i][v] = true;
         }
     }
     var offset = getYOffset();
@@ -212,32 +212,40 @@ function ExtractMarks() {
     //internalPositions[i][1] has Y for name, offset[i] has X for skill, Positions contains x & y of weaks
     for (var i = 0; i < Positions.length; i++) {
         //for each Weak, find lowest difference in Y values with names.
-        var lowestdiff=10000;
-        var lowestiderator=-1;
+        var lowestdiff = 10000;
+        var lowestiderator = -1;
         for (var x = 0; x < internalPositions.length; x++) {
-            var diff=Math.abs(Positions[i][1]-internalPositions[x][1]);
-            if(diff<lowestdiff){lowestdiff=diff;lowestiderator=x;}
+            var diff = Math.abs(Positions[i][1] - internalPositions[x][1]);
+            if (diff < lowestdiff) {
+                lowestdiff = diff;
+                lowestiderator = x;
+            }
         }
         //internalPositions[lowestiderator][0] has name of person, lowestiderator is pos of person
-        lowestdiff=10000;
-        var lowestiderator2=-1;
-        for (var x = 0; x < offset.length-1; x++) {
-            var diff=Math.abs(offset[x]-Positions[i][0]);
-            if(diff<lowestdiff){lowestdiff=diff;lowestiderator2=x;}
+        lowestdiff = 10000;
+        var lowestiderator2 = -1;
+        for (var x = 0; x < offset.length - 1; x++) {
+            var diff = Math.abs(offset[x] - Positions[i][0]);
+            if (diff < lowestdiff) {
+                lowestdiff = diff;
+                lowestiderator2 = x;
+            }
         }
         //set mark position to false
-        Marks[lowestiderator][lowestiderator2+1]=false;
+        if (lowestiderator === -1 || lowestiderator2 === -1) {
+            Marks[lowestiderator][lowestiderator2 + 1] = false;
+        }
     }
     //print off all marks.
     for (var i = 0; i < Marks.length; i++) {
-        var txt="";
-        Marks[i][Marks.length]=true;
+        var txt = "";
+        Marks[i][Marks.length] = true;
         for (var b = 0; b < Marks[i].length; b++) {
-            txt=txt+Marks[i][b].toString()+"   ";
+            txt = txt + Marks[i][b].toString() + "   ";
         }
         console.log(txt);
     }
-    Info.Marks=Marks;
+    Info.Marks = Marks;
 }
 
 async function getText(location) {
@@ -263,7 +271,7 @@ exports.Process = (req, res) => {
     getText(req.body.loc).then(re => {
         res.status(200).send(Info);
     });//.catch(err => {
-        //console.log("error:" + err.toString());
-        //res.status(500).end();
+    //console.log("error:" + err.toString());
+    //res.status(500).end();
     //});
 };
