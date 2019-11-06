@@ -10,7 +10,7 @@ var LevelDetails = {"PRESCHOOL 1": 12, "PRESCHOOL 2": 13, "PRESCHOOL 3": 16, "PR
 var internalPositions = [];
 
 function ExtractBarcode() {
-    Info.Barcode = fulltext.match(new RegExp("[0-9]{" + process.env.Barcode_Length + "}", "g"))[0];
+    Info.Barcode = fulltext.match(new RegExp("[0-9]{" + process.env.Barcode_Length + "}", "g"));
     console.log(Info.Barcode);
 }
 
