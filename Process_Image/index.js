@@ -233,7 +233,7 @@ function ExtractMarks() {
         }
         //set mark position to false
         if (lowestiderator !== -1 && lowestiderator2 !== -1) {
-            Marks[lowestiderator][lowestiderator2 + 1] = false;
+            Marks[lowestiderator][lowestiderator2] = false;
         }
     }
     //print off all marks.
