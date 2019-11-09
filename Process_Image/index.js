@@ -222,6 +222,7 @@ function ExtractMarks() {
             }
         }
         //internalPositions[lowestiderator][0] has name of person, lowestiderator is pos of person
+        //find closest match to skill and get position in offset
         lowestdiff = 10000;
         var lowestiderator2 = -1;
         for (var x = 0; x < offset.length - 1; x++) {
@@ -232,7 +233,7 @@ function ExtractMarks() {
             }
         }
         //set mark position to false
-        if (lowestiderator !== -1 && lowestiderator2 !== -1) {
+        if (lowestiderator !== -1 && lowestiderator2 !== -1 && lowestiderator2<LevelDetails[Info.Level]-2) {
             Marks[lowestiderator][lowestiderator2] = false;
         }
     }
