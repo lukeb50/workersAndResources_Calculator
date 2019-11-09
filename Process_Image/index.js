@@ -10,7 +10,7 @@ var LevelDetails = {"PRESCHOOL 1": 12, "PRESCHOOL 2": 13, "PRESCHOOL 3": 16, "PR
 var internalPositions = [];
 
 function ExtractBarcode() {
-    Info.Barcode = fulltext.match(new RegExp("[0-9]{" + process.env.Barcode_Length + "}", "g"))[0];
+    Info.Barcode = fulltext.match(new RegExp("[0-9]{" + process.env.Barcode_Length + "}", "g"));
     console.log(Info.Barcode);
 }
 
@@ -232,7 +232,7 @@ function ExtractMarks() {
             }
         }
         //set mark position to false
-        if (lowestiderator === -1 || lowestiderator2 === -1) {
+        if (lowestiderator !== -1 && lowestiderator2 !== -1) {
             Marks[lowestiderator][lowestiderator2 + 1] = false;
         }
     }
