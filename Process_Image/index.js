@@ -207,6 +207,12 @@ function ExtractMarks() {
             Marks[i][v] = true;
         }
     }
+    
+    var MustSees=new Array(LevelDetails[Info.Level]);
+    for (var i = 0; i < MustSees.length; i++) {
+        MustSees[i]=[];
+    }
+    Info.MustSees=MustSees;
     var offset = getYOffset();
     console.log(offset.length);
     //internalPositions[i][1] has Y for name, offset[i] has X for skill, Positions contains x & y of weaks
