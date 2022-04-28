@@ -1,0 +1,484 @@
+#loadblocker{
+    position: fixed;
+    top:0;
+    display: none;
+}
+
+#programmer-topbar{
+    width:100%;
+    flex: 0 0 35px;
+    border-bottom: 2px solid var(--color-primary-dark);
+    background: var(--color-primary-light);
+    overflow:hidden;
+}
+
+#logout-div{
+    height:100%;
+}
+
+#logout-div button{
+    height:100%;
+}
+
+#programmer-btns{
+    width:fit-content;
+    display: inline-block;
+    height: 100%;
+    margin:0;
+    word-spacing: -4px;
+}
+
+#programmer-btns button{
+    height:100%;
+    border: 0;
+    border-right:1px solid var(--color-primary-dark);
+    background: transparent;
+}
+
+#table-menu-holder{
+    flex:1 1;
+    flex-direction: column;
+}
+
+#table-menu-holder,#lookup-menu-holder,#general-menu-holder{
+    display: none;
+}
+
+.altmenu{
+    width:100%;
+    flex: 1 1 0px;
+    overflow: auto;
+}
+
+#lookup-menu-holder div{
+    margin-top: 5px;
+    margin-left: 5px;
+}
+
+#lookup-menu-holder div input{
+    border:1px solid grey;
+    border-radius: 5px;
+    margin-left:5px;
+}
+
+#lookup-error-div{
+    display:none;
+}
+
+#lookup-error-txt{
+    color:var(--color-red-bright);
+    margin: 0;
+    display: inline;
+}
+
+#general-menu-holder p{
+    margin: 5px;
+}
+
+#general-menu-holder label{
+    margin-left: 5px;
+}
+
+#general-menu-holder input{
+    margin-left: 5px;
+    border:1px solid grey;
+    border-radius: 5px;
+}
+
+#general-save-btn{
+    display: block;
+}
+
+#user-menu-bar{
+    border-bottom: 2px solid var(--color-primary);
+}
+
+#user-menu-list div{
+    border-bottom: 1px solid var(--color-primary);
+    padding: 5px;
+}
+
+#user-menu-list div div.btnholder{
+    margin: 0;
+    padding:5px;
+    border:0;
+}
+
+#user-menu-list div div.btnholder button{
+    border-radius: 5px;
+}    
+
+#user-menu-list div label{
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+#user-menu-list div select,#user-menu-list div select option{
+    color:black;
+}
+
+#user-menu-list div p{
+    display: block;
+    margin: 0;
+}
+
+#user-menu-list div div.time{
+    border:none;
+}
+
+#user-menu-list div div.time div{
+    border:none;
+    padding-left:0;
+}
+
+#user-menu-list div div.time div p{
+    display: inline-block;
+}
+
+#user-menu-list div div.time div button{
+    border:none;
+    background:none;
+    color:grey;
+}
+
+
+#record-menu-holder select,#report-bar select{
+    color:black;
+    background:white;
+}
+
+#record-menu-filters,#report-bar,#user-menu-bar{
+    padding:5px;
+    border-bottom: 2px solid var(--color-primary);
+    background:rgba(225, 242, 242,0.4);
+}
+
+#record-menu-holder button.mainround, #report-bar button.mainround{
+    border-radius: 5px;
+        background:white;
+
+}
+
+#record-menu-results div.entry{
+    border-bottom: 3px solid var(--color-primary-dark);
+    padding-bottom: 5px;
+}
+
+#record-menu-results div.entry:nth-child(even){
+    background:rgba(155,155,155,0.2);
+}
+
+#record-menu-results div div.detail{
+    border-top: 1px solid rgba(0,0,0,0.1);
+    padding-bottom: 0px;
+    margin-top: 5px;
+}
+
+#record-menu-results p{
+    margin: 0;
+    margin-left: 5px;
+    padding-top: 5px;
+}
+
+#record-menu-results p.studentname{
+    background:rgba(155,155,155,0.3);
+    margin-left: 0;
+    padding-left: 5px;
+}
+
+#record-menu-results button{
+    background: none;
+    border:none;
+    margin-top:5px;
+    font-size:16px;
+}
+
+#record-menu-results button:hover{
+    color:rgba(0,0,0,0.6);
+    cursor: alias;
+}
+
+.loadmore{
+    margin: 0;
+    padding:5px;
+    background:rgba(100,100,100,0.2);
+    font-weight: bold;
+}
+
+.loadmore:hover{
+    background: rgba(100,100,100,0.4);
+}
+
+#worksheet-multiple-select{
+    left:35%;
+    width:100%;
+    overflow-y: auto;
+}
+
+#worksheet-multiple-select p{
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+#worksheet-multiple-select div{
+    padding-left: 5px;
+    margin-bottom: 5px;
+}
+
+#worksheet-multiple-select div button.mainround{
+    border-radius: 5px;
+}
+
+
+#worksheet-multiple-select label{
+    margin: 5px;
+}
+
+#general-single-settings div{
+    margin-bottom: 5px;
+}
+
+.qbtn{
+    background: transparent;
+    border-radius: 50%;
+    border:1px solid grey;
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+#general-menu-holder div span:not(.setting-arrow){
+    width: calc(100% - 4px * 2);
+    display: block;
+    background:var(--color-primary-light-background-transparent);
+    border-top: 2px solid var(--color-primary);
+    border-bottom: 1px solid var(--color-primary);
+    padding:4px;
+    font-weight: bold;
+}
+
+#general-menu-holder div:not(.nomargin) span:not(.setting-arrow){
+    margin-bottom: 5px;
+}
+
+#general-menu-holder div span button{
+    float: right;
+    padding:0px;
+    background:none;
+    border:none;
+    height: 100%;
+}
+
+#general-menu-holder div:not(.nomargin) *{
+    margin-bottom: 4px;
+}
+
+#general-menu-holder div.nomargin *{
+    margin-bottom: 0px;
+}
+
+#add-user-btn{
+    border-radius: 5px;
+    background:white;
+}
+
+#adduser-inputholder{
+    display: flex;
+    padding:5px;
+    padding-right: 10px;
+}
+
+@media(max-width:700px){
+    #adduser-inputholder label{
+        display: none;
+    }
+}
+
+#adduser-inputholder input{
+    border-radius: 5px;
+    border: 1px solid black;
+    flex-grow: 1;
+    margin-left: 5px;
+}
+
+#adduser-history{
+    border-top: 2px solid var(--color-primary-dark);
+    border-bottom: 2px solid var(--color-primary-dark);
+    flex: 1;
+    overflow-y: auto;
+}
+
+#adduser-history div{
+    display: flex;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+#adduser-history div:not(:nth-child(1)){
+    border-top: 1px solid var(--color-primary);
+}
+
+#adduser-history p{
+    height: 100%;
+    flex: 1;
+    margin: 0!important;
+    text-align: left!important;
+    padding-left: 5px;
+}
+
+#adduser-history label{
+    padding-right: 15px;
+    padding-left:10px;
+    color:#ba8a27;
+}
+
+#adduser-history label.success{
+    color: var(--color-primary-bright);
+}
+
+#adduser-history label.fail{
+    color:var(--color-red);
+}
+
+#adduser-history-text{
+    display: block;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+#report-bar button{
+    padding-left:10px;
+    padding-right: 10px;
+}
+
+#report-table{
+    width:100%;
+    border-collapse: collapse;
+}
+
+#report-table tr:nth-child(1){
+    border-bottom: 2px solid var(--color-primary)!important;
+}
+
+#report-table tr{
+    border-bottom: 1px solid var(--color-primary)!important;
+    height: 20px;
+}
+
+#report-table td,#report-table th{
+    height: 30px;
+    border-right: 1px solid var(--color-primary)!important;
+    width:25%;
+}
+
+#report-table td:nth-child(4),#report-table th:nth-child(4){
+    border-right:none!important;
+}
+
+#report-table tr:nth-child(even){
+    background:rgba(155,155,155,0.2);
+}
+
+#report-table td button{
+    margin-left: 5px;
+    background:white;
+    border-radius: 5px;
+    padding:2px;
+    width:calc(100% - 10px);
+}
+
+#report-table td div.spinnerexternal{
+    border-spacing: 0;  
+    border:2px solid var(--color-primary-dark);
+    border-radius: 5px;
+    width:calc(100% - 12px);
+    height: 25px;
+    box-sizing: border-box;
+    padding:2px;
+    margin-left: 5px;
+    overflow: hidden;
+}
+
+#report-table td div.spinnerinternal{
+    background:var(--color-primary);
+    width:50%;
+    height: 100%;
+    position: relative;
+    animation: reportload linear 2s infinite;
+}
+
+@keyframes reportload {
+    0% {
+        width:0%;
+        left:0%;
+    }
+    40% {
+        left:0;
+        width:40%;
+    }
+    100% {
+        left:100%;
+        width:50%:
+    }
+}
+
+#reset-all-btn{
+    border-color: var(--color-red-mild);
+}
+
+#reset-all-btn:hover{
+    background:var(--color-red-light-half-transparent)!important;
+}
+
+.darkred{
+    color:var(--color-red-bright);
+}
+
+#billing-table{
+    width:calc(100% - 10px);
+    box-sizing: border-box;
+    margin-left: 5px;
+    border-collapse: collapse;
+    display: block;
+}
+
+#billing-table th, #billing-table td{
+    border:1px solid grey;
+    width:200px;
+}
+
+#billing-table td:not(:nth-child(1)){
+    text-align: center;
+}
+
+#billing-table td.tblank{
+    border:none;
+}
+
+#billing-table th:nth-child(1){
+    border-radius: 5px 0 0 0;
+}
+
+#sheet-search-btn, #archive-search-btn{
+    margin-left: 5px;
+    border-radius: 5px;
+}
+
+#maintable tr th:nth-child(1){
+    padding-left: 0px;
+}
+
+#general-menu-holder button.mainround{
+    border-radius: 5px;
+    margin-left: 5px;
+}
+
+#general-menu-holder select,#general-menu-holder input[type="text"],#single-settings-div input[type="text"], #org-name-input{
+    border: 2px solid var(--color-primary-dark);
+}
+
+#general-menu-holder button.roundaction, #single-settings-div button.roundaction{
+    margin-left: 5px;
+    border:2px solid var(--color-primary-dark);
+    padding-right: 1px;
+}

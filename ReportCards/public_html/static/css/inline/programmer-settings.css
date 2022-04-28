@@ -1,0 +1,550 @@
+body{
+    margin:0px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.btn{
+    border:1px solid grey;
+    border-radius: 5px;
+    margin-left: 5px;
+    background: transparent;
+}
+
+.btn:hover:not(:disabled){
+    background:rgba(155,200,200,0.2);
+}
+
+#general-menu-holder p{
+    margin: 5px;
+    text-decoration: underline;
+}
+
+#general-menu-holder label{
+    margin-left: 5px;
+}
+
+#general-menu-holder input, select{
+    margin-left: 5px;
+    border:1px solid grey;
+    border-radius: 5px;
+}
+
+#general-save-btn{
+    display: block;
+}
+
+#general-menu-holder div span:not(.setting-arrow){
+    width: calc(100% - 4px * 2);
+    display: block;
+    background:var(--color-primary-light-background-transparent);
+    border-top: 2px solid var(--color-primary);
+    border-bottom: 1px solid var(--color-primary);
+    padding:4px;
+    font-weight: bold;
+}
+
+#general-menu-holder div:not(.nomargin) span:not(.setting-arrow){
+    margin-bottom: 5px;
+}
+
+#general-menu-holder div span button{
+    float: right;
+    padding:0px;
+    background:none;
+    border:none;
+    height: 100%;
+}
+
+#general-menu-holder div:not(.nomargin) *{
+    margin-bottom: 4px;
+}
+
+#general-menu-holder div.nomargin *{
+    margin-bottom: 0px;
+}
+
+#level-settings-container{
+    flex-direction: row;
+    background:transparent;
+    width:100%;
+    display: flex;
+    height: fit-content;
+}
+
+#level-settings-container div{
+    height: 40em;
+    flex-grow:1;
+    width:fit-content;
+}
+
+#level-settings-container div div:not(#level-settings-container){
+    border-left:none;
+}
+
+#lvl-list-settings-container{
+    width:fit-content;
+    flex-grow:0!important;
+    display: flex;
+    flex-direction: column;
+}
+
+#lvl-list-settings-container label{
+    font-weight: bold;
+    margin: 0;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-bottom: 2px solid grey;
+    background:rgba(155,155,155,0.15);
+}
+
+#lvl-list-settings-container label.unbold{
+    font-weight: normal;
+}
+
+#lvl-list-settings-container div{
+    width: 20em;
+    border:none!important;
+}
+
+#lvl-list-settings-container div img{
+    width:12px;
+    height: 12px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+#lvl-list-settings-container label.alerttext{
+    all: unset!important;
+    color: #FF7566!important;
+}
+
+#lvl-list-settings-levels,#lvl-list-settings-groups{
+    overflow-y: scroll;
+}
+
+#lvl-list-settings-container div div.lvl-settings-sidelist{
+    width: calc(100% - 2px);
+    height: fit-content;
+    border:none!important;
+    overflow-y: initial;
+    padding: 2px 0px 2px 2px;
+
+}
+
+#lvl-list-settings-container div div.lvl-settings-sidelist:not(:nth-child(1)){
+    border-top: 2px solid grey!important;
+}
+
+#lvl-list-settings-container div div.lvl-settings-sidelist:nth-child(even){
+    background:rgba(155,155,155,0.1);
+}
+
+#lvl-list-settings-container div div.lvl-settings-sidelist label{
+    padding:0px 0px 0px 5px;
+    border:none;
+    height: 100%;
+    display: block;
+    background:none;
+}
+
+#lvl-list-settings-container div:nth-child(2){
+    border-bottom: 2px solid grey!important;
+    border-top: 2px solid black;
+}
+
+#lvl-list-settings-container div div.lvl-settings-sidelist div{
+    height:fit-content;
+    width:fit-content;
+    border: none!important;
+    margin-bottom: 5px;
+}
+
+#lvl-list-settings-container div div.lvl-settings-sidelist div button{
+    height: 25px;
+    margin-left: 5px;
+    display: inline;
+    background:rgba(155,155,155,0.2);
+    border:none;
+    vertical-align: middle;
+    border-radius: 5px;
+}
+
+#lvl-list-settings-container div div.lvl-settings-sidelist div input[type=image]{
+    height:25px;
+    width:25px;
+    display: inline;
+    background:rgba(155,155,155,0.2);
+    vertical-align: middle;
+    border:none;
+}
+
+#lvl-settings-save-holder{
+    border-top: 2px solid grey;
+    padding: 5px;
+}
+
+#group-menu{
+    text-align: center;
+}
+
+#group-menu select{
+    color:black!important;
+    border-color:grey;
+    width:96%;
+    margin: 5px 0px 5px 0px;
+    padding:5px;
+}
+
+#group-menu input{
+    width:96%;
+    margin: 5px 0px 5px 0px;
+    border-radius: 5px;
+    border:1px solid grey;
+    padding:5px;
+}
+
+#group-menu button{
+    margin-bottom: 5px;
+}
+
+#color-input{
+    height: 4em;
+    padding:2px!important;
+    border-radius: 0px!important;
+    border:2px solid grey!important;
+
+}
+
+#main-lvl-config-side-container{
+    flex:1!important;
+    flex-direction: column;
+    overflow-y: scroll;
+}
+
+#lvl-settings-skills-container{
+    flex:1!important;
+    overflow-y: scroll;
+}
+
+#main-lvl-config-side-container div{
+    width: 100%;
+    height: calc(50% - 0.5px);
+}
+#main-lvl-config-side-container div:nth-child(2){
+    border-top: 1px solid grey;
+}
+
+#sidebar-lvl-settings div{
+    height: fit-content;
+    padding-top:2px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid grey;
+}
+
+#sidebar-lvl-settings label{
+    font-weight: bold;
+}
+
+#sidebar-lvl-settings div *{
+    display: inline;
+    font-weight: normal;
+}
+
+#sidebar-lvl-next p{
+    width:calc(100% - 5px);
+    padding-left: 5px;
+    margin: 5px 0px 5px 0px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#constant-next-text{
+    border-top:1px solid grey!important;
+}
+
+#sidebar-lvl-next div{
+    height: fit-content;
+    border:none!important;
+}
+
+#sidebar-lvl-next div select{
+    border-color:black!important;
+    color:black!important;
+    width:80%;
+    margin:0px 5px 0px 5px;
+}
+
+#sidebar-lvl-next div select option:nth-child(even){
+    font-weight: bold;
+    background:rgba(155,155,155,0.2);
+}
+
+#sidebar-lvl-next div.next-list-item{
+    margin-top: 5px;
+    border:none!important;
+    padding:5px 0px 5px 0px;
+}
+
+#sidebar-lvl-next div.next-list-item:nth-child(odd){
+    background:rgba(155,155,155,0.2);
+}
+
+#sidebar-lvl-next div.next-list-item label{
+    font-weight: normal;
+}
+
+#lvl-settings-skills-container label{
+    width:calc(100% - 5px);
+    display: inline-block;
+    padding-left: 5px;
+    margin: 0;
+}
+
+#lvl-settings-skills-container div{
+    height: fit-content;
+    width: 100%;
+    display: inline-block;
+}
+#lvl-settings-skills-container div.btnholder{
+    padding-top: 3px!important;
+    background:rgba(155,155,155,0.2);
+}
+
+#lvl-settings-skills-container div:not(:nth-child(1)){
+    outline: 1px solid grey;
+}
+
+#lvl-settings-skills-container div label{
+    background:rgba(155,155,155,0.3);
+    padding:0px;
+    padding-top: 1px;
+    padding-bottom: 2px;
+    margin:0;
+    width:100%;
+}
+
+#lvl-settings-skills-container div button{
+    background:none;
+    border:none;
+    margin-left: 5px;
+    font-weight: bold;
+    height: 100%;
+}
+
+#lvl-settings-skills-container div button.del{
+    color:darkred;
+}
+
+#lvl-settings-skills-container div button.green{
+    color:darkgreen;
+}
+
+#lvl-settings-skills-container div p {
+    text-decoration: none;
+    margin: 0px 5px 0px 5px;
+}
+
+#lvl-settings-skills-container div button {
+    display: inline-block;
+}
+
+#metadata-list{
+    margin: 0!important;
+    padding-bottom: 5px;
+}
+
+#metadata-list div{
+    padding: 5px 0 5px 0!important;
+    margin-bottom: 0px!important;
+}
+
+#metadata-list div:nth-child(even){
+    background:rgba(155,155,155,0.1);
+}
+
+#metadata-save-btn{
+    margin-top: 2px!important;
+    margin-bottom: 6px!important;
+}
+
+#metadata-list button:not(#metadata-add){
+    margin: 0!important;
+    margin-left: 5px!important;
+    background:rgba(155,155,155,0.3);
+    border:none;
+    border-radius: 5px;
+    height:24px;
+}
+
+#metadata-add{
+    margin: 0!important;
+    margin-top: 5px!important;
+    margin-left: 5px!important;
+    background:rgba(155,155,155,0.5);
+    border:none;
+    border-radius: 5px;
+    height:24px;
+}
+
+#general-facility-settings span{
+    margin: 0!important;
+}
+
+#facility-setting-holder{
+    width: 100%;
+    min-height: 30px;
+    border-bottom:2px solid grey;
+    flex-direction: column;
+    display: flex;
+}
+
+#timeblock-div, #facility-div{
+    flex:1;
+    margin:0!important;
+}
+
+#timeblock-div b, #facility-div b{
+    margin-left: 5px;
+    padding-top: 5px;
+    padding-bottom: 1px;
+    display: block;
+}
+
+#timeblock-div div, #facility-div div{
+    padding:4px 0 4px 0;
+    margin:0!important;   
+}
+
+#timeblock-div div div {
+    display: inline-block;
+    margin:0 4px 0 4px!important;
+}
+
+#timeblock-div div:nth-child(even):not(.btnholder), #facility-div div:nth-child(even):not(.btnholder) {
+    background:rgba(155,155,155,0.2);
+}
+
+#facility-div div div span{
+    all: initial!important;
+    display:block!important;
+    height: 20px!important;
+    padding:2px!important;
+    font-family: 'Roboto', sans-serif!important;
+    padding-bottom: 4px!important;
+}
+
+label.Pending{
+    color:darkorange;
+}
+
+label.failure, label.unauthorized{
+    color:red;
+}
+
+label.Success{
+    color:green;
+}
+
+#facility-div div div span label,#facility-div div div span b{
+    display: inline-block;
+}
+
+#facility-div div div span label{
+    margin-right: 5px;
+}
+
+#facility-div div div span button{
+    padding-left: 5px;
+    padding-right: 5px;
+    float: initial;
+}
+
+#timeblock-div div div button, #facility-div div div button:not(#facilitycreatebtn){
+    margin:0px!important;
+    background:rgba(155,155,155,0.25);
+    border:none;
+    border-radius: 5px;
+    margin-right: 5px!important;
+    font-weight: normal;
+}
+
+#facilitycreatebtn{
+    margin-bottom: 0!important;
+    margin-left: 5px;
+    background:rgba(155,155,155,0.25);
+    border:none;
+    border-radius: 5px;
+    font-weight: normal;
+}
+
+#facility-div{
+    border-bottom: 2px solid grey;
+}
+
+#save-lvl-settings-btn.unsaved{
+    background:rgba(169, 200, 200,0.4);
+}
+
+#general-email-settings * span{
+    all: initial!important;
+    font-family: 'Roboto', sans-serif!important;
+}
+
+#general-email-settings div.flex{
+    display: flex;
+    flex-direction: row;
+}
+
+#email-settings-subject{
+    flex: 1;
+    margin-right: 5px;
+    margin-left: 5px;
+    border:1px solid black;
+    border-radius: 5px;
+}
+
+#email-settings-body,#email-settings-plain-body{
+    margin-right: 5px;
+    margin-left: 5px;
+    border:1px solid black;
+    border-radius: 5px;
+    height: 100px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    resize: none;
+    width: calc(100% - 16px);
+}
+
+#save-email-btn{
+    margin-top:5px;
+}
+
+#email-settings-subject span,#email-settings-body span{
+    background:rgba(155,155,155,0.4)!important;
+    display: inline-block!important;
+}
+
+i{
+    display: block;
+}
+
+.px5margin{
+    margin-top: 5px;
+}
+
+body::-webkit-scrollbar {
+    width: 10px;
+    border-radius: 5px;
+}
+
+body::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+}
+
+body::-webkit-scrollbar-thumb {
+    background: #888; 
+}
+
+body::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+}

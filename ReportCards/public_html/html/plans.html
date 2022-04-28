@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Lesson Plans</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../static/css/plans.css" type="text/css"/>
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+        <link rel="apple-touch-icon" sizes="120x120" href="../static/icos/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="../static/icos/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="../static/icos/favicon-16x16.png">
+        <link rel="manifest" href="../static/icos/site.webmanifest">
+        <link rel="mask-icon" href="../static/icos/safari-pinned-tab.svg">
+        <meta name="msapplication-TileColor" content="#00aba9">
+        <meta name="theme-color" content="#ffffff">
+    </head>
+    <body>
+        <div id="loader"><div></div></div>
+        <div id="menu">
+            <div id="menu-holder">
+                <div id="add-progression-menu"></div>
+                <div id="add-level-menu"></div>
+                <div id="share-menu">
+                    <input id="share-search" placeholder="Type to Search">
+                    <div id="inner-share"></div>
+                </div>
+                <div id="print-menu">
+                    <div><label>Week: <input id="print-week" value =1 type="number"></label></div>
+                    <div><label title="Print info such as song lyrics...">Show Details<input id="print-details" type="checkbox"></label></div>
+                    <div><button id="print-btn">Print</button></div>
+                </div>
+                <div id="menu-btn-holder">
+                    <button onclick="document.getElementById('menu').style.display = 'none'">Close</button>
+                </div>
+            </div>
+        </div>
+        <div id="container">
+            <div id="topbar">
+                <div id="main-overview-topbar">
+                    <div id="main-overview-topbar-left">
+                        <div style="display: none"><button id="share-back-btn">Back</button></div>
+                        <div><label>Name:<input id="name-filter" placeholder="Name"></label></div>
+                        <div><label>Day:<select id="day-filter">
+                                    <option style="font-weight: bold" value="*">Any Day</option>
+                                    <option value="mon">Monday</option>
+                                    <option value="tue">Tuesday</option>
+                                    <option value="wed">Wednesday</option>
+                                    <option value="thu">Thursday</option>
+                                    <option value="fri">Friday</option>
+                                    <option value="sat">Saturday</option>
+                                    <option value="sun">Sunday</option>
+                                </select></label></div>
+                        <div><label>Level:<select id="level-filter">
+                                    <option value="*">Any Level</option>
+
+                                </select></label></div>
+                        <div><button id="filter-btn">Filter</button></div>
+                    </div>
+                    <div id="main-overview-topbar-right">
+                        <span id="select-all-container"><span title="Select/Unselect All" id="select-all"></span></span>
+                        <span><button id="allprintbtn" disabled>Print</button></span>
+                        <span><button id="alldeletebtn" disabled>Delete</button></span>
+                    </div>
+                </div>
+                <div id="single-plan-topbar" style="display: none">
+                    <div id="left-topbar">
+                        <button id="topbar-back-btn">Back</button>
+                        <label></label>
+                    </div>
+                    <div id="right-topbar">
+                        <button id="share-btn">Share</button><button id="to-core-btn">Core Plan</button><button id="last-week-btn" disabled>Last Week</button>
+                        <label id="week-label">Week 4</label>
+                        <button id="next-week-btn">Next Week</button>
+                    </div>
+                </div>
+            </div>
+            <div id="main-overview"></div>
+            <div id="plan-overview" style="display: none">
+                <div id="core-details">
+                    <div><label>Plan Name:<input id="plan-name-input" type="text"></label></div>
+                    <div><label>Day:<select id="plan-day-input"><option value="mon">Monday</option><option value="tue">Tuesday</option><option value="wed">Wednesday</option><option value="thu">Thursday</option><option value="fri">Friday</option><option value="sat">Saturday</option><option value="sun">Sunday</option></select></label></div>
+                    <div><label>Time:<input id="plan-time-input" type="text"></label></div>
+                    <div><label>Notes:<input id="plan-note-input" type="text"></label></div>
+                </div>
+                <div id="core-plan">
+                    <div id="level-switcher"><button id="add-lvl-btn" class="small-lvl">+</button></div>
+                    <div id="inner-core-plan-holder"><table id="inner-core-plan"></table></div>
+                </div>
+            </div>
+            <div id="single-plan" style="display:none">
+                <div id="left">
+                    <div id="snap-point"></div>
+                </div>
+                <div id="right"></div>
+            </div>
+            <div id="bottombar">
+                <div id="main-site-div"><a href="../" id="main-site-btn">To Main Site</a></div>
+                <div id="bottom-spacer"></div>
+                <div id="logout-div" style="float:right">
+                    <button id="save-btn">Save</button>
+                    <button id="settings-btn">Settings</button>
+                    <button id="logout-btn">Log Out</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-database.js"></script>
+        <script src="../static/javascript/http_controller.js"></script>
+        <script src="../static/javascript/plans.js"></script>
+    </body>
+</html>

@@ -1,0 +1,52 @@
+*{padding: 0;
+  margin: 0;
+  border:0;}
+
+#print{
+    padding:5px;
+    border-radius: 5px;
+    border:2px solid #00c3ff;
+    position: fixed;
+    margin: 5px;
+}
+
+@media print{
+    img{
+        background-size: cover;
+        page-break-after: always;
+    }
+
+    div{
+        display: inline-block;
+        height: fit-content;
+        width:fit-content;
+    }
+
+    img.half{
+        height: 99vh;
+        width:50vw;
+        background-size:100vw 100vh;
+    }
+
+    div.full{
+        height: 99vh;
+        width:100vw;
+    }
+
+    img.full{
+        position:fixed;
+        height: 100vw;
+        width:99vh;
+        transform-origin: 0 0;
+        transform: rotate(90deg) translateY(-100vw);
+    }
+
+    img.halfSpacer, div.halfSpacer{
+        width:50vw;
+        height: 99vh;
+    }
+
+    #print{
+        display:none;
+    }
+}

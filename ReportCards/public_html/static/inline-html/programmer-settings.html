@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Programmer Settings-Report Cards</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../css/inline/programmer-settings.css" type="text/css"/>
+        <link rel="stylesheet" href="../css/main/index.css" type="text/css"/>
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+        <link rel="apple-touch-icon" sizes="120x120" href="https://report-cards-6290.appspot.com/static/icos/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="https://report-cards-6290.appspot.com/static/icos/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="https://report-cards-6290.appspot.com/static/icos/favicon-16x16.png">
+        <link rel="mask-icon" href="https://report-cards-6290.appspot.com/static/icos/safari-pinned-tab.svg">
+        <link rel="manifest" href="../icos/site.webmanifest">
+        <meta name="msapplication-TileColor" content="#00aba9">
+        <meta name="theme-color" content="#ffffff">
+    </head>
+    <body>
+        <div class="blocker" id="loadblocker">
+            <div class="load" id="loadspinner"></div>
+            <div id="main-menu">
+                <div class="menuitem" id="group-menu">
+                    <div id="regex-menu">
+                        <p>Use a <a target='_blank' href="https://regexr.com/">Regex</a> pattern or a list separated by '|' to indicate which levels belong to this group</p>
+                        <input id="regex-input" placeholder="Kinderswim|Waterbabies|Preschool Prep|Other">
+                        <button id="applyRegex" class="btn">Apply</button>
+                    </div>
+                    <div id="group-color-menu">
+                        <p>Select a color to represent this group. A familiar color such as the worksheet color is recommended.</p>
+                        <input id="color-input" type="color">
+                        <button id="applyColor" class="btn">Apply</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="altmenu" id="general-menu-holder">
+            <div id="general-level-settings" class="nomargin">
+                <span><label>Level Settings</label><button class="setting-arrow nomargin">▲</button></span>
+                <div id="level-settings-supercontainer">
+                    <div id="level-settings-container">
+                        <div id="lvl-list-settings-container">
+                            <label>Levels:</label>
+                            <div id="lvl-list-settings-levels"></div>
+                            <label>Groupings:</label>
+                            <div id="lvl-list-settings-groups"></div>
+                        </div>
+                        <div id="lvl-settings-skills-container">
+                            <div id="main-lvl-config-container"></div>
+                        </div>
+                        <div id="main-lvl-config-side-container">
+                            <div id="sidebar-lvl-settings">
+                                <label>Level Settings</label>
+                                <div><label>Comments:<input disabled id="isCommentsEnabled" type="checkbox"></label></div>
+                                <div title="Leave blank for a checkmark"><label>Pass Letter:<input disabled id="passLetterInput" type="text"></label></div>
+                                <div><label>Weak Letter:<input disabled id="weakLetterInput" type="text"></label></div>
+                                <div><label>Weak Letter Offset:<input disabled id="weakLetterOffset" type="number"></label></div>
+                                <div><label>Highlight Weak Letter:<input disabled id="HighlightWeakLetter" type="checkbox"></label></div>
+                                <div title="Set to 0 to disable"><label>Weak Grouping Range:<input disabled id="isWeakGrouping" type="number"></label></div>
+                                <div><label>Remove Grouped Highlighting:<input disabled id="WeakGroupingHighlight" type="checkbox"></label></div>
+                            </div>
+                            <div id="sidebar-lvl-next">
+                                <div class="px5margin"><label>Level Shortform:<input id="shortform-input"></label></div>
+                                <p>Passing Options:</p>
+                                <div><select id="Passing-Level-Select"></select><button id="Add-Passing-Level" disabled class="btn">+</button></div>
+                                <div id="settings-passing-div"></div>
+                                <p id="constant-next-text">Constant Options:</p>
+                                <div><select id="Constant-Level-Select"></select><button id="Add-Constant-Level" disabled class="btn">+</button></div>
+                                <div id="settings-constant-div"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <button disabled id="open-editor-btn" class="btn px5margin">Card Editor</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="lvl-settings-save-holder">
+                    <button class="btn" id="save-lvl-settings-btn">Save</button>
+                </div>
+            </div>
+            <div id="general-metadata-settings"><!--true-->
+                <span><label>Metadata Settings</label><button class="setting-arrow">▲</button></span>
+                <p>Metadata is set by instructors on worksheets and can be used for printing extra information.</p>
+                <p>Renaming/Adding/Deleting metadata will NOT affect sheets with existing metadata</p>
+                <div id="metadata-list"></div>
+                <button class="btn" id="metadata-save-btn">Save Metadata</button>
+            </div>
+            <div id="general-facility-settings"><!--true-->
+                <span><label>Facility & Time Settings</label><button class="setting-arrow">▲</button></span>
+                <div id="facility-setting-holder">
+                    <div id="facility-div"></div>
+                    <div id="timeblock-div"></div>
+                </div>
+                <button class="btn" id="facility-save-btn">Save Data</button>
+            </div>
+            <div id="general-email-settings"><!--true-->
+                <span><label>Email Settings</label><button class="setting-arrow">▲</button></span>
+                <div>Select Modifier: 
+                    <select id="email-modifier-select">
+                        <option value="level">Current Level</option>
+                        <option value="nextlevel">Next Level</option>
+                        <option value="session">Session</option>
+                        <option value="instructor">Instructor Name</option>
+                        <option value="student">Student Name</option>
+                        <option value="barcode">Class Code</option>
+                        <option value="facility">Facility Name</option>
+                        <option value="facility_short">Facility Shortform</option>
+                        <option id="commentoption" value="comment">Comment</option>
+                        <optgroup label="Complex Modifiers">
+                            <option value="list">Skill List</option>
+                        </optgroup>
+                    </select><button id="email-add-modifier-btn" class="btn">Add</button></div>
+                <div class="flex"><label><b>Email Subject: </b></label><input id="email-settings-subject"></div>
+                <label><b>HTML Email Body:</b></label>
+                <textarea id="email-settings-body"></textarea>
+                <i>The email body supports a limited subset of HTML tags, including text(p,label,i,...), images(img) and tables.</i>
+                <label><b>Email Text Body:</b></label>
+                <textarea id="email-settings-plain-body"></textarea>
+                <i>This text will be shown on email clients that do not support HTML. Recommended for accessibility but not required.</i>
+                <button id="email-html-btn" class="btn">View HTML email</button>
+                <button id="email-plaintext-btn" class="btn">View plaintext email</button>
+                <div><button id="save-email-btn" class="btn">Save Email</button></div>
+            </div>
+        </div>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-database.js"></script>
+        <script src="../javascript/utility/http_controller.js"></script>
+        <script src="../javascript/inline/programmer-settings.js"></script>
+    </body>
+</html>

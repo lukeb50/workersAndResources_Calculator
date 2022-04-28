@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Report Cards</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../css/main/index.css" type="text/css"/>
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+        <link rel="apple-touch-icon" sizes="120x120" href="../static/icos/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="../icos/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="../icos/favicon-16x16.png">
+        <link rel="manifest" href="../icos/site.webmanifest">
+        <link rel="mask-icon" href="../icos/safari-pinned-tab.svg">
+        <meta name="msapplication-TileColor" content="#00aba9">
+        <meta name="theme-color" content="#ffffff">
+    </head>
+    <body>
+        <div class="blocker" id="loadblocker">
+            <div class="load" id="loadspinner"></div>
+            <div id="main-menu">
+                <div class="menuitem" id="topbar-overflow">
+                    <div id="topbar-overflow-holder"></div>
+                </div>
+                <div class="menuitem" id="print-menu">
+                    <!--<button id="printhelp">?</button>-->
+                    <h1>Print Menu</h1>
+                    <div id="print-top-buttons">
+                        <button id="print-sheet-btn" class="print-selected mainround">Current Worksheet</button>
+                        <button id="print-time-btn" class="mainround">Current Time</button>
+                    </div>
+                    <div id="print-middle-holder">
+                        <div id="print-sheet-div" class="print-middle-div"></div>
+                        <a id="print-sheet-label"></a>
+                        <div id="print-person-div" class="print-middle-div"></div>
+                    </div>
+                    <div id="print-bottom-buttons">
+                        <button id="print-menu-execute" class="mainround">Print</button>
+                    </div>
+                </div>
+                <div class="menuitem" id="visualmarkingdiv">
+                    <div id="visualmarkingtop">
+                        <p id="visualmarkingname">Name</p>
+                        <button id="visualmarkingclose">X</button>              
+                    </div>
+                    <div id="visualmarkinghold">
+                        <img id="cardimg" src="" alt="report card">
+                        <div id="visualmustseeholder"></div>
+                    </div>
+                    <div id="visualmarkingbottom">
+                        <button id="visualmarkingprev">Previous</button>
+                        <p id="visualmarkingprogress">11/40</p>
+                        <button id="visualmarkingnext">Next</button>
+                    </div>
+                </div>
+                <div class="menuitem" id="comment-menu">
+                    <label class="bold" id="comment-student-name"></label>
+                    <label id="comment-student-state"></label>
+                    <textarea id="comment-box" maxlength="200"></textarea>
+                    <button id="comment-save-btn" class="mainround">Save</button>
+                </div>
+                <div class="menuitem" id="metadata-menu">
+                    <h1>Edit Sheet Information</h1>
+                    <div id="metadata-menu-holder"></div>
+                </div>
+                <button class="mainround" id="main-menu-close-btn">Close</button>
+            </div>
+        </div>
+        <div class="blocker" id="blocker">
+            <div id="change_marking_div">
+                <button id="blocker_btn1">Complete</button>
+                <button id="blocker_btn2">No Marking</button>
+            </div>
+            <img src="../images/weak.png" alt="mark" id="blocker_mark">
+            <div id="blocker_mustsees"></div>
+            <div id="blocker_changelvl"></div>
+        </div>
+        <div id="topbar">
+            <div id="topbar-left">
+                <a id="sheetinfo">No Selection</a>
+            </div>
+            <div id="topbar-controls">
+                <button id="savebtn">Save</button>
+                <button id="printbtn">Print</button>
+                <button id="visualmarkbtn">Marking</button>
+            </div>
+        </div>
+        <div id="tablecontainer">
+            <table id="maintable"></table>
+            <button id="add_row_btn">+</button>
+        </div>
+        <div id="lowbar_container">
+            <div id="lowbar">
+                <button class="lowbarbtn" id="lowbar_back" disabled><</button>
+                <div id="barlist"></div>
+                <button class="lowbarbtn" id="lowbar_next" disabled>></button>
+            </div>
+            <div id="uploadsection">
+                <div id="uploaderdiv">
+                    <button id="new_sheet_manual" class="mainround">New Worksheet</button>
+                </div>
+                <div id="manual_lvl_div">
+                    <div id="manual_selector_div">
+                        <select id="manual_selector"></select>
+                        <div id="manual_btn_div">
+                            <button id="manual_create_btn" class="mainround">Create</button>
+                            <button id="manual_back_btn" class="mainround">Back</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-storage.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-database.js"></script>
+        <script src="../javascript/utility/http_controller.js"></script>
+        <script src="../javascript/utility/core-render.js"></script>
+        <script src="../javascript/utility/card-generator.js"></script>
+        <script src="../javascript/inline/time-access.js"></script>
+    </body>
+</html>

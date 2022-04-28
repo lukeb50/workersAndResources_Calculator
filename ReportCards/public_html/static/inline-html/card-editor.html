@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Editor-Report Cards</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../css/inline/card-editor.css" type="text/css"/>
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+        <link rel="apple-touch-icon" sizes="120x120" href="../icos/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="../icos/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="../icos/favicon-16x16.png">
+        <link rel="manifest" href="../icos/site.webmanifest">
+        <link rel="mask-icon" href="../icos/safari-pinned-tab.svg">
+        <meta name="msapplication-TileColor" content="#00aba9">
+        <meta name="theme-color" content="#ffffff">
+    </head>
+    <body>
+        <div id="print-settings-holder">
+            <div id="print-settings-topbar">
+                <div id="image-highlighting-edit-holder">
+                    <button disabled id="insert-weak-check">Weak Checkbox/Letter</button>
+                    <button disabled id="insert-skill-highlight">Skill Highlight</button>
+                    <button disabled id="insert-mustsee-highlight">Must See Highlight</button>
+                </div>
+                <div id="image-text-edit-holder">
+                    <label>Font: <input id="font-size-input" type="number" value=12><b>px</b></label>
+                    <label>Multiline: <input id="multiline-input" type="checkbox"></label>
+                    <label>Variable: <input id="variablefont-input" type="checkbox"></label>
+                    <label>Type: <select id="text-type-select">
+                            <option value="level">Current Level</option>
+                            <option value="nextlevel">Next Level</option>
+                            <option value="session">Session</option>
+                            <option value="instructor">Instructor Name</option>
+                            <option value="student">Student Name</option>
+                            <option value="barcode">Class Code</option>
+                            <option value="facility">Facility Name</option>
+                            <option value="facility_short">Facility Shortform</option>
+                            <option id="commentoption" value="comment">Comment</option>
+                            <option value="custom">Custom Text</option>
+                        </select></label>
+                    <button class="btn" id="create-text-btn">Insert</button>
+                </div>
+                <div id="image-select-holder">
+                    <div><select title="Front Image" id="image-select-card"></select><button id="image-select-card-set-btn">Set</button></div>
+                    <div><select title="Back Image" id="image-select-card-back"></select><button id="image-select-card-set-back-btn">Set</button></div>
+                    <button onclick="document.getElementById('new-card-img-upload').click();">Upload</button>
+                    <input id="new-card-img-upload" accept=".png,.jpg,.jpeg" type="file">
+                    <label>Half:<input id="ishalf-check" type="checkbox"></label>
+                </div>
+            </div>
+            <div id="image-container">
+                <img alt="" src="" id="editor-image-front">
+                <img alt="" src="" id="editor-image-back">
+            </div>
+            <div id="markup-holder"></div>
+            <div id="grouping-holder"></div>
+        </div>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-storage.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-database.js"></script>
+        <script src="../javascript/utility/http_controller.js"></script>
+        <script src="../javascript/inline/card-editor.js"></script>
+    </body>
+</html>

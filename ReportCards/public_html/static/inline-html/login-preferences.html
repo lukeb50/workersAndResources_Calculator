@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Account-Report Cards</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../css/main/index.css" type="text/css"/>
+        <link rel="stylesheet" href="../css/inline/login-preferences.css" type="text/css"/>
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+        <link rel="apple-touch-icon" sizes="120x120" href="../icos/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="../icos/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="../icos/favicon-16x16.png">
+        <link rel="manifest" href="../icos/site.webmanifest">
+        <link rel="mask-icon" href="../icos/safari-pinned-tab.svg">
+        <meta name="msapplication-TileColor" content="#00aba9">
+        <meta name="theme-color" content="#ffffff">
+    </head>
+    <body>
+        <div id="sign-div">
+            <div id="emailresetdiv">
+                <h1>Change Email</h1>
+                <div><label>New Email:</label><input type="email" id="email-email"></div>
+                <button id="email-btn" class="mainround">Confirm</button>
+                <button id="email-cancel" onclick="cancelAction()" class="mainround">Cancel</button>
+            </div>
+            <div id="passwordresetdiv">
+                <h1>Reset Password</h1>
+                <div><label>New Password:</label><input autocomplete="new-password" type="password" id="password-password"></div>
+                <div><label>Confirm New Password:</label><input autocomplete="new-password" type="password" id="password-confirm"></div>
+                <button id="password-btn" class="mainround">Confirm</button>
+                <button id="password-cancel" onclick="cancelAction()" class="mainround">Cancel</button>
+            </div>
+            <div id="logindiv">
+                <h1>Log In</h1>
+                <a id="security-prompt">Please log in again before performing security-sensitive operations</a>
+                <div><label>Email:</label><input type="email" id="confirm-email"></div>
+                <div><label>Password:</label><input autocomplete="current-password" type="password" id="confirm-password"></div>
+                <button id="confirm-btn" class="mainround">Confirm</button>
+                <button id="login-cancel" onclick="cancelAction()" class="mainround">Cancel</button>
+            </div>
+            <div id="signupdiv">
+                <h1>Add Email & Password</h1>
+                <a id="security-prompt2">Once you choose your email & password, you will be prompted to sign in with a provider to confirm the operation.</a>
+                <div><label>Email:</label><input type="email" id="signup-email"></div>
+                <div><label>Password:</label><input autocomplete="new-password" type="password" id="signup-password"></div>
+                <div><label>Confirm Password:</label><input autocomplete="new-password" type="password" id="signup-password-confirm"></div>
+                <button id="add-email-btn" class="mainround">Confirm</button>
+                <button id="signup-cancel" onclick="cancelAction()" class="mainround">Cancel</button>
+            </div>
+        </div>
+        <div id="providerdiv">
+            <h1>Change Providers</h1>
+            <a id="providerexplain">Change the providers you use to log in to your account</a>
+            <a class="providerprompt">Current providers:</a>
+            <div class="providerlist" id="currentproviders">
+            </div>
+            <a class="providerprompt">Available providers:</a>
+            <div class="providerlist" id="availableproviders">
+            </div>
+        </div>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
+        <script src="../javascript/utility/http_controller.js"></script>
+        <script src="../javascript/inline/login-preferences.js"></script>
+    </body>
+</html>

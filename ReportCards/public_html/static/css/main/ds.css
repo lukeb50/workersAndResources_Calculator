@@ -1,0 +1,346 @@
+.dsbtn{
+    background:rgba(146, 211, 157,0.5)!important;
+    color: rgba(50,50,50,.7)!important;
+    font-weight: bold;
+    transition: 1s;
+}
+
+.dsbtn:hover{
+    background:rgba(101, 185, 116,0.7)!important;
+}
+
+#emailbtn.unsaved,#emailbtn:disabled,#savebtn:disabled{
+    background:var(--color-red-light)!important;
+    color:black;
+    border-color: white;
+}
+
+#topbar-controls .dsbtn{
+    width: fit-content!important;
+    padding-left: 10px!important;
+    padding-right:10px!important;
+}
+
+#middle-holder{
+    flex: 1 1;
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    overflow: hidden;
+}
+
+#personlist{
+    flex: 0 0 13rem;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    box-shadow: 2px 0px 6px 4px var(--color-primary);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    background:rgba(230,230,230,0.4)!important;
+    transition: 0.5s;
+}
+
+#personlist-holder{
+    flex: 1 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#collapse-personlist{
+    border:none;
+    padding:5px;
+    border-top: 2px solid var(--color-primary);
+    background:var(--color-primary-light-transparent);
+    position: relative;
+}
+
+#collapse-personlist:hover{
+    background:var(--color-primary-light)
+}
+
+#tablecontainer{
+    height: 100%;
+}
+
+#add_row_btn{
+    margin-left: 10px;
+}
+
+#maintable tr th:nth-child(1){
+    padding-left: 10px;
+}
+
+#addinst{
+    width:90%;
+    margin-left: 5%;
+    height: 40px;
+    background:white;
+    margin-top:5px;
+    margin-bottom: 5px;
+}
+
+#personlist-holder div{
+    background:white;
+    width: 13.5rem;
+    height: fit-content;
+    border-bottom:2px solid var(--color-primary-dark);
+    box-sizing: border-box;
+    padding-top: 2px;
+}
+
+#personlist-holder div p{
+    width:calc(100% - 5px);
+    margin:0px;
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+#personlist-holder div label{
+    margin-left: 5px;
+}
+
+#personlist-holder div input{
+    width:4em;
+    padding:0;
+    border-radius: 5px;
+    background:white;
+    border:1px solid var(--color-primary-dark);
+    margin: 5px;
+    padding-left: 2px;
+}
+
+#personlist-holder div input:disabled{
+    background:repeating-linear-gradient(45deg,rgba(255,255,255,0.5) 1px,rgba(0,0,0,0.2) 5px);
+    color:transparent;
+}
+
+#personlist-holder div button,#personlist-holder div a{
+    border:none;
+    display: block;
+    background:white;
+    border-top: 1px solid rgb(169,200,200);
+    font-size: 16px;
+    color:var(--color-primary-dark-highlight);
+    cursor: pointer;
+    text-align: left;
+    text-decoration:none;
+    padding:2px;
+    padding-left:6px;
+    width:100%;
+}
+
+#personlist-holder div button:before,#personlist-holder div a:before{
+    content:"-";
+    color:var(--color-primary-dark-highlight);
+}
+
+#personlist-holder div button:hover, #personlist-holder div a:hover{
+    background:rgba(155,155,155,0.2);
+}
+
+#email-maindiv{
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#email-maindiv b.info{
+    display: block;
+    text-align: center;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+#email-maindiv div b{
+    margin: 0;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+}
+
+#email-maindiv div.levelDiv{
+    border-top:2px solid var(--color-primary-dark);
+    border-bottom:2px solid var(--color-primary-dark);
+}
+
+#email-maindiv div div div{
+    display:flex;
+    flex-direction:row;
+    margin-bottom: 5px;
+}
+
+#email-maindiv div b.levelTitle{
+    border-bottom:1px solid #a9c8c8;
+    width:100%;
+    display: block;
+}
+
+#email-maindiv div b:not(.levelTitle){
+    background:rgba(155,155,155,0.3);
+    padding:0;
+    padding-left: 5px;
+    width:100%;
+    display: block;
+
+}
+
+#email-maindiv div label{
+    width: fit-content;
+    padding-left:5px;
+}
+
+#email-maindiv div div input{
+    background:transparent;
+    display: inline;
+    flex:1;
+    border:transparent;
+    font-size: 14px;
+    color:blue;
+}
+
+#archivewarning{
+    display: inline;
+    width:fit-content;
+}
+
+div.time{
+    padding:0px!important;
+    padding-left:5px!important;
+}
+
+p.notime{
+    padding-bottom: 2px;
+}
+
+div.btnholder{
+    padding:0px!important;
+}
+
+div.btnholder button{
+    margin-right: 5px;
+    font-weight: bold;
+}
+
+button.disablebtn-disabled{
+    color:rgba(100,0,0,0.8);
+}
+
+#user-menu div{
+    height: 25px;
+    padding:5px;
+    line-height: 25px;
+    font-weight: bold;
+}
+
+#user-menu div:nth-child(odd){
+    background:rgba(155,155,155,0.2);
+}
+
+#user-menu div:nth-child(odd) button.roundaction{
+    background:white;
+}
+
+#user-menu div button.roundaction{
+    float:right;
+    border:1px solid rgba(0,0,0,0.4);
+}
+
+#user-menu{
+    overflow-y: auto;
+}
+
+#searchspan{
+    width:fit-content;
+    height: 40px;
+    padding-left: 5px;
+}
+
+#searchinput{
+    width:200px;
+    border-radius: 5px;
+    border:1px solid grey;
+}
+
+#searchinput.expand{
+    border-radius:5px 5px 0px 0px;
+}
+
+#searchbtn{
+    border:none!important;
+}
+
+#searchbtn:hover{
+    background:none!important;
+}
+
+#timebtn{
+    border-left:2px solid #a9c8c8!important;
+}
+
+#topbar-overflow-holder button{
+    border-left: none!important;
+}
+
+#searchBackground{
+    height: fit-content;
+    background:white;
+    position: absolute;
+    border: 1px solid grey;
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+    z-index: 2;
+}
+
+#searchBackground p{
+    margin: 0;
+    text-align: left;
+    font-weight: bold;
+}
+
+#searchBackground div{
+    display: block;
+    width:100%;
+    text-align: left;
+    border:none;
+    border-top: 1px solid grey;
+    background:none;
+    cursor:default;
+}
+
+#searchBackground div:nth-child(even){
+    background:rgba(155,155,155,0.05);
+}
+
+#searchBackground div i{
+    display: block;
+    width:100%;
+    font-size:10px;
+    cursor: default;
+}
+
+#topbar-overflow #searchinput{
+    width:90%;
+    margin: auto;
+    display: block;
+}
+
+#notification-menu p{
+    width: calc(100% - 20px);
+    padding:5px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+#notification-menu button{
+    width: 80%;
+    margin: 0 auto;
+    margin-top: 5px;
+    display: block;
+    height: 36px;
+}
+
+#notification-menu button{
+    font-weight: bold;
+}
