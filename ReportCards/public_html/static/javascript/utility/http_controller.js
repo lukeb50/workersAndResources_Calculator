@@ -266,7 +266,7 @@ function calculateUniqueObjectID(Name, existingObject) {
         var Id = attemptID(Name);
         var keys = Object.keys(existingObject);
         if (keys.reduce(function (acc, current) {
-            return acc + (current === Id ? 1 : 0);
+            return acc + (current.toString() === Id.toString() ? 1 : 0);
         }, 0) === 0) {
             return Id;
         }
