@@ -7,7 +7,7 @@ const BAR_PADDING = 5;
 const BAR_VERTICAL = BAR_HEIGHT + (BAR_PADDING * 2);
 var LvlInfo = window.allLvlInfo;
 window.allLvlInfo = null;
-var i = window.I;
+var i = window.Id;
 window.I = null;
 
 var currentElement = null;

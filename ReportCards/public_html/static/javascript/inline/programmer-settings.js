@@ -1,12 +1,12 @@
 /* global LevelConfigs, clientDb, initClientDatabase, firebase, email_pattern */
 
 var GroupingData = null;
-var allLvlInfo = null;
 var isLevelEdit = false;
-var NextLvlDetails = null;
 
 var Facilities = {};
 var Timeblocks = {};
+
+Levels = {};
 
 const groupmenu = document.getElementById("group-menu");
 
@@ -167,12 +167,12 @@ async function generateLvlGroupingSettingsList() {
 
     function bindColorChange(btn, i) {
         btn.onclick = function () {
-            resetloader(false,groupmenu,"block");
+            resetloader(false, groupmenu, "block");
             document.getElementById("regex-menu").style.display = "none";
             document.getElementById("group-color-menu").style.display = "block";
             document.getElementById("color-input").value = GroupingData[i].Color;
             getUserInput().then((newVal) => {
-                resetloader(false,null,null);
+                resetloader(false, null, null);
                 GroupingData[i].Color = newVal;
                 setLevelEdit(true);
             });
@@ -188,12 +188,12 @@ async function generateLvlGroupingSettingsList() {
 
     function bindMatchChange(btn, i) {
         btn.onclick = function () {
-            resetloader(false,groupmenu,"block");
+            resetloader(false, groupmenu, "block");
             document.getElementById("regex-menu").style.display = "block";
             document.getElementById("group-color-menu").style.display = "none";
             document.getElementById("regex-input").value = GroupingData[i].Regex;
             getUserInput().then((newVal) => {
-                resetloader(false,null,null);
+                resetloader(false, null, null);
                 GroupingData[i].Regex = newVal;
                 generateLvlSettingsList();//Regen level list, may change groups
                 setLevelEdit(true);
@@ -211,9 +211,9 @@ async function generateLvlGroupingSettingsList() {
 
     function bindChangeName(btn, i) {
         btn.onclick = function () {
-            var newName = prompt("Enter new name for group " + GroupingData[i].Name + ":").escapeJSON();
+            var newName = prompt("Enter new name for group " + GroupingData[i].Name + ":");
             if (newName !== "" && newName !== null) {
-                GroupingData[i].Name = newName;
+                GroupingData[i].Name = newName.escapeJSON();
                 setLevelEdit(true);
                 generateLvlGroupingSettingsList();//regenerate data
             }
@@ -224,13 +224,7 @@ async function generateLvlGroupingSettingsList() {
 const LvlList = document.getElementById("lvl-list-settings-levels");
 
 async function generateLvlSettingsList() {
-    generateMainLevelConfig(-1, true);
-    if (allLvlInfo === null) {
-        allLvlInfo = await getDetails("Levels");
-        NextLvlDetails = await getDetails("Level-Next");
-        allLvlInfo = allLvlInfo ? allLvlInfo : [];
-        NextLvlDetails = NextLvlDetails ? NextLvlDetails : [];
-    }
+    generateMainLevelConfig(-1, null);
     clearChildren(LvlList);
     var RegexPatterns = [];
     for (var r = 0; r < GroupingData.length; r++) {
@@ -238,15 +232,8 @@ async function generateLvlSettingsList() {
             RegexPatterns.push({Name: GroupingData[r].Name, Regex: new RegExp(GroupingData[r].Regex)});
         }
     }
-    for (var i = 0; i < allLvlInfo.length; i++) {
-        LvlList.appendChild(generateLevelListing(i, true, RegexPatterns));
-    }
-    for (var i = 0; i < NextLvlDetails.length; i++) {
-        if (allLvlInfo.filter((data) => {
-            return data.Name === NextLvlDetails[i].Name;
-        }).length === 0) {
-            LvlList.appendChild(generateLevelListing(i, false, RegexPatterns));
-        }
+    for (const [id, lvl] of Object.entries(Levels)) {
+        LvlList.appendChild(generateLevelListing(id, lvl, RegexPatterns));
     }
     LvlList.appendChild(generateNewLevelListing());
 
@@ -261,142 +248,85 @@ async function generateLvlSettingsList() {
             btn.onclick = function () {
                 var newName = prompt("Enter new level name:").escapeJSON();
                 if (newName !== null && newName !== "") {
-                    NextLvlDetails.push({Name: newName, Shortform: newName.substring(0, 2)});
+                    var newLvlId = calculateUniqueObjectID(newName, Levels);
+                    Levels[newLvlId] = {Name: newName, Shortform: "", MustSees: {}, Skills: [], Settings: {CommentEnabled: false, WeakLetter: "w", WeakLetterOffset: 0, WeakGrouping: false}, CONSTANT: [], PASS: []};
                     setLevelEdit(true);
                     generateLvlSettingsList();
                 }
             };
-        }), i, null, null);
+        }), null, null, null);
         container.appendChild(box);
         return container;
     }
 
-    function generateLevelListing(i, isFull, RegexPatterns) {
+    function generateLevelListing(id, lvl, RegexPatterns) {
         var container = document.createElement("div");
         container.className = "lvl-settings-sidelist";
         var groupName = "No Group";
         for (var x = 0; x < RegexPatterns.length; x++) {
-            if (RegexPatterns[x].Regex.test((isFull ? allLvlInfo : NextLvlDetails)[i].Name) === true) {
+            if (RegexPatterns[x].Regex.test(lvl.Name) === true) {
                 groupName = RegexPatterns[x].Name;
                 break;
             }
         }
         var lbl = document.createElement("label");
-        if (isFull && (!NextLvlDetails[i]["PASS"])) {
-            //potential alert icon
-            var alertholder = document.createElement("div");
-            var alertico = document.createElement("img");
-            alertico.src = "../images/cross.png";
-            alertholder.appendChild(alertico);
-            var infotext = document.createElement("label");
-            infotext.className = "alerttext";
-            infotext.textContent = "Missing Next Level Options";
-            infotext.title = "Ensure that 'Passing Options' has at least 1 level selected";
-            alertholder.appendChild(infotext);
-            container.appendChild(alertholder);
-        }
+        /*if (isFull && (!NextLvlDetails[i]["PASS"])) {TODO
+         //potential alert icon
+         var alertholder = document.createElement("div");
+         var alertico = document.createElement("img");
+         alertico.src = "../images/cross.png";
+         alertholder.appendChild(alertico);
+         var infotext = document.createElement("label");
+         infotext.className = "alerttext";
+         infotext.textContent = "Missing Next Level Options";
+         infotext.title = "Ensure that 'Passing Options' has at least 1 level selected";
+         alertholder.appendChild(infotext);
+         container.appendChild(alertholder);
+         }*/
         //
-        lbl.textContent = (isFull ? allLvlInfo : NextLvlDetails)[i].Name;
+        lbl.textContent = lvl.Name;
         container.appendChild(lbl);
         var typelbl = document.createElement("label");
         typelbl.className = "unbold";
-        typelbl.textContent = "(" + groupName + ") " + (isFull === true ? "Full" : "Partial") + " Level";
+        typelbl.textContent = "(" + groupName + ") " + " Level";
         container.appendChild(typelbl);
-        container.appendChild(generateBtns(i, allLvlInfo.length, isFull));
+        container.appendChild(generateBtns(id, lvl));
         container.onclick = function () {
-            generateMainLevelConfig(i, isFull);
+            generateMainLevelConfig(id, lvl);
         };
         return container;
     }
 
-    function generateBtns(i, length, isFull) {
+    function generateBtns(id, lvl) {
         var holder = document.createElement("div");
-        holder.appendChild(createLvlSettingListBtn("Name", holder, bindChangeName, i, null, isFull));
-        if (isFull === true) {
-            var upBtn = createLvlSettingListBtn("🠉", holder, bindUpArrow, i, null, isFull);
-            upBtn.disabled = i === 0;
-            var downBtn = createLvlSettingListBtn("🠋", holder, bindDownArrow, i, null, isFull);
-            downBtn.disabled = i === length - 1;
-        } else {
-            holder.appendChild(createLvlSettingListBtn("Convert to full level", holder, bindChangeToFull, i, null, isFull));
-        }
-        holder.appendChild(createLvlSettingListBtn("X", holder, bindDelete, i, null, isFull));
+        holder.appendChild(createLvlSettingListBtn("Name", holder, bindChangeName, lvl, null));
+        holder.appendChild(createLvlSettingListBtn("X", holder, bindDelete, id, null, null));
         return holder;
     }
 
-    function bindDelete(btn, i, isFull) {
+    function bindDelete(btn, id) {
         btn.onclick = function () {
             if (confirm("Delete this level?")) {
-                NextLvlDetails.splice(i, 1);
-                if (isFull === true) {
-                    allLvlInfo.splice(i, 1);
-                }
+                delete Levels[id];
                 setLevelEdit(true);
                 generateLvlSettingsList();
             }
         };
     }
 
-    function bindChangeToFull(btn, i) {
-        btn.onclick = function () {
-            if (confirm("Convert to a full level?")) {
-                var newData = {Name: NextLvlDetails[i].Name, MustSees: {}, Skills: [], Settings: {CommentEnabled: false, WeakLetter: "w", WeakLetterOffset: 0, WeakGrouping: false}};
-                allLvlInfo.push(newData);
-                NextLvlDetails.move(i, allLvlInfo.length - 1);
-                setLevelEdit(true);
-                generateLvlSettingsList();
-            }
-        };
-    }
-
-    function bindUpArrow(btn, i) {
-        btn.onclick = function () {
-            allLvlInfo.move(i, i - 1);
-            NextLvlDetails.move(i, i - 1);
-            setLevelEdit(true);
-            generateLvlSettingsList();
-        };
-    }
-
-    function bindDownArrow(btn, i) {
-        btn.onclick = function () {
-            allLvlInfo.move(i, i + 1);
-            NextLvlDetails.move(i, i + 1);
-            setLevelEdit(true);
-            generateLvlSettingsList();
-        };
-    }
-
-    function bindChangeName(btn, i, isFull) {
+    function bindChangeName(btn, lvl) {
         btn.onclick = function () {
             var newName = prompt("New name for level:").escapeJSON();
             if (newName !== null && newName !== "") {
-                if (isFull === true) {//Change next level name mapping for full lvl
-                    for (var x = 0; x < NextLvlDetails.length; x++) {
-                        if (NextLvlDetails[x].Name === allLvlInfo[i].Name) {
-                            NextLvlDetails[x].Name = newName;
-                        }
-                    }
-                }
-                (isFull ? allLvlInfo : NextLvlDetails)[i].Name = newName;
+                lvl.Name = newName;
                 setLevelEdit(true);
                 generateLvlSettingsList();
             }
         };
     }
-
-    async function getDetails(loc) {
-        return new Promise((resolve, reject) => {
-            clientDb.ref(loc).once('value').then((snap) => {
-                resolve(snap.val());
-            }).catch(() => {
-                reject(null);
-            });
-        });
-    }
 }
 
-function createLvlSettingListBtn(txt, bindTo, bindFunc, i, imgName, isFull) {
+function createLvlSettingListBtn(txt, bindTo, bindFunc, lvl, imgName) {
     if (imgName === undefined)
         imgName = null;
     var btn = document.createElement(imgName === null ? "button" : "input");
@@ -411,7 +341,7 @@ function createLvlSettingListBtn(txt, bindTo, bindFunc, i, imgName, isFull) {
     }
     bindTo.appendChild(btn);
     if (bindFunc) {
-        bindFunc(btn, i, isFull);
+        bindFunc(btn, lvl);
     }
     return btn;
 }
@@ -432,71 +362,68 @@ for (var c = 0; c < LevelConfigs.length; c++) {//1 time binding
 }
 function bindOnLvlSettingChange(item) {//binding function
     item.onchange = function () {
-        var i = item.getAttribute("data-i");
+        var id = parseInt(item.getAttribute("data-id"));
         var x = item.getAttribute("data-x");
-        allLvlInfo[i].Settings[LevelConfigs[x].Name] = item.type === "checkbox" ? item.checked : item.value.escapeJSON();
+        Levels[id].Settings[LevelConfigs[x].Name] = item.type === "checkbox" ? item.checked : item.value.escapeJSON();
         setLevelEdit(true);
     };
 }
-function updateEditBtn(i) {
+function updateEditBtn(id) {
     editorBtn.onclick = function () {
         var editWindow = window.open("../inline-html/card-editor.html", "Card Editor", 'left=0,top=0,width=' + window.innerWidth + ',height=' + window.innerHeight);
-        editWindow.allLvlInfo = allLvlInfo;
-        editWindow.I = i;
+        editWindow.allLvlInfo = Levels;
+        editWindow.Id = id;
     };
 }
-function generateMainLevelConfig(i, isFull) {
-    var loc = isFull ? allLvlInfo : NextLvlDetails;
-    initSettings(i, isFull);
-    initNextLevels(i);
-    initMainConfig(i, isFull);
+function generateMainLevelConfig(id, lvl) {
+    initSettings(id, lvl);
+    initNextLevels(lvl);
+    initMainConfig(id, lvl);
     editorBtn.disabled = true;
-    if (i === -1) {//Don't render full view if partial level, only next info
+    if (lvl === null) {//Don't render full view if partial level, only next info
         return;
     }
-    if (isFull === true) {
-        editorBtn.disabled = false;
-        updateEditBtn(i);
-    }
+    editorBtn.disabled = false;
+    updateEditBtn(id);
 
-    function initMainConfig(i, isFull) {
+    function initMainConfig(id, lvl) {
         clearChildren(mainLevelConfig);
-        if (i === -1 || isFull === false) {
+        if (lvl === null) {
             return;
         }
         var lbl = document.createElement("label");
-        lbl.textContent = loc[i].Name;
-        if (!allLvlInfo[i].Skills) {
-            allLvlInfo[i].Skills = [];
+        lbl.textContent = lvl.Name;
+        if (!lvl.Skills) {
+            lvl.Skills = [];
         }
-        for (var c = 0; c < allLvlInfo[i].Skills.length; c++) {
+        for (var c = 0; c < lvl.Skills.length; c++) {
             var div = document.createElement("div");
             var lbl = document.createElement("label");
-            lbl.textContent = allLvlInfo[i].Skills[c].Name;
+            lbl.textContent = lvl.Skills[c].Name;
             div.appendChild(lbl);
             var btnholder = document.createElement("div");
             btnholder.className = "btnholder";
             div.appendChild(btnholder);
-            var delbtn = createLvlSettingListBtn("X", btnholder, bindDelete, i, null, c);
-            var upbtn = createLvlSettingListBtn("🠉", btnholder, bindUpArrow, i, null, c);
+            var delbtn = createLvlSettingListBtn("X", btnholder, bindDelete, lvl, null, c);
+            var upbtn = createLvlSettingListBtn("🠉", btnholder, bindUpArrow, lvl, null, c);
             upbtn.disabled = c === 0;
-            var downbtn = createLvlSettingListBtn("🠋", btnholder, bindDownArrow, i, null, c);
-            downbtn.disabled = c === allLvlInfo[i].Skills.length - 1;
+            var downbtn = createLvlSettingListBtn("🠋", btnholder, bindDownArrow, lvl, null, c);
+            downbtn.disabled = c === lvl.Skills.length - 1;
             delbtn.className = "del";
-            var addbtn = createLvlSettingListBtn("New Must See", btnholder, bindNewMustSee, i, null, c);
+            var addbtn = createLvlSettingListBtn("New Must See", btnholder, bindNewMustSee, lvl, null, c);
             addbtn.className = "green";
-            if (allLvlInfo[i].MustSees && allLvlInfo[i].MustSees[c]) {
-                for (var t = 0; t < allLvlInfo[i].MustSees[c].length; t++) {
+            if (lvl.MustSees && lvl.MustSees[c]) {
+                for (var t = 0; t < lvl.MustSees[c].length; t++) {
                     var p = document.createElement("p");
-                    p.textContent = allLvlInfo[i].MustSees[c][t].Name;
-                    bindMustSeeClick(p, i, c, t);//Send to card editor
+                    p.textContent = lvl.MustSees[c][t].Name;
+                    bindMustSeeClick(p, lvl, c, t);//Send to card editor
                     div.appendChild(p);
                     var delmsbtn = createLvlSettingListBtn("X", div, bindMustSeeDelete, c, null, t);
                     delmsbtn.className = "del";
                 }
             }
             mainLevelConfig.appendChild(div);
-            bindSkillClick(lbl, i, c);//Send to card editor
+            bindSkillClick(lbl, lvl, c);//Send to card editor
         }
         //New Skill
         var div = document.createElement("div");
@@ -510,41 +437,41 @@ function generateMainLevelConfig(i, isFull) {
         btn.onclick = function () {
             var newName = prompt("Enter skill name:").escapeJSON();
             if (newName !== "" && newName !== null) {
-                if (!allLvlInfo.Skills) {
-                    allLvlInfo.Skills = [];
+                if (!lvl.Skills) {
+                    lvl.Skills = [];
                 }
                 ;
-                allLvlInfo[i].Skills.push({Name: newName});
-                generateMainLevelConfig(i, isFull);
+                lvl.Skills.push({Name: newName});
+                generateMainLevelConfig(id, lvl);
                 setLevelEdit(true);
             }
         };
         div.appendChild(btn);
 
-        function bindSkillClick(div, i, c) {
+        function bindSkillClick(div, lvl, c) {
             div.onclick = function () {
                 SkillChannel.postMessage(c);
             };
         }
 
-        function bindMustSeeClick(div, i, c, m) {
+        function bindMustSeeClick(div, lvl, c, m) {
             div.onclick = function () {
                 MustSeeChannel.postMessage({Skill: c, MustSee: m});
             };
         }
 
-        function bindNewMustSee(btn, i, c) {
+        function bindNewMustSee(btn, lvl, c) {
             btn.onclick = function () {
                 var newName = prompt("Must See Name:").escapeJSON();
                 if (newName !== null && newName !== "") {
-                    if (!allLvlInfo[i].MustSees) {
-                        allLvlInfo[i].MustSees = {};
+                    if (!lvl.MustSees) {
+                        lvl.MustSees = {};
                     }
-                    if (!allLvlInfo[i].MustSees[c]) {
-                        allLvlInfo[i].MustSees[c] = [];
+                    if (!lvl.MustSees[c]) {
+                        lvl.MustSees[c] = [];
                     }
-                    allLvlInfo[i].MustSees[c].push({Name: newName});
-                    generateMainLevelConfig(i, isFull);
+                    lvl.MustSees[c].push({Name: newName});
+                    generateMainLevelConfig(id, lvl);
                     setLevelEdit(true);
                 }
             };
@@ -553,110 +480,108 @@ function generateMainLevelConfig(i, isFull) {
         function bindMustSeeDelete(btn, c, t) {
             btn.onclick = function () {
                 if (confirm("Delete this must see?")) {
-                    allLvlInfo[i].MustSees[c].splice(t, 1);
-                    generateMainLevelConfig(i, isFull);
+                    lvl.MustSees[c].splice(t, 1);
+                    generateMainLevelConfig(id, lvl);
                     setLevelEdit(true);
                 }
             };
         }
 
-        function bindDownArrow(btn, i, c) {
+        function bindDownArrow(btn, lvl, c) {
             btn.onclick = function () {
-                moveSkill(i, c, c + 1);
-                generateMainLevelConfig(i, isFull);
+                moveSkill(lvl, c, c + 1);
+                generateMainLevelConfig(id, lvl);
                 setLevelEdit(true);
             };
         }
 
-        function bindUpArrow(btn, i, c) {
+        function bindUpArrow(btn, lvl, c) {
             btn.onclick = function () {
-                moveSkill(i, c, c - 1);
-                generateMainLevelConfig(i, isFull);
+                moveSkill(lvl, c, c - 1);
+                generateMainLevelConfig(id, lvl);
                 setLevelEdit(true);
             };
         }
 
-        function moveSkill(i, from, to) {
-            if (allLvlInfo[i].MustSees) {
-                var tmp = Object.keys(allLvlInfo[i].MustSees);
+        function moveSkill(lvl, from, to) {
+            if (lvl.MustSees) {
+                var tmp = Object.keys(lvl.MustSees);
                 var newArray = [];//used to resuffle
-                for (var v = 0; v < allLvlInfo[i].Skills.length; v++) {
+                for (var v = 0; v < lvl.Skills.length; v++) {
                     if (tmp.indexOf(v.toString()) !== -1) {
-                        newArray[v] = allLvlInfo[i].MustSees[v];
+                        newArray[v] = lvl.MustSees[v];
                     } else {
                         newArray[v] = null;
                     }
                 }
                 newArray.move(from, to);
-                allLvlInfo[i].Skills.move(from, to);
+                lvl.Skills.move(from, to);
                 var newMustSees = {};
                 for (var v = 0; v < newArray.length; v++) {
                     if (newArray[v] !== null) {
                         newMustSees[v.toString()] = newArray[v];
                     }
                 }
-                allLvlInfo[i].MustSees = newMustSees;
+                lvl.MustSees = newMustSees;
             }
         }
 
-        function bindDelete(btn, i, c) {
+        function bindDelete(btn, lvl, c) {
             btn.onclick = function () {
                 if (!confirm("Delete this skill?")) {
                     return;
                 }
-                allLvlInfo[i].Skills.splice(c, 1);
-                generateMainLevelConfig(i, isFull);
+                lvl.Skills.splice(c, 1);
+                generateMainLevelConfig(id, lvl);
                 setLevelEdit(true);
             };
         }
     }
-    function initNextLevels(i) {
-        shortform_input.disabled = i === -1;
-        if (i !== -1) {
-            shortform_input.value = NextLvlDetails[i].Shortform;
+    function initNextLevels(lvl) {
+        shortform_input.disabled = lvl === null;
+        if (lvl !== null) {
+            shortform_input.value = lvl.Shortform;
         }
-        function initSelector(type, selector) {
+        function initSelector(lvl, type, selector) {
             clearChildren(selector);
-            if (i === -1) {
+            if (lvl === null) {
                 setInputsEnabled(false);
                 return;
             }
-            if (NextLvlDetails[i][type] === undefined) {
-                NextLvlDetails[i][type] = [];
+            if (lvl[type] === undefined) {
+                lvl[type] = [];
             }
-            ;
             setInputsEnabled(true);
-            var toCreate = NextLvlDetails.filter((lvl) => {
-                var allow = lvl.Name !== loc[i].Name;
-                if (NextLvlDetails[i][type].indexOf(lvl.Name) !== -1) {
-                    allow = false;
+            var toCreate = [];
+            for (const [iterateId, iterateLvl] of Object.entries(Levels)) {
+                if (lvl[type].indexOf(parseInt(iterateId)) === -1) {
+                    toCreate.push({Name: iterateLvl.Name, Id: iterateId});
                 }
-                return allow;
-            });
+            }
             clearChildren(selector);
             for (var lvl of toCreate) {
                 var opt = document.createElement("option");
                 opt.textContent = lvl.Name;
-                opt.value = lvl.Name;
+                opt.value = lvl.Id;
                 selector.appendChild(opt);
             }
         }
-        initSelector("PASS", passingSelect);
-        initSelector("CONSTANT", constantSelect);
+        initSelector(lvl, "PASS", passingSelect);
+        initSelector(lvl, "CONSTANT", constantSelect);
 
         function initList(type, holder) {
             clearChildren(holder);
-            if (i === -1 || NextLvlDetails[i][type] === undefined) {
+            if (lvl === null || lvl[type] === undefined) {
                 return;
             }
-            for (var c = 0; c < NextLvlDetails[i][type].length; c++) {
+            for (var c = 0; c < lvl[type].length; c++) {
                 holder.appendChild(createItem(c));
             }
             function createItem(pos) {
                 var div = document.createElement("div");
                 div.className = "next-list-item";
                 var lbl = document.createElement("label");
-                lbl.textContent = NextLvlDetails[i][type][pos];
+                lbl.textContent = Levels[lvl[type][pos]].Name;
                 div.appendChild(lbl);
                 var btn = document.createElement("button");
                 btn.className = "btn";
@@ -668,8 +593,8 @@ function generateMainLevelConfig(i, isFull) {
 
             function bindRemoveItem(btn, type, pos) {
                 btn.onclick = function () {
-                    NextLvlDetails[i][type].splice(pos, 1);
-                    initNextLevels(i);
+                    lvl[type].splice(pos, 1);
+                    initNextLevels(lvl);
                     setLevelEdit(true);
                 };
             }
@@ -683,15 +608,15 @@ function generateMainLevelConfig(i, isFull) {
     }
 
     shortform_input.onchange = function () {
-        NextLvlDetails[i].Shortform = shortform_input.value.escapeJSON();
+        lvl.Shortform = shortform_input.value.escapeJSON();
     };
 
     passingAddBtn.onclick = function () {
         if (passingSelect.value === "") {
             return;
         }
-        NextLvlDetails[i].PASS.push(passingSelect.value);
-        initNextLevels(i);
+        lvl.PASS.push(parseInt(passingSelect.value));
+        initNextLevels(lvl);
         setLevelEdit(true);
     };
 
@@ -699,24 +624,23 @@ function generateMainLevelConfig(i, isFull) {
         if (constantSelect.value === "") {
             return;
         }
-        NextLvlDetails[i].CONSTANT.push(constantSelect.value);
-        initNextLevels(i);
+        lvl.CONSTANT.push(parseInt(constantSelect.value));
+        initNextLevels(lvl);
         setLevelEdit(true);
     };
 
-    function initSettings(i, isFull) {
+    function initSettings(id, lvl) {
         for (var x = 0; x < LevelConfigs.length; x++) {
-            if (isFull === true) {
+            if (true) {
                 var loc = LevelConfigs[x].Element.type === "checkbox" ? "checked" : "value";
-                if (i === -1 || allLvlInfo[i].Settings[LevelConfigs[x].Name]) {
-                    LevelConfigs[x].Element[loc] = (i !== -1 ? allLvlInfo[i].Settings[LevelConfigs[x].Name] : LevelConfigs[x].Default);
+                if (lvl === null || lvl.Settings[LevelConfigs[x].Name]) {
+                    LevelConfigs[x].Element[loc] = (lvl !== null ? lvl.Settings[LevelConfigs[x].Name] : LevelConfigs[x].Default);
                 } else {
                     LevelConfigs[x].Element[loc] = LevelConfigs[x].Default;
                 }
                 LevelConfigs[x].Element.setAttribute("data-x", x);
-                LevelConfigs[x].Element.setAttribute("data-i", i);
-                LevelConfigs[x].Element.setAttribute("data-full", isFull);
-                LevelConfigs[x].Element.disabled = (i === -1 ? true : false);
+                LevelConfigs[x].Element.setAttribute("data-id", id);
+                LevelConfigs[x].Element.disabled = (lvl === null ? true : false);
             } else {
                 LevelConfigs[x].Element.disabled = true;
                 if (LevelConfigs[x].Element.type === "checkbox") {
@@ -734,12 +658,12 @@ var metadata;
 var metadataChanges = [];
 function generateMetadataList() {
     document.getElementById("metadata-save-btn").onclick = function () {
-        resetloader(true,null,null);
+        resetloader(true, null, null);
         saveMetadata(metadata).then(() => {
-            resetloader(false,null,null);
+            resetloader(false, null, null);
             generateEmailSelectMetadata();
         }).catch((e) => {
-            resetloader(false,null,null);
+            resetloader(false, null, null);
         });
     };
 
@@ -1080,17 +1004,17 @@ async function generateFacilityMenu() {
     }
 
     document.getElementById("facility-save-btn").onclick = function () {
-        resetloader(true,null,null);
+        resetloader(true, null, null);
         saveData(Facilities, "Facilities").then(() => {
             saveData(Timeblocks, "Timeblocks").then(() => {
-                resetloader(false,null,null);
+                resetloader(false, null, null);
                 generateFacilityMenu();
             }).catch((e) => {
-                resetloader(false,null,null);
+                resetloader(false, null, null);
                 alert("Error saving data");
             });
         }).catch((e) => {
-            resetloader(false,null,null);
+            resetloader(false, null, null);
             alert("Error saving facility data");
         });
     };
@@ -1254,20 +1178,14 @@ function setLevelEdit(newVal) {
     isLevelEdit = newVal;
 }
 
-function resetSettingsLevel() {
-    NextLvlDetails = null;
-    GroupingData = null;
-    allLvlInfo = null;
-}
-
 save_email_btn.onclick = function () {
-    resetloader(true,null,null);
+    resetloader(true, null, null);
     var saveData = {Subject: email_subject.value, HTML: email_body.value, Plain: email_plain_body.value};
     saveEmailData(saveData).then(function () {
-        resetloader(false,null,null);
+        resetloader(false, null, null);
     }).catch((err) => {
         alert("Error saving data");
-        resetloader(false,null,null);
+        resetloader(false, null, null);
     });
 
     async function saveEmailData(Data) {
@@ -1276,13 +1194,13 @@ save_email_btn.onclick = function () {
 };
 
 document.getElementById("save-lvl-settings-btn").onclick = function () {
-    resetloader(true,null,null);
+    resetloader(true, null, null);
     saveLevelData().then(() => {
         setLevelEdit(false);
-        resetloader(false,null,null);
+        resetloader(false, null, null);
     }).catch((err) => {
         alert("Error saving data");
-        resetloader(false,null,null);
+        resetloader(false, null, null);
         console.log(err);
     });
     async function saveLevelData() {
@@ -1295,18 +1213,19 @@ document.getElementById("save-lvl-settings-btn").onclick = function () {
 };
 
 window.onload = function () {
-    resetloader(true,null,null);
+    resetloader(true, null, null);
     firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
             initClientDatabase().then(async() => {
                 await initCoreData(true);
+                await getCompleteLevels();
                 generateLvlGroupingSettingsList();//Level Config
                 generateMetadataList();
                 generateFacilityMenu();
                 generateEmailMenu();
-                resetloader(false,null,null);
+                resetloader(false, null, null);
             }).catch((f) => {
-                resetloader(false,null,null);
+                resetloader(false, null, null);
                 alert("Error logging in - please try again later");
                 console.log(f);
             });
