@@ -326,7 +326,7 @@ async function generateLvlSettingsList() {
     }
 }
 
-function createLvlSettingListBtn(txt, bindTo, bindFunc, lvl, imgName) {
+function createLvlSettingListBtn(txt, bindTo, bindFunc, lvl, imgName, posVal) {
     if (imgName === undefined)
         imgName = null;
     var btn = document.createElement(imgName === null ? "button" : "input");
@@ -341,7 +341,7 @@ function createLvlSettingListBtn(txt, bindTo, bindFunc, lvl, imgName) {
     }
     bindTo.appendChild(btn);
     if (bindFunc) {
-        bindFunc(btn, lvl);
+        bindFunc(btn, lvl,posVal);
     }
     return btn;
 }
@@ -462,14 +462,18 @@ function generateMainLevelConfig(id, lvl) {
 
         function bindNewMustSee(btn, lvl, c) {
             btn.onclick = function () {
+                console.log(c);
                 var newName = prompt("Must See Name:").escapeJSON();
                 if (newName !== null && newName !== "") {
+                    console.log(lvl.MustSees);
                     if (!lvl.MustSees) {
                         lvl.MustSees = {};
                     }
+                    console.log(lvl.MustSees);
                     if (!lvl.MustSees[c]) {
                         lvl.MustSees[c] = [];
                     }
+                    console.log(lvl.MustSees[c]);
                     lvl.MustSees[c].push({Name: newName});
                     generateMainLevelConfig(id, lvl);
                     setLevelEdit(true);
@@ -1205,8 +1209,7 @@ document.getElementById("save-lvl-settings-btn").onclick = function () {
     });
     async function saveLevelData() {
         var sendData = {};
-        sendData["Level"] = allLvlInfo;
-        sendData["Next"] = NextLvlDetails;
+        sendData["Level"] = Levels;
         sendData["Group"] = GroupingData;
         return await send_http_request("2/save/leveldata", JSON.stringify(sendData), []);
     }
