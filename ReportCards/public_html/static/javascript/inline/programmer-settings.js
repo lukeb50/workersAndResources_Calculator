@@ -588,7 +588,7 @@ function generateMainLevelConfig(id, lvl) {
                 lbl.textContent = Levels[lvl[type][pos]].Name;
                 div.appendChild(lbl);
                 var btn = document.createElement("button");
-                btn.className = "btn";
+                btn.className = "roundaction listdot";
                 btn.textContent = "-";
                 bindRemoveItem(btn, type, pos);
                 div.appendChild(btn);

@@ -22,13 +22,13 @@
                 <div class="menuitem" id="group-menu">
                     <div id="regex-menu">
                         <p>Use a <a target='_blank' href="https://regexr.com/">Regex</a> pattern or a list separated by '|' to indicate which levels belong to this group</p>
-                        <input id="regex-input" placeholder="Kinderswim|Waterbabies|Preschool Prep|Other">
-                        <button id="applyRegex" class="btn">Apply</button>
+                        <input id="regex-input" type="text" placeholder="Kinderswim|Waterbabies|Preschool Prep|Other">
+                        <button id="applyRegex" class="mainround">Apply</button>
                     </div>
                     <div id="group-color-menu">
                         <p>Select a color to represent this group. A familiar color such as the worksheet color is recommended.</p>
                         <input id="color-input" type="color">
-                        <button id="applyColor" class="btn">Apply</button>
+                        <button id="applyColor" class="mainround">Apply</button>
                     </div>
                 </div>
             </div>
@@ -59,22 +59,22 @@
                                 <div><label>Remove Grouped Highlighting:<input disabled id="WeakGroupingHighlight" type="checkbox"></label></div>
                             </div>
                             <div id="sidebar-lvl-next">
-                                <div class="px5margin"><label>Level Shortform:<input id="shortform-input"></label></div>
+                                <div class="px5margin"><label>Level Shortform:<input type="text" id="shortform-input"></label></div>
                                 <p>Passing Options:</p>
-                                <div><select id="Passing-Level-Select"></select><button id="Add-Passing-Level" disabled class="btn">+</button></div>
+                                <div><select id="Passing-Level-Select"></select><button id="Add-Passing-Level" disabled class="listdot roundaction">+</button></div>
                                 <div id="settings-passing-div"></div>
                                 <p id="constant-next-text">Constant Options:</p>
-                                <div><select id="Constant-Level-Select"></select><button id="Add-Constant-Level" disabled class="btn">+</button></div>
+                                <div><select id="Constant-Level-Select"></select><button id="Add-Constant-Level" disabled class="listdot roundaction">+</button></div>
                                 <div id="settings-constant-div"></div>
                             </div>
                         </div>
                         <div>
-                            <button disabled id="open-editor-btn" class="btn px5margin">Card Editor</button>
+                            <button disabled id="open-editor-btn" class="mainround px5margin">Card Editor</button>
                         </div>
                     </div>
                 </div>
                 <div id="lvl-settings-save-holder">
-                    <button class="btn" id="save-lvl-settings-btn">Save</button>
+                    <button class="mainround" id="save-lvl-settings-btn">Save</button>
                 </div>
             </div>
             <div id="general-metadata-settings"><!--true-->
@@ -82,7 +82,7 @@
                 <p>Metadata is set by instructors on worksheets and can be used for printing extra information.</p>
                 <p>Renaming/Adding/Deleting metadata will NOT affect sheets with existing metadata</p>
                 <div id="metadata-list"></div>
-                <button class="btn" id="metadata-save-btn">Save Metadata</button>
+                <button class="mainround" id="metadata-save-btn">Save Metadata</button>
             </div>
             <div id="general-facility-settings"><!--true-->
                 <span><label>Facility & Time Settings</label><button class="setting-arrow">▲</button></span>
@@ -90,7 +90,7 @@
                     <div id="facility-div"></div>
                     <div id="timeblock-div"></div>
                 </div>
-                <button class="btn" id="facility-save-btn">Save Data</button>
+                <button class="mainround" id="facility-save-btn">Save Data</button>
             </div>
             <div id="general-email-settings"><!--true-->
                 <span><label>Email Settings</label><button class="setting-arrow">▲</button></span>
@@ -108,17 +108,17 @@
                         <optgroup label="Complex Modifiers">
                             <option value="list">Skill List</option>
                         </optgroup>
-                    </select><button id="email-add-modifier-btn" class="btn">Add</button></div>
-                <div class="flex"><label><b>Email Subject: </b></label><input id="email-settings-subject"></div>
+                    </select><button id="email-add-modifier-btn" class="mainround">Add</button></div>
+                <div class="flex"><label><b>Email Subject: </b></label><input type="text" id="email-settings-subject"></div>
                 <label><b>HTML Email Body:</b></label>
                 <textarea id="email-settings-body"></textarea>
                 <i>The email body supports a limited subset of HTML tags, including text(p,label,i,...), images(img) and tables.</i>
                 <label><b>Email Text Body:</b></label>
                 <textarea id="email-settings-plain-body"></textarea>
                 <i>This text will be shown on email clients that do not support HTML. Recommended for accessibility but not required.</i>
-                <button id="email-html-btn" class="btn">View HTML email</button>
-                <button id="email-plaintext-btn" class="btn">View plaintext email</button>
-                <div><button id="save-email-btn" class="btn">Save Email</button></div>
+                <button id="email-html-btn" class="mainround">View HTML email</button>
+                <button id="email-plaintext-btn" class="mainround">View plaintext email</button>
+                <div><button id="save-email-btn" class="mainround">Save Email</button></div>
             </div>
         </div>
         <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>

@@ -3,15 +3,16 @@ body{
     font-family: 'Roboto', sans-serif;
 }
 
-.btn{
-    border:1px solid grey;
-    border-radius: 5px;
-    margin-left: 5px;
-    background: transparent;
+input[type="text"],input[type="number"],textarea, select{
+    border:2px solid var(--color-primary-dark)!important;
 }
 
-.btn:hover:not(:disabled){
-    background:rgba(155,200,200,0.2);
+input[type="text"]:disabled,input[type="number"]:disabled,textarea:disabled, select:disabled{
+    background:rgba(200,200,200,0.15);
+}
+
+button.mainround{
+    border-radius: 5px!important;
 }
 
 #general-menu-holder p{
@@ -199,7 +200,6 @@ body{
     width:96%;
     margin: 5px 0px 5px 0px;
     border-radius: 5px;
-    border:1px solid grey;
     padding:5px;
 }
 
@@ -268,7 +268,6 @@ body{
 }
 
 #sidebar-lvl-next div select{
-    border-color:black!important;
     color:black!important;
     width:80%;
     margin:0px 5px 0px 5px;
@@ -348,6 +347,18 @@ body{
     display: inline-block;
 }
 
+#Add-Passing-Level, #Add-Constant-Level{
+    height: 1.5rem!important;
+    width: 1.5rem!important;
+    outline:2px solid var(--color-primary-dark)!important;
+}
+
+div.next-list-item button.roundaction{
+    margin-left: 5px;
+    height: 1.25rem!important;
+    width:1.25rem!important;
+}
+
 #metadata-list{
     margin: 0!important;
     padding-bottom: 5px;
@@ -364,6 +375,7 @@ body{
 
 #metadata-save-btn{
     margin-top: 2px!important;
+    margin-left: 5px;
     margin-bottom: 6px!important;
 }
 
@@ -396,6 +408,10 @@ body{
     border-bottom:2px solid grey;
     flex-direction: column;
     display: flex;
+}
+
+#facility-save-btn{
+    margin-left:5px;
 }
 
 #timeblock-div, #facility-div{
@@ -512,10 +528,11 @@ label.Success{
     overflow-y: auto;
     white-space: pre-wrap;
     resize: none;
-    width: calc(100% - 16px);
+    width: calc(100% - 18px);
 }
 
 #save-email-btn{
+    margin-left:5px;
     margin-top:5px;
 }
 
@@ -524,12 +541,24 @@ label.Success{
     display: inline-block!important;
 }
 
+#email-html-btn{
+    margin-left: 5px;
+}
+
+#email-add-modifier-btn{
+    margin-left: 5px;
+}
+
 i{
     display: block;
 }
 
 .px5margin{
     margin-top: 5px;
+}
+
+#open-editor-btn{
+    margin-left: 5px;
 }
 
 body::-webkit-scrollbar {
