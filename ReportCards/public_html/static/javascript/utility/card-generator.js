@@ -377,13 +377,13 @@ function generateTextGraphics(ctx, LevelMarkup, sheet, student, side, inst) {
     function getText(currentTxt, sheet, student, inst) {
         switch (currentTxt.Type) {
             case "level":
-                return sheet.Level;
+                return Levels[sheet.Level].Name;
             case "nextlevel":
                 //Check if all marking is done or not, return blank if skill is unmarked
                 if (sheet.Marks[student].reduce((acc, current) => {
                     return acc + (current !== null ? 1 : 0);
                 }, 0) === sheet.Marks[student].length) {
-                    return sheet.NextLevel[student];
+                    return Levels[sheet.NextLevel[student]].Name;
                 } else {
                     return "";
                 }
