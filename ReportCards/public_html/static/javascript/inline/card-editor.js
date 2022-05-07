@@ -1,4 +1,4 @@
-/* global firebase, getMetadataFromID, clientDb */
+/* global firebase, getMetadataFromID, clientDb, Organization */
 
 const storage = firebase.app().storage("gs://report-cards-6290-uploads");
 
@@ -174,6 +174,7 @@ window.onload = async function () {
     firebase.auth().onAuthStateChanged(async function (user) {
         if (user) {
             await initClientDatabase();
+            updateNewCardSelector();
             return new Promise((resolve, reject) => {
                 clientDb.ref("Settings").once('value').then((snap) => {
                     Metadata = snap.val()["Sheet-Metadata"] ? snap.val()["Sheet-Metadata"] : [];
@@ -273,7 +274,7 @@ async function updateNewCardSelector() {
     clearChildren(new_card_img_select);
     clearChildren(new_card_back_img_select);
     var listedImages = null;
-    await storage.ref("cc17e5cf-b320-4d1d-857b-238e9fbdb144/").listAll().then((res) => {
+    await storage.ref(Organization+"/").listAll().then((res) => {
         listedImages = res;
         return;
     });
@@ -324,8 +325,6 @@ new_card_img_upload.addEventListener('change', function () {
         return send_http_request("2/add/image", imgData, [["name", filename], ["type", type]]);
     }
 });
-
-updateNewCardSelector();
 
 const new_txt_size = document.getElementById("font-size-input");
 const new_txt_line = document.getElementById("multiline-input");
