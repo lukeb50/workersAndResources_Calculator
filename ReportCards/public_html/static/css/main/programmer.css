@@ -277,9 +277,13 @@
     margin-bottom: 0px;
 }
 
-#add-user-btn{
+#add-user-btn, #adduser-execute{
     border-radius: 5px;
     background:white;
+}
+
+#adduser-execute{
+    margin-left: 5px;
 }
 
 #adduser-inputholder{
