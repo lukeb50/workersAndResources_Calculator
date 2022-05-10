@@ -905,7 +905,7 @@ async function getLvlInfo(Level) {
 document.getElementById("manual_create_btn").onclick = function () {
     var lvl = manual_sel.value;
     if (lvl !== "") {
-        var toAdd = {"Names": [], "Barcode": "0", "Level": parseInt(lvl), "Marks": [], "MustSees": [], "VerifiedBy": "", "UniqueID": "", "NextLevel": [], "Attendance": [], Timeblock: programmerMode.split("---")[1], Facility: programmerMode.split("---")[0]};
+        var toAdd = {"Names": [], "Barcode": "0", "Level": parseInt(lvl), "Marks": [], "MustSees": [], "VerifiedBy": "", "UniqueID": "", "NextLevel": [], "Attendance": [], "Timeblock": programmerMode.split("---")[1],"Facility": programmerMode.split("---")[0],"TimeStart":0};
         getLvlInfo(lvl).then(function () {
             if (Levels[lvl].Settings.CommentEnabled) {
                 toAdd["Comments"] = [];
