@@ -1,0 +1,72 @@
+#scheduleTable{
+    border-collapse: collapse;
+    height: fit-content;
+    display: table!important;
+    table-layout: fixed;
+    width:fit-content;
+}
+
+#scheduleTable th, #scheduleTable td{
+    border: 1px solid black;
+}
+
+#scheduleTable th{
+    word-break: break-all;
+}
+
+#scheduleTable tr td:nth-child(1),#scheduleTable tr th:nth-child(1){
+    width:8ch;
+    text-align: center;
+}
+
+#scheduleTable tr td:not(:nth-child(1)),#scheduleTable tr th:not(:nth-child(1)){
+    width: 10em;
+}
+
+#scheduleTable tr:nth-child(1){
+    background:var(--color-primary-mostly-transparent);
+}
+
+#scheduleTable td div{
+    display: block;
+    height: 100%;
+}
+
+#scheduleTable td div b{
+    text-align: center;
+    display: block;
+}
+
+#scheduleTable td div label, #scheduleTable td div label.light{
+    text-align: center;
+    display: block;
+}
+
+#scheduleTable td div label.light{
+    font-size: 0.80rem;
+}
+
+#sheetinfo-menu{
+    flex-direction: column;
+}
+
+#sheetinfo-barcode{
+    display: block;
+    text-align: center;
+    font-size: 1.1em;
+}
+
+#sheetinfo-instructor{
+    display: block;
+    padding-left: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+#sheetinfo-studentlist{
+    flex:1;
+    margin-top: 0px;
+    margin-left: 5px;
+    padding-left: 20px;
+    overflow-y: auto;
+}

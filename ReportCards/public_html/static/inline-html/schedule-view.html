@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Schedule View</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../css/main/index.css" type="text/css"/>
+        <link rel="stylesheet" href="../css/inline/schedule-view.css" type="text/css"/>
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+        <link rel="apple-touch-icon" sizes="120x120" href="https://report-cards-6290.appspot.com/static/icos/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="https://report-cards-6290.appspot.com/static/icos/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="https://report-cards-6290.appspot.com/static/icos/favicon-16x16.png">
+        <link rel="mask-icon" href="https://report-cards-6290.appspot.com/static/icos/safari-pinned-tab.svg">
+        <link rel="manifest" href="../../static/icos/site.webmanifest">
+        <meta name="msapplication-TileColor" content="#00aba9">
+        <meta name="theme-color" content="#ffffff">
+    </head>
+    <body>
+        <div class="blocker" id="loadblocker">
+            <div class="load" id="loadspinner"></div>
+            <div id="main-menu">
+                <div class="menuitem" id="sheetinfo-menu">
+                    <h1 id="sheetinfo-level"></h1>
+                    <label id="sheetinfo-barcode"></label>
+                    <label id="sheetinfo-instructor"></label>
+                    <ul id="sheetinfo-studentlist"></ul>
+                </div>
+                <button class="mainround" id="main-menu-close-btn">Close</button>
+            </div>
+        </div>
+        <table id="scheduleTable"></table>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-database.js"></script>
+        <script src="../javascript/utility/http_controller.js"></script>
+        <script src="../javascript/inline/schedule-view.js"></script>
+    </body>
+</html>

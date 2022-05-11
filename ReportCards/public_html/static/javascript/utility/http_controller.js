@@ -29,7 +29,8 @@ var LevelConfigs = [{Name: "CommentEnabled", Element: document.getElementById("i
     {Name: "WeakGrouping", Element: document.getElementById("isWeakGrouping"), Default: 0},
     {Name: "WeakGroupingHighlight", Element: document.getElementById("WeakGroupingHighlight"), Default: false},
     {Name: "PassLetter", Element: document.getElementById("passLetterInput"), Default: ""},
-    {Name: "HighlightWeakLetter", Element: document.getElementById("HighlightWeakLetter"), Default: false}];
+    {Name: "HighlightWeakLetter", Element: document.getElementById("HighlightWeakLetter"), Default: false},
+    {Name: "Duration", Element: document.getElementById("ClassDuration"), Default: 30}];
 var xhttp;
 
 async function send_http_request(dbpath, body, headers, urlsection) {
@@ -110,7 +111,7 @@ async function initSelectorScreen(AppendTo) {//.Regex, .Name .Autosort
                 var group = document.createElement("optgroup");
                 AppendTo.appendChild(group);
                 group.label = Group.Name;
-                Group.Levels.forEach((LevelName,index) => {
+                Group.Levels.forEach((LevelName, index) => {
                     var opt = document.createElement("option");
                     opt.value = Group.Ids[index];
                     opt.textContent = LevelName;
@@ -140,10 +141,10 @@ async function getCompleteLevels() {
 //Takes in a level loaded from DB and pads out possible null fields for
 //easier usage (Avoid constant null checks)
 function processLoadedLevel(LvlData) {
-    LvlData.Skills = LvlData.Skills?LvlData.Skills:[];
-    LvlData.MustSees = LvlData.MustSees?LvlData.MustSees:{};
-    LvlData.PrintSettings = LvlData.PrintSettings?LvlData.PrintSettings:{};
-    LvlData.Settings = LvlData.Settings?LvlData.Settings:{};
+    LvlData.Skills = LvlData.Skills ? LvlData.Skills : [];
+    LvlData.MustSees = LvlData.MustSees ? LvlData.MustSees : {};
+    LvlData.PrintSettings = LvlData.PrintSettings ? LvlData.PrintSettings : {};
+    LvlData.Settings = LvlData.Settings ? LvlData.Settings : {};
     return LvlData;
 }
 
