@@ -25,10 +25,31 @@
                     <label id="sheetinfo-instructor"></label>
                     <ul id="sheetinfo-studentlist"></ul>
                 </div>
+                <div class="menuitem" id="config-menu">
+                    <label>Upload an Activity Attendance Sheet report as an Excel sheet</label>
+                    <input type="file" id="excelUpload"/>
+                    <div id="person-config-div"></div>
+                    <button id="config-add-instructor">Add Instructor</button>
+                    <label>A config can be pasted below, which will copy instructor names & barcodes but use updated data from the spreadsheet</label>
+                    <input id="paste-person-config" type="text">
+                    <div style="width:100%;text-align: center;margin-top: 5px">
+                        <button id="configCreateBtn" class="mainround">Create Config</button>
+                    </div>
+                </div>
                 <button class="mainround" id="main-menu-close-btn">Close</button>
             </div>
         </div>
         <table id="scheduleTable"></table>
+        <div id="uploadSection">        
+            <button id="getMasterConfig">Copy Master Config</button>
+            <button id="inputMasterConfig">Input Master Config</button>
+            <button id="createConfig">Create Config File</button>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
+
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.13.5/xlsx.full.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.13.5/jszip.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
         <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-database.js"></script>
