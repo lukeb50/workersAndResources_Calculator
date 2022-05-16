@@ -4,6 +4,13 @@
     display: table!important;
     table-layout: fixed;
     width:fit-content;
+    border-top: 1px solid black;
+}
+
+#main-schedule-holder{
+    width: 100%;
+    height: 100%;
+    overflow: auto;
 }
 
 #scheduleTable th, #scheduleTable td{
@@ -48,27 +55,24 @@
 
 #sheetinfo-menu{
     flex-direction: column;
+    overflow-y: auto;
 }
 
-#sheetinfo-barcode{
+#sheetinfo-menu label{
     display: block;
     text-align: center;
-    font-size: 1.1em;
+    font-size: 0.95em;
 }
 
-#sheetinfo-instructor{
-    display: block;
-    padding-left: 10px;
-    font-size: 1.2em;
-    font-weight: bold;
+#sheetinfo-menu h1{
+    font-size: 1.5em;
 }
 
-#sheetinfo-studentlist{
-    flex:1;
+#sheetinfo-menu ul{
     margin-top: 0px;
+    margin-bottom: 0px;
     margin-left: 5px;
     padding-left: 20px;
-    overflow-y: auto;
 }
 
 #config-menu{

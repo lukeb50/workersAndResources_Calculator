@@ -79,8 +79,9 @@ const instlist = document.getElementById("personlist-holder");
 const commentmenu = document.getElementById("comment-menu");
 const metadatamenu = document.getElementById("metadata-menu");
 const prevlookupmenu = document.getElementById("previouslookup-menu");
+const schedulemenu = document.getElementById("schedule-menu");
 
-const loaditms = [loadspinner, overflower, timemenu, printmenu, emailmenu, usermenu, notifmenu, commentmenu, metadatamenu, prevlookupmenu]; //items that should be hidden when showing main blocker
+const loaditms = [loadspinner, overflower, timemenu, printmenu, emailmenu, usermenu, notifmenu, commentmenu, metadatamenu, prevlookupmenu, schedulemenu]; //items that should be hidden when showing main blocker
 
 const screenquery = window.matchMedia("(max-width: 700px)");
 
@@ -690,6 +691,14 @@ window.onload = function () {
             bindPersonListClick(div);
             instlist.appendChild(div);
         }
+        let schedulebtn = document.createElement("button");
+        schedulebtn.textContent = "View Schedule";
+        schedulebtn.id = "viewschedulebtn";
+        schedulebtn.className = "mainround";
+        instlist.appendChild(schedulebtn);
+        schedulebtn.onclick = function () {
+            resetloader(false,schedulemenu,"block");
+        };
         let addbtn = document.createElement("button");
         addbtn.textContent = "Add Instructor";
         addbtn.id = "addinst";
@@ -786,7 +795,6 @@ window.onload = function () {
             //Uid is the person to grant access to
             btn.onclick = function () {
                 resetloader(true, null, null);
-                console.log(personI);
                 setAccess(currentTime, uid).then(() => {
                     resetloader(false, null, null);
                 }).catch((e) => {
@@ -829,16 +837,15 @@ window.onload = function () {
     instlistcollapse.onclick = function (ev) {
         ev.stopPropagation();
         instlistparent.style.flex = "0 1 2em";
-        instlistparent.setAttribute("data-collapse","true");
-        setChildrenDisplay(instlistparent,"none");
+        instlistparent.setAttribute("data-collapse", "true");
+        setChildrenDisplay(instlistparent, "none");
     };
-    
-    instlistparent.onclick = function(){
-        console.log(instlistparent.getAttribute("data-collapse"));
-        if(instlistparent.getAttribute("data-collapse")==="true"){
+
+    instlistparent.onclick = function () {
+        if (instlistparent.getAttribute("data-collapse") === "true") {
             instlistparent.style.flex = "0 0 13rem";
-            instlistparent.setAttribute("data-collapse","false");
-            setChildrenDisplay(instlistparent,"block");
+            instlistparent.setAttribute("data-collapse", "false");
+            setChildrenDisplay(instlistparent, "block");
         }
     };
 
@@ -1230,7 +1237,7 @@ window.onload = function () {
                     searchbtn.setAttribute("data-search", "{}");
                 }
                 clearChildren(searchDiv);
-                if(EditPending === true){
+                if (EditPending === true) {
                     editAlert = document.createElement("p");
                     editAlert.textContent = "Save to search edits";
                     searchDiv.appendChild(editAlert);

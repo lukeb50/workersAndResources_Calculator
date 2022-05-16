@@ -5,10 +5,6 @@ const sheetinfomenu = document.getElementById("sheetinfo-menu");
 const configmenu = document.getElementById("config-menu");
 const mainmenu = document.getElementById("main-menu");
 const close_mainmenu = document.getElementById("main-menu-close-btn");
-const sheetinfo_level = document.getElementById("sheetinfo-level");
-const sheetinfo_instructor = document.getElementById("sheetinfo-instructor");
-const sheetinfo_barcode = document.getElementById("sheetinfo-barcode");
-const sheetinfo_studentlist = document.getElementById("sheetinfo-studentlist");
 const loaditms = [loadspinner, sheetinfomenu, configmenu];
 var dummyData = [
     /*[
@@ -74,14 +70,14 @@ function displaySchedule(Time) {
             var isLesson = false;
             for (var s = 0; s < dummyData[i].length; s++) {
                 var currentSheet = dummyData[i][s];
-                if (currentSheet.TimeStart === t) {
+                if (getClassProperty(currentSheet, "TimeStart") === t) {
                     isLesson = true;
                     var lessonHolder = document.createElement("td");
-                    lessonHolder.rowSpan = (currentSheet.Duration ? currentSheet.Duration : Levels[currentSheet.Level].Settings.Duration) / tableInformation.increment;//TODO: code for Excel
-                    lessonHolder.style.backgroundColor = getLevelColor(currentSheet.Level);
+                    lessonHolder.rowSpan = getClassDuration(currentSheet) / tableInformation.increment;
+                    lessonHolder.style.backgroundColor = getLevelColor(getClassProperty(currentSheet, "Level"));
                     createSheetListing(lessonHolder, i, s);
                     timerow.appendChild(lessonHolder);
-                } else if (t >= currentSheet.TimeStart && t < currentSheet.TimeStart + parseInt(Levels[currentSheet.Level]?Levels[currentSheet.Level].Settings.Duration:currentSheet.Duration)) {//TODO: Excel sheet code
+                } else if (t >= getClassProperty(currentSheet, "TimeStart") && t < getClassProperty(currentSheet, "TimeStart") + getClassDuration(currentSheet)) {
                     isLesson = true;
                 }
             }
@@ -109,7 +105,6 @@ function displaySchedule(Time) {
     function updateCurrentTime() {
         currentTime = new Date();
         var timeStamp = (currentTime.getHours() * 60) + currentTime.getMinutes();
-        console.log("Update: " + timeStamp);
         if (timeStamp >= tableInformation.firstStart && timeStamp < tableInformation.lastEnd) {
             //Time exists inside table range
             var timeEl = document.getElementById("time-" + roundDown5(timeStamp));
@@ -133,44 +128,87 @@ function displaySchedule(Time) {
 
     function createSheetListing(table, inst, sheetI) {
         var sheet = dummyData[inst][sheetI];
+        var isCombo = Array.isArray(sheet);
         var holder = document.createElement("div");
         table.appendChild(holder);
         //create labels
         var lvlText = document.createElement("b");
-        lvlText.textContent = Levels[sheet.Level] ? Levels[sheet.Level].Name : sheet.Level;//TODO: Excel sheet code
+        if (!isCombo) {
+            lvlText.textContent = getLevelName(sheet);
+        } else {
+            var lvlNameArr = [];
+            for (var i = 0; i < sheet.length; i++) {
+                lvlNameArr.push(getLevelName(sheet[i]));
+            }
+            lvlText.textContent = lvlNameArr.join(", ");
+        }
         holder.appendChild(lvlText);
         var barcodeText = document.createElement("label");
-        barcodeText.textContent = sheet.Barcode;
+        if (!isCombo) {
+            barcodeText.textContent = sheet.Barcode;
+        } else {
+            var bCodeArr = [];
+            for (var i = 0; i < sheet.length; i++) {
+                bCodeArr.push(sheet[i].Barcode);
+            }
+            barcodeText.textContent = bCodeArr.join(", ");
+        }
         holder.appendChild(barcodeText);
         var studentText = document.createElement("label");
         studentText.className = "light";
-        studentText.textContent = sheet.Names.length + " Registered";
+        if (!isCombo) {
+            studentText.textContent = sheet.Names.length + " Registered";
+        } else {
+            var stuCountArr = [];
+            for (var i = 0; i < sheet.length; i++) {
+                stuCountArr.push(sheet[i].Names.length);
+            }
+            studentText.textContent = stuCountArr.join(", ") + " Registered";
+        }
         holder.appendChild(studentText);
         var timeText = document.createElement("label");
         timeText.className = "light";
-        if (Levels[sheet.Level]) {
-            timeText.textContent = convertTimeReadable(sheet.TimeStart) + " - " + convertTimeReadable(sheet.TimeStart + parseInt(Levels[sheet.Level].Settings.Duration));
-        } else {//TODO: Excel sheet code
-            timeText.textContent = convertTimeReadable(sheet.TimeStart) + " - " + convertTimeReadable(sheet.TimeStart + sheet.Duration);
-        }
+        timeText.textContent = convertTimeReadable(getClassProperty(sheet, "TimeStart")) + " - " + convertTimeReadable(getClassProperty(sheet, "TimeStart") + getClassDuration(sheet));
         holder.appendChild(timeText);
-        bindSheetClick(holder, i, s);
+        bindSheetClick(holder, inst, sheetI);
+    }
+
+    function getLevelName(sheet) {
+        return Levels[sheet.Level] ? Levels[sheet.Level].Name : sheet.Level;
     }
 
     function bindSheetClick(div, i, s) {
         div.onclick = function () {
+            clearChildren(sheetinfomenu);
             sheet = dummyData[i][s];
-            sheetinfo_level.textContent = Levels[sheet.Level]?Levels[sheet.Level].Name:sheet.Level;//TODO:Excel sheet code
-            sheetinfo_instructor.textContent = "";
-            sheetinfo_barcode.textContent = sheet.Barcode;
-            clearChildren(sheetinfo_studentlist);
-            sheet.Names.forEach((name) => {
-                var listItem = document.createElement("li");
-                listItem.textContent = name;
-                sheetinfo_studentlist.appendChild(listItem);
-            });
+            if (Array.isArray(sheet)) {
+                sheet.forEach((c) => {
+                    createSheetMenu(sheetinfomenu, c, i);
+                });
+            } else {
+                createSheetMenu(sheetinfomenu, sheet, i);
+            }
             resetloader(false, sheetinfomenu, "flex");
         };
+    }
+
+    function createSheetMenu(div, sheet, instructor) {
+        var title = document.createElement("h1");
+        title.textContent = getLevelName(sheet) + " - " + sheet.Barcode;
+        div.appendChild(title);
+        var time = document.createElement("label");
+        time.textContent = convertTimeReadable(sheet.TimeStart) + " - " + convertTimeReadable(sheet.TimeStart + getClassDuration(sheet));
+        div.appendChild(time);
+        var inst = document.createElement("label");
+        inst.textContent = People[instructor].Name;
+        div.appendChild(inst);
+        var nameList = document.createElement("ul");
+        div.appendChild(nameList);
+        sheet.Names.forEach((name) => {
+            var item = document.createElement("li");
+            item.textContent = name;
+            nameList.appendChild(item);
+        });
     }
 }
 
@@ -208,23 +246,40 @@ function calculateTimeSpacing(sheets) {
         sheets[uI].sort((a, b) => {//sort so we can pull prev sheet to calculate breaks
             return parseInt(a.TimeStart) - parseInt(b.TimeStart);
         });
-        for (var sI = 0; sI < sheets[uI].length; sI++) {
-//how long the class lasts
-            var dur = 0;//TODO: Code for handling Excel
-            if (!isNaN(parseInt(sheets[uI][sI].Level))) {
-                dur = parseInt(Levels[sheets[uI][sI].Level].Settings.Duration);
-            } else {
-                dur = sheets[uI][sI].Duration;
+        for (var s = 0; s < sheets[uI].length; s++) {
+            var sheet = sheets[uI][s];
+            var potentialHolder = [];
+            for (var i = s + 1; i < sheets[uI].length; i++) {
+                var nxt = sheets[uI][i];
+                if (nxt.TimeStart === sheet.TimeStart) {
+                    if (getClassDuration(nxt) === getClassDuration(sheet)) {
+                        potentialHolder.push(nxt);
+                        sheets[uI].splice(i, 1);
+                    } else {
+                        console.log("Sheet cannot be grouped, discarding");
+                        alert("Two sheets exist with the same instructor and starting time, but do not finish at the same time. Only one sheet will still display.");
+                        sheets[uI].splice(i, 1);
+                    }
+                }
             }
-            firstStart = Math.min(firstStart, sheets[uI][sI].TimeStart);
-            lastEnd = Math.max(lastEnd, parseInt(sheets[uI][sI].TimeStart) + dur);
+            if (potentialHolder.length > 0) {
+                potentialHolder.unshift(sheet);
+                sheets[uI].splice(s, 1);
+                sheets[uI].splice(s, 0, potentialHolder);
+            }
+        }
+        for (var sI = 0; sI < sheets[uI].length; sI++) {
+            //how long the class lasts
+            var dur = getClassDuration(sheets[uI][sI]);
+            firstStart = Math.min(firstStart, getClassProperty(sheets[uI][sI], "TimeStart"));
+            lastEnd = Math.max(lastEnd, getClassProperty(sheets[uI][sI], "TimeStart") + dur);
             if (spacingTimes.indexOf(dur) === -1) {
                 spacingTimes.push(dur); //add duration if it does not yet exist
             }
             if (sI > 0) {//if not the first class for the instructor, calculate break with previous class
                 var prevSheet = sheets[uI][sI - 1];
-                var prevEnd = prevSheet.TimeStart + parseInt(Levels[prevSheet.Level]?Levels[prevSheet.Level].Settings.Duration:prevSheet.Duration);//TODO: Excel sheet code
-                var spacingDur = sheets[uI][sI].TimeStart - prevEnd; //break duration
+                var prevEnd = getClassProperty(prevSheet, "TimeStart") + getClassDuration(prevSheet);
+                var spacingDur = getClassProperty(sheets[uI][sI], "TimeStart") - prevEnd; //break duration
                 if (spacingTimes.indexOf(spacingDur) === -1) {
                     spacingTimes.push(spacingDur); //add duration if it does not yet exist
                 }
@@ -232,6 +287,25 @@ function calculateTimeSpacing(sheets) {
         }
     }
     return {firstStart: firstStart, lastEnd: lastEnd, increment: multiGCD(spacingTimes)};
+}
+
+function getClassDuration(c) {
+    if (Array.isArray(c)) {
+        return getClassDuration(c[0]);
+    } else if (!isNaN(c.Level)) {
+        return parseInt(Levels[c.Level].Settings.Duration);
+    } else if (isNaN(c.Level)) {
+        return c.Duration;
+    }
+    return 0;
+}
+
+function getClassProperty(c, p) {
+    if (Array.isArray(c)) {
+        return c[0][p];
+    } else {
+        return c[p];
+    }
 }
 
 //Greatest common denominator for n values
@@ -343,7 +417,6 @@ window.onload = function () {
                 var barcodes = tmpPeopleBarcodes[p];
                 for (var c = 0; c < cData.length; c++) {
                     var Class = cData[c];
-                    console.log(Class);
                     if (barcodes.indexOf(Class.Barcode) !== -1) {
                         dataArray.push(Class);
                     }
