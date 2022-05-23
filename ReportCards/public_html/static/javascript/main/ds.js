@@ -35,6 +35,7 @@ const blocker_mark = document.getElementById("blocker_mark");
 const blocker_change = document.getElementById("change_marking_div");
 const blocker_mustsee = document.getElementById("blocker_mustsees");
 const blocker_lvl = document.getElementById("blocker_changelvl");
+const schedule_frame = document.getElementById("scheduleFrame");
 const printsheet = document.getElementById("print-sheet-btn");
 const printsheetdiv = document.getElementById("print-sheet-div");
 const printtime = document.getElementById("print-time-btn");
@@ -697,7 +698,9 @@ window.onload = function () {
         schedulebtn.className = "mainround";
         instlist.appendChild(schedulebtn);
         schedulebtn.onclick = function () {
-            resetloader(false,schedulemenu,"block");
+            schedule_frame.contentWindow.document.getElementById("uploadSection").style.display = "none";
+            schedule_frame.contentWindow.loadAndDisplaySchedule(currentTime);
+            resetloader(false, schedulemenu, "block");
         };
         let addbtn = document.createElement("button");
         addbtn.textContent = "Add Instructor";

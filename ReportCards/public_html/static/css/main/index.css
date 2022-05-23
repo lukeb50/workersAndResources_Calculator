@@ -881,20 +881,21 @@ select{
     overflow-y: auto;
 }
 
-#blocker_mustsees::-webkit-scrollbar {
+.scrollbar::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
     border-radius: 5px;
 }
 
-#blocker_mustsees::-webkit-scrollbar-track {
+.scrollbar::-webkit-scrollbar-track {
     background: #f1f1f1; 
 }
 
-#blocker_mustsees::-webkit-scrollbar-thumb {
+.scrollbar::-webkit-scrollbar-thumb {
     background: #888; 
 }
 
-#blocker_mustsees::-webkit-scrollbar-thumb:hover {
+.scrollbar::-webkit-scrollbar-thumb:hover {
     background: #555; 
 }
 

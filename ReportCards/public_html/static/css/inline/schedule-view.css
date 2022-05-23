@@ -4,7 +4,7 @@
     display: table!important;
     table-layout: fixed;
     width:fit-content;
-    border-top: 1px solid black;
+    border-bottom: 1px solid black;
 }
 
 #main-schedule-holder{
@@ -13,8 +13,9 @@
     overflow: auto;
 }
 
-#scheduleTable th, #scheduleTable td{
-    border: 1px solid black;
+#scheduleTable th:not(:nth-child(1)), #scheduleTable td:not(:nth-child(1)){
+    border-left: 1px solid black;
+    width: 10em;
 }
 
 #scheduleTable th{
@@ -26,12 +27,12 @@
     text-align: center;
 }
 
-#scheduleTable tr td:not(:nth-child(1)),#scheduleTable tr th:not(:nth-child(1)){
-    width: 10em;
-}
-
 #scheduleTable tr:nth-child(1){
     background:var(--color-primary-mostly-transparent);
+}
+
+#scheduleTable tr:not(:nth-child(1)) td{
+    border-top: 1px solid black;
 }
 
 #scheduleTable td div{
@@ -75,6 +76,35 @@
     padding-left: 20px;
 }
 
+#sheetinfo-menu span.edit_title{
+    text-align: center;
+}
+
+#sheetinfo-menu span.edit_title button{
+    border:2px solid var(--color-primary);
+    border-radius: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
+    font-size: 0.75em;
+    background: white;
+}
+
+#sheetinfo-menu ul li button{
+    background:white;
+    border:2px solid var(--color-primary);
+    margin-left: 5px;
+    border-radius: 7px;
+    margin-top: 2px;
+}
+
+#sheetinfo-menu button.addstudent{
+    width:fit-content;
+    background: white;
+    border:2px solid var(--color-primary);
+    margin-left: 5px;
+    border-radius: 5px;
+}
+
 #config-menu{
     flex-direction: column;
     width:100%;
@@ -89,7 +119,7 @@
 
 #timeLine{
     position: absolute;
-    width:calc(100% - 8ch);
+    width:calc(100% - 10ch);
     height: 0px;
     border-bottom: 1px solid rgba(198, 77, 77,0.3);
 }
