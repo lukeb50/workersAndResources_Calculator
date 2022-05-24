@@ -32,7 +32,7 @@ function displaySchedule(Time) {
     for (var p = 0; p < People.length; p++) {
         var instHeader = document.createElement("th");
         instHeader.textContent = People[p].Name;
-        if (editMode) {
+        if (editMode === true) {
             bindAddClassClick(instHeader, p);
         }
         headerRow.appendChild(instHeader);
@@ -185,7 +185,7 @@ function displaySchedule(Time) {
         var title = document.createElement("h1");
         title.textContent = getLevelName(sheet) + " - " + sheet.Barcode;
         div.appendChild(title);
-        if (editMode) {
+        if (editMode === true) {
             var titleEdits = document.createElement("span");
             var nameEdit = document.createElement("button");
             nameEdit.textContent = "Edit Level";
@@ -256,7 +256,7 @@ function displaySchedule(Time) {
                     if (Array.isArray(scheduleData[instructor][sheeti])) {
                         console.log(sheeti);
                         scheduleData[instructor][sheeti].splice(scheduleData[instructor][sheeti].indexOf(sheet), 1);
-                        if(scheduleData[instructor][sheeti].length === 1){
+                        if (scheduleData[instructor][sheeti].length === 1) {
                             scheduleData[instructor][sheeti] = scheduleData[instructor][sheeti][0];
                         }
                     } else {
@@ -267,8 +267,8 @@ function displaySchedule(Time) {
                 }
             };
             titleEdits.appendChild(deleteEdits);
+            div.appendChild(titleEdits);
         }
-        div.appendChild(titleEdits);
         var time = document.createElement("label");
         time.textContent = convertTimeReadable(sheet.TimeStart) + " - " + convertTimeReadable(sheet.TimeStart + getClassDuration(sheet));
         div.appendChild(time);
@@ -281,27 +281,31 @@ function displaySchedule(Time) {
             var item = document.createElement("li");
             item.textContent = name;
             nameList.appendChild(item);
-            var editbtn = document.createElement("button");
-            editbtn.textContent = "Change";
-            bindStudentNameChange(editbtn, sheet, sheeti, instructor, i);
-            item.appendChild(editbtn);
-            var delbtn = document.createElement("button");
-            delbtn.textContent = "-";
-            bindStudentDelete(delbtn, sheet, sheeti, instructor, i);
-            item.appendChild(delbtn);
-        });
-        var addbtn = document.createElement("button");
-        addbtn.textContent = "Add Student";
-        addbtn.className = "addstudent";
-        addbtn.onclick = function () {
-            var newName = prompt("Enter new student name");
-            if (newName) {
-                sheet.Names.push(newName);
-                displaySheetMenu(instructor, sheeti);
-                displaySchedule(true);
+            if (editMode === true) {
+                var editbtn = document.createElement("button");
+                editbtn.textContent = "Change";
+                bindStudentNameChange(editbtn, sheet, sheeti, instructor, i);
+                item.appendChild(editbtn);
+                var delbtn = document.createElement("button");
+                delbtn.textContent = "-";
+                bindStudentDelete(delbtn, sheet, sheeti, instructor, i);
+                item.appendChild(delbtn);
             }
-        };
-        div.appendChild(addbtn);
+        });
+        if (editMode === true) {
+            var addbtn = document.createElement("button");
+            addbtn.textContent = "Add Student";
+            addbtn.className = "addstudent";
+            addbtn.onclick = function () {
+                var newName = prompt("Enter new student name");
+                if (newName) {
+                    sheet.Names.push(newName);
+                    displaySheetMenu(instructor, sheeti);
+                    displaySchedule(true);
+                }
+            };
+            div.appendChild(addbtn);
+        }
     }
 
     function bindStudentNameChange(btn, sheet, sheeti, instructor, studentI) {

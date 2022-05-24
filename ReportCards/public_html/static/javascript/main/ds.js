@@ -699,6 +699,7 @@ window.onload = function () {
         instlist.appendChild(schedulebtn);
         schedulebtn.onclick = function () {
             schedule_frame.contentWindow.document.getElementById("uploadSection").style.display = "none";
+            schedule_frame.contentWindow.setEditMode(false);
             schedule_frame.contentWindow.loadAndDisplaySchedule(currentTime);
             resetloader(false, schedulemenu, "block");
         };
