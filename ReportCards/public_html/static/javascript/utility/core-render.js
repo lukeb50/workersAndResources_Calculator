@@ -78,10 +78,9 @@ function addRow() {
         for (var i = 0; i < documents[dsMode === false ? currentTime : currentPerson][id].Marks[documents[dsMode === false ? currentTime : currentPerson][id].Marks.length - 1].length; i++) {
             documents[dsMode === false ? currentTime : currentPerson][id].Marks[documents[dsMode === false ? currentTime : currentPerson][id].Marks.length - 1][i] = true;
         }
-        documents[dsMode === false ? currentTime : currentPerson][id].MustSees.push(new Array(Levels[documents[dsMode === false ? currentTime : currentPerson][id].Level].MustSees.length));
-        for (var i = 0; i < documents[dsMode === false ? currentTime : currentPerson][id].MustSees[documents[dsMode === false ? currentTime : currentPerson][id].MustSees.length - 1].length; i++) {
-            documents[dsMode === false ? currentTime : currentPerson][id].MustSees[documents[dsMode === false ? currentTime : currentPerson][id].MustSees.length - 1][i] = [];
-        }
+        var skillArray = Levels[documents[dsMode === false ? currentTime : currentPerson][id].Level].Skills;
+        var skillCount = skillArray ? skillArray.length : 0;
+        documents[dsMode === false ? currentTime : currentPerson][id].MustSees.push(Array.from(Array(skillCount), () => new Array(0)));
         changeEditPending(true);
         renderTable(id);
     }
@@ -496,16 +495,20 @@ function AttachCommentClick(commbtn, id, i) {
         comment_box.value = documents[dsMode === false ? currentTime : currentPerson][id].Comments[i];
         comment_student.textContent = documents[dsMode === false ? currentTime : currentPerson][id].Names[i];
         comment_state.textContent = "Edit Comment";
+        //Delete & replace save button so that events for many clicks do not all fire on a single save
+        var newSave = comment_save_btn.cloneNode(true);
+        commentmenu.replaceChild(newSave, comment_save_btn);
+        comment_save_btn = newSave;
         comment_save_btn.addEventListener("click", onSaveBtn);
     };
     function onSaveBtn() {
         resetloader(false, null, null);
+        console.log(i, id);
         if (documents[dsMode === false ? currentTime : currentPerson][id].Comments[i] !== comment_box.value) {
             changeEditPending(true);
             renderTable(id);
         }
         documents[dsMode === false ? currentTime : currentPerson][id].Comments[i] = comment_box.value.escapeJSON();
-        comment_save_btn.removeEventListener('click', onSaveBtn);
     }
 }
 
@@ -905,7 +908,7 @@ async function getLvlInfo(Level) {
 document.getElementById("manual_create_btn").onclick = function () {
     var lvl = manual_sel.value;
     if (lvl !== "") {
-        var toAdd = {"Names": [], "Barcode": "0", "Level": parseInt(lvl), "Marks": [], "MustSees": [], "VerifiedBy": "", "UniqueID": "", "NextLevel": [], "Attendance": [], "Timeblock": programmerMode.split("---")[1],"Facility": programmerMode.split("---")[0],"TimeStart":0};
+        var toAdd = {"Names": [], "Barcode": "0", "Level": parseInt(lvl), "Marks": [], "MustSees": [], "VerifiedBy": "", "UniqueID": "", "NextLevel": [], "Attendance": [], "Timeblock": programmerMode.split("---")[1], "Facility": programmerMode.split("---")[0], "TimeStart": 0};
         getLvlInfo(lvl).then(function () {
             if (Levels[lvl].Settings.CommentEnabled) {
                 toAdd["Comments"] = [];

@@ -526,38 +526,100 @@ window.onload = function () {
         var config = JSON.parse(prompt("Enter config"));
         People = config.People;
         scheduleData = config.Data;
+        resetloader(false, null, null);
         displaySchedule(true);
     };
+    
     var tmpPeople = [];
     var tmpPeopleBarcodes = [];
     document.getElementById("createConfig").onclick = function () {
         resetloader(false, configmenu, "flex");
-        tmpPeople = [];
-        tmpPeopleBarcodes = [];
+        tmpPeople = JSON.parse(JSON.stringify(People));
+        tmpPeopleBarcodes = getTmpBarcodes();
         renderTmpPeopleList();
+        document.getElementById("excelUpload").value = null;
     };
+
+    function getTmpBarcodes() {
+        var res = [];
+        for (var i = 0; i < scheduleData.length; i++) {
+            res.push([]);
+            for (var s = 0; s < scheduleData[i].length; s++) {
+                if (Array.isArray(scheduleData[i][s])) {
+                    for (var x = 0; x < scheduleData[i][s].length; x++) {
+                        res[i].push(scheduleData[i][s][x].Barcode);
+                    }
+                } else {
+                    res[i].push(scheduleData[i][s].Barcode);
+                }
+            }
+        }
+        return res;
+    }
     document.getElementById("config-add-instructor").onclick = function () {
         var name = prompt("Enter instructor name:");
         if (name) {
-            var codes = prompt("Enter instructor barcodes, seperated by commas (,)");
             tmpPeople.push({Name: name});
-            var codeArray = codes.split(",");
-            var codeIntArray = [];
-            codeArray.forEach((code) => {
-                codeIntArray.push(parseInt(code));
-            });
-            tmpPeopleBarcodes.push(codeIntArray);
+            tmpPeopleBarcodes.push([]);
             renderTmpPeopleList();
         }
     };
     var tmpPeopleDiv = document.getElementById("person-config-div");
     function renderTmpPeopleList() {
         clearChildren(tmpPeopleDiv);
+        var plist = document.createElement("ul");
+        tmpPeopleDiv.appendChild(plist);
         for (var p = 0; p < tmpPeople.length; p++) {
-            var lbl = document.createElement("p");
-            lbl.textContent = tmpPeople[p].Name + ": " + tmpPeopleBarcodes.toString();
-            tmpPeopleDiv.appendChild(lbl);
+            var lbl = document.createElement("li");
+            lbl.textContent = tmpPeople[p].Name;
+            plist.appendChild(lbl);
+            var delbtn = document.createElement("button");
+            delbtn.textContent = "Delete";
+            bindDeleteTmpInstructor(delbtn,p);
+            lbl.appendChild(delbtn);
+            var codes = tmpPeopleBarcodes[p];
+            var codelist = document.createElement("ul");
+            plist.appendChild(codelist);
+            for (var c = 0; c < codes.length; c++) {
+                var codeli = document.createElement("li");
+                codeli.textContent = codes[c];
+                codelist.appendChild(codeli);
+                var delbtn = document.createElement("button");
+                delbtn.textContent = "Delete";
+                bindDeleteTmpBarcode(delbtn,p,c);
+                codeli.appendChild(delbtn);
+            }
+            var addcodebtn = document.createElement("button");
+            addcodebtn.textContent = "Add barcode";
+            bindAddTmpBarcode(addcodebtn,p);
+            plist.appendChild(addcodebtn);
         }
+    }
+    
+    function bindDeleteTmpInstructor(btn,instI){
+        btn.onclick = function(){
+            tmpPeople.splice(instI,1);
+            tmpPeopleBarcodes.splice(instI,1);
+            renderTmpPeopleList();
+        };
+    }
+    
+    function bindAddTmpBarcode(btn,instI){
+        btn.onclick = function(){
+            var code = prompt("Enter barcode");
+            if(code && !isNaN(parseInt(code))){
+                tmpPeopleBarcodes[instI].push(parseInt(code));
+                renderTmpPeopleList();
+                document.getElementById("configCreateBtn").disabled = document.getElementById("excelUpload").value?false:true;
+            }
+        };
+    }
+    
+    function bindDeleteTmpBarcode(btn,instI,barcodeI){
+        btn.onclick = function(){
+            tmpPeopleBarcodes[instI].splice(barcodeI,1);
+             renderTmpPeopleList();
+        };
     }
 
     document.getElementById("configCreateBtn").onclick = async function () {
@@ -585,8 +647,12 @@ window.onload = function () {
                     var Class = cData[c];
                     if (barcodes.indexOf(Class.Barcode) !== -1) {
                         dataArray.push(Class);
+                        barcodes.splice(barcodes.indexOf(Class.Barcode),1);
                     }
                 }
+                barcodes.forEach((code)=>{//any custom entries
+                    //TODO: Transfer any custom entries to the new data
+                });
                 scheduleData.push(dataArray);
             }
             displaySchedule(true);
