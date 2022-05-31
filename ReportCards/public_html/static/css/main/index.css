@@ -88,7 +88,8 @@ button.roundaction{
     width:90%;
     display:block;
     margin:0 auto;
-    border-radius: 15px;
+    border-radius: 10px;
+    border:2px solid var(--color-primary-dark);
 }
 
 #uploadsection{

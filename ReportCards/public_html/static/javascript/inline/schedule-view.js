@@ -6,15 +6,11 @@ const configmenu = document.getElementById("config-menu");
 const mainmenu = document.getElementById("main-menu");
 const close_mainmenu = document.getElementById("main-menu-close-btn");
 const loaditms = [loadspinner, sheetinfomenu, configmenu];
-
 var scheduleData = [];
 var People = [];
-
 var Levels = {};
 var GroupingData = [];
-
 var editMode = true;
-
 const scheduleTable = document.getElementById("scheduleTable");
 var timeIntervalId = -1;
 function displaySchedule(Time) {
@@ -330,9 +326,9 @@ function displaySchedule(Time) {
 
     function bindAddClassClick(instHeader, p) {
         instHeader.onclick = function () {
-            var lvl = prompt("Enter level");//null
-            var code = parseInt(prompt("Enter barcode"));//NaN
-            var start = convertToTimeStartTwelveHour(prompt("Enter start time HH:MM PM"));//null
+            var lvl = prompt("Enter level"); //null
+            var code = parseInt(prompt("Enter barcode")); //NaN
+            var start = convertToTimeStartTwelveHour(prompt("Enter start time HH:MM PM")); //null
             //determineLevelId
             if (lvl && !isNaN(code) && start !== null) {
                 if (determineLevelId(lvl) !== null) {
@@ -408,7 +404,7 @@ function calculateTimeSpacing(sheets) {
             }
         }
         for (var sI = 0; sI < sheets[uI].length; sI++) {
-            //how long the class lasts
+//how long the class lasts
             var dur = getClassDuration(sheets[uI][sI]);
             firstStart = Math.min(firstStart, getClassProperty(sheets[uI][sI], "TimeStart"));
             lastEnd = Math.max(lastEnd, getClassProperty(sheets[uI][sI], "TimeStart") + dur);
@@ -478,7 +474,7 @@ async function getGroupingData() {
 }
 
 async function loadAndDisplaySchedule(timeblock) {
-    displaySchedule();//clear
+    displaySchedule(); //clear
     if (timeblock === null || !timeblock) {
         return;
     }
@@ -529,7 +525,6 @@ window.onload = function () {
         resetloader(false, null, null);
         displaySchedule(true);
     };
-    
     var tmpPeople = [];
     var tmpPeopleBarcodes = [];
     document.getElementById("createConfig").onclick = function () {
@@ -539,7 +534,6 @@ window.onload = function () {
         renderTmpPeopleList();
         document.getElementById("excelUpload").value = null;
     };
-
     function getTmpBarcodes() {
         var res = [];
         for (var i = 0; i < scheduleData.length; i++) {
@@ -559,11 +553,19 @@ window.onload = function () {
     document.getElementById("config-add-instructor").onclick = function () {
         var name = prompt("Enter instructor name:");
         if (name) {
-            tmpPeople.push({Name: name});
+            tmpPeople.push({Name: name, Uid: genUid()});
             tmpPeopleBarcodes.push([]);
             renderTmpPeopleList();
         }
     };
+    function genUid() {
+        try {
+            return Math.random().toString(36).slice(2, 7);
+        } catch (err) {
+            return genUid();
+        }
+    }
+
     var tmpPeopleDiv = document.getElementById("person-config-div");
     function renderTmpPeopleList() {
         clearChildren(tmpPeopleDiv);
@@ -575,7 +577,7 @@ window.onload = function () {
             plist.appendChild(lbl);
             var delbtn = document.createElement("button");
             delbtn.textContent = "Delete";
-            bindDeleteTmpInstructor(delbtn,p);
+            bindDeleteTmpInstructor(delbtn, p);
             lbl.appendChild(delbtn);
             var codes = tmpPeopleBarcodes[p];
             var codelist = document.createElement("ul");
@@ -586,51 +588,52 @@ window.onload = function () {
                 codelist.appendChild(codeli);
                 var delbtn = document.createElement("button");
                 delbtn.textContent = "Delete";
-                bindDeleteTmpBarcode(delbtn,p,c);
+                bindDeleteTmpBarcode(delbtn, p, c);
                 codeli.appendChild(delbtn);
             }
             var addcodebtn = document.createElement("button");
             addcodebtn.textContent = "Add barcode";
-            bindAddTmpBarcode(addcodebtn,p);
+            bindAddTmpBarcode(addcodebtn, p);
             plist.appendChild(addcodebtn);
         }
     }
-    
-    function bindDeleteTmpInstructor(btn,instI){
-        btn.onclick = function(){
-            tmpPeople.splice(instI,1);
-            tmpPeopleBarcodes.splice(instI,1);
+
+    function bindDeleteTmpInstructor(btn, instI) {
+        btn.onclick = function () {
+            tmpPeople.splice(instI, 1);
+            tmpPeopleBarcodes.splice(instI, 1);
             renderTmpPeopleList();
         };
     }
-    
-    function bindAddTmpBarcode(btn,instI){
-        btn.onclick = function(){
+
+    function bindAddTmpBarcode(btn, instI) {
+        btn.onclick = function () {
             var code = prompt("Enter barcode");
-            if(code && !isNaN(parseInt(code))){
+            if (code && !isNaN(parseInt(code))) {
                 tmpPeopleBarcodes[instI].push(parseInt(code));
                 renderTmpPeopleList();
-                document.getElementById("configCreateBtn").disabled = document.getElementById("excelUpload").value?false:true;
+                document.getElementById("configCreateBtn").disabled = document.getElementById("excelUpload").value ? false : true;
             }
         };
     }
-    
-    function bindDeleteTmpBarcode(btn,instI,barcodeI){
-        btn.onclick = function(){
-            tmpPeopleBarcodes[instI].splice(barcodeI,1);
-             renderTmpPeopleList();
+
+    function bindDeleteTmpBarcode(btn, instI, barcodeI) {
+        btn.onclick = function () {
+            tmpPeopleBarcodes[instI].splice(barcodeI, 1);
+            renderTmpPeopleList();
         };
     }
 
     document.getElementById("configCreateBtn").onclick = async function () {
         resetloader(true, null, null);
         HandleSpeadsheetUpload().then((cData) => {
+            var oldScheduleData = scheduleData;
             scheduleData = [];
             if (tmpPeople.length > 0) {
-                People = tmpPeople;
+                //Nothing, but don't alert error
             } else if (document.getElementById("paste-person-config").value !== "") {
                 var t = JSON.parse(document.getElementById("paste-person-config").value);
-                People = t.People;
+                tmpPeople = t.People;
                 for (var p = 0; p < People.length; p++) {
                     tmpPeopleBarcodes[p] = [];
                     for (var c = 0; c < t.Data[p].length; c++) {
@@ -640,21 +643,47 @@ window.onload = function () {
             } else {
                 alert("No instructor data provided");
             }
-            for (var p = 0; p < People.length; p++) {
-                var dataArray = [];
-                var barcodes = tmpPeopleBarcodes[p];
-                for (var c = 0; c < cData.length; c++) {
-                    var Class = cData[c];
-                    if (barcodes.indexOf(Class.Barcode) !== -1) {
-                        dataArray.push(Class);
-                        barcodes.splice(barcodes.indexOf(Class.Barcode),1);
+            //remove any groupings to simplify indexing, groupings will be re-calculated on table display
+            for (var p = 0; p < oldScheduleData.length; p++) {
+                var allMerged = [];
+                for (var c = oldScheduleData[p].length; c >= 0; c--) {
+                    if (Array.isArray(oldScheduleData[p][c])) {
+                        for (var x = 0; x < oldScheduleData[p][c].length; x++) {
+                            allMerged.push(oldScheduleData[p][c][x]);
+                        }
+                        oldScheduleData[p].splice(c, 1);
                     }
                 }
-                barcodes.forEach((code)=>{//any custom entries
-                    //TODO: Transfer any custom entries to the new data
-                });
-                scheduleData.push(dataArray);
+                oldScheduleData[p] = oldScheduleData[p].concat(allMerged);
             }
+            for (var p = 0; p < tmpPeople.length; p++) {
+                var uPos = People.findIndex(inst => inst.Uid === tmpPeople[p].Uid);
+                console.log(uPos);
+                if (uPos !== -1) {
+                    //uPos is the position of the temp person in the old person list. If it exists, this user is being carried over
+                    var dataArray = [];
+                    var barcodes = tmpPeopleBarcodes[p];
+                    for (var c = 0; c < cData.length; c++) {
+                        var Class = cData[c];
+                        if (barcodes.indexOf(Class.Barcode) !== -1) {
+                            dataArray.push(Class);
+                            barcodes.splice(barcodes.indexOf(Class.Barcode), 1);
+                        }
+                    }
+                    //Transfer any custom entries to the new data
+                    console.log("Transfer:"+uPos);
+                    barcodes.forEach((code) => {//any custom entries
+                        console.log(uPos, oldScheduleData[uPos]);
+                        let index = oldScheduleData[uPos].findIndex(sheet => sheet.Barcode === code);
+                        dataArray.push(JSON.parse(JSON.stringify(oldScheduleData[uPos][index])));
+                        oldScheduleData[uPos].splice(index, 1);
+                    });
+                    scheduleData.push(dataArray);
+                } else {
+                    scheduleData.push([]);
+                }
+            }
+            People = tmpPeople;
             displaySchedule(true);
             resetloader(false, null, null);
         }).catch((e) => {
@@ -663,8 +692,6 @@ window.onload = function () {
         });
     };
 };
-
-
 function HandleSpeadsheetUpload() {
     return new Promise((resolve, reject) => {
         var fileUpload = document.getElementById("excelUpload");
