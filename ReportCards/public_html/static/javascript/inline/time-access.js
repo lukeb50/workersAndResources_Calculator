@@ -9,11 +9,7 @@ var Timeblocks = {};
 
 const storage = firebase.app().storage("gs://report-cards-6290-uploads");
 const barlist = document.getElementById("barlist");
-const btnnext = document.getElementById("lowbar_next");//not inverted to allow click in same dir
-const btnback = document.getElementById("lowbar_back");//as scrolling
 const new_sheet_manual = document.getElementById("new_sheet_manual");
-const manual_div = document.getElementById("manual_lvl_div");
-
 const loadblocker = document.getElementById("loadblocker");
 const blocker = document.getElementById("blocker");
 const blocker_mark = document.getElementById("blocker_mark");
@@ -24,7 +20,6 @@ const blocker_lvl = document.getElementById("blocker_changelvl");
 const mainmenu = document.getElementById("main-menu");
 const close_mainmenu = document.getElementById("main-menu-close-btn");
 
-const manual_sel = document.getElementById("manual_selector");
 const upload_button_div = document.getElementById("uploaderdiv");
 const sheetinfo = document.getElementById("sheetinfo");
 
@@ -97,24 +92,6 @@ function SaveSheets() {//Should be set to save all timeblocks
 
 savebtn.onclick = function () {
     SaveSheets();
-};
-
-new_sheet_manual.onclick = function () {
-    upload_button_div.style.display = "none";
-    manual_div.style.display = "block";
-};
-
-document.getElementById("manual_back_btn").onclick = function () {
-    upload_button_div.style.display = "flex";
-    manual_div.style.display = "none";
-};
-
-btnnext.onclick = function () {
-    populatebar(-1);
-};
-
-btnback.onclick = function () {
-    populatebar(1);
 };
 
 printbtn.onclick = function () {

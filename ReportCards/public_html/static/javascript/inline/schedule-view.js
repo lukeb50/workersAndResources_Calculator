@@ -347,16 +347,6 @@ function displaySchedule(Time) {
     }
 }
 
-function convertTimeReadable(t, useTwelveHour) {
-    useTwelveHour = true;
-    if (useTwelveHour === false) {//24 hour clock
-        return Math.floor(t / 60) + ":" + (t % 60 <= 9 ? "0" + (t % 60) : t % 60);
-    } else {// 12 hour clock (am pm)
-        var hour = Math.floor(t / 60);
-        return (hour <= 12 ? hour : hour - 12) + ":" + (t % 60 <= 9 ? "0" + (t % 60) : t % 60) + " " + (hour < 12 ? "am" : "pm");
-    }
-}
-
 function getLevelColor(LevelId) {
     if (!Levels[LevelId]) {//TODO:Excel sheet code
         return "#ffffff";

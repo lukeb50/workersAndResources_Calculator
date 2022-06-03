@@ -181,6 +181,23 @@ function resetloader(isLoad, itemToShow, displayType) {
     }
 }
 
+const isOverflown = ({clientHeight, scrollHeight}) => scrollHeight > clientHeight;
+
+function sizeTextToContainer( {element, minSize = 1, maxSize = 1000, step = 1}){
+    let s = minSize;
+    let overflow = false;
+    let parentNode = element.parentNode;
+    console.log(parentNode.clientHeight, parentNode.scrollHeight);
+    while (!overflow && s < maxSize) {
+        element.style.fontSize = s + "px";
+        overflow = isOverflown(element);
+        if (!overflow) {
+            s += step;
+        }
+    }
+    element.style.fontSize = (s - step) + "px";
+}
+
 function HexToDecimal(HexString, Position) {
     HexString = HexString.substring(1);
     Position--;
@@ -305,14 +322,38 @@ var Months = ["January", "Febuary", "March", "April", "May", "June", "July", "Au
 function timestampToText(time) {
     var date = new Date(time * 1000);
     return Days[date.getDay()] + ", " + Months[date.getMonth()] + " " + date.getDate() + " " + date.getFullYear() + " at " + (date.getHours() > 12 ? getZeroString(date.getHours() - 12) : getZeroString(date.getHours())) + ":" + getZeroString(date.getMinutes()) + (date.getHours() > 12 ? "pm" : "am");
-    function getZeroString(time) {//prefixes single digit numbers with a 0
-        //5 -> "05", 15 -> "15", 0-> "00"
-        if (time < 10) {
-            return "0" + time;
-        } else {
-            return time.toString();
+}
+
+function getZeroString(time) {//prefixes single digit numbers with a 0
+    //5 -> "05", 15 -> "15", 0-> "00"
+    if (time < 10) {
+        return "0" + time;
+    } else {
+        return time.toString();
+    }
+}
+
+//Converts a minutes-since-midnight value to human readable time (12:44am)
+function convertTimeReadable(t, useTwelveHour) {
+    if (useTwelveHour === false) {//24 hour clock
+        return getZeroString(Math.floor(t / 60)) + ":" + getZeroString(t % 60);
+    } else {// 12 hour clock (am pm)
+        var hour = Math.floor(t / 60);
+        return (hour <= 12 ? hour : hour - 12) + ":" + getZeroString(t % 60) + " " + (hour < 12 ? "am" : "pm");
+    }
+}
+
+function getTimeFromInput(input) {
+    var inputVal = input.value;
+    if (inputVal && inputVal !== "") {//value exists, check if valid
+        var split = inputVal.split(":");
+        var hours = parseInt(split[0]);
+        var minutes = parseInt(split[1]);
+        if (hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60) {
+            return startMark = hours * 60 + minutes;
         }
     }
+    return null;
 }
 
 const General_Settings = [{Element: document.getElementById("general-session-input"), Name: "Session", Type: "text"},

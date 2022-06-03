@@ -11,15 +11,11 @@ const timeselect = document.getElementById("timeselector");
 
 const storage = firebase.app().storage("gs://report-cards-6290-uploads");
 const barlist = document.getElementById("barlist");
-const btnnext = document.getElementById("lowbar_next");//not inverted to allow click in same dir
-const btnback = document.getElementById("lowbar_back");//as scrolling
 const upload_button_div = document.getElementById("uploaderdiv");
 const maintable = document.getElementById("maintable");
 const sheetinfo = document.getElementById("sheetinfo");
 const add_row_btn = document.getElementById("add_row_btn");
 const new_sheet_manual = document.getElementById("new_sheet_manual");
-const manual_div = document.getElementById("manual_lvl_div");
-const manual_sel = document.getElementById("manual_selector");
 const topbar_controls = document.getElementById("topbar-controls");
 const overflowbtn = document.getElementById("overflowbtn");
 
@@ -583,24 +579,6 @@ window.onload = function () {
         } else {//no data, load
             HandleLoad();
         }
-    };
-
-    new_sheet_manual.onclick = function () {
-        upload_button_div.style.display = "none";
-        manual_div.style.display = "block";
-    };
-
-    document.getElementById("manual_back_btn").onclick = function () {
-        upload_button_div.style.display = "flex";
-        manual_div.style.display = "none";
-    };
-
-    btnnext.onclick = function () {
-        populatebar(-1);
-    };
-
-    btnback.onclick = function () {
-        populatebar(1);
     };
 
     printbtn.onclick = function () {

@@ -1,4 +1,4 @@
-/* global firebase, add_row_btn, documents, currentTime, printbtn, maintable, blocker, blocker_change, blocker_lvl, blocker_mark, blocker_mustsee, screenquery, sheetinfo, overflowbtn, topbar_controls, overflowmenu, barlist, loadblocker, btnback, btnnext, savebtn, currentPerson, People, UserData, commentmenu, manual_sel, manual_div, metadatamenu, getMetadataFromID, clientDb, upload_button_div */
+/* global firebase, add_row_btn, documents, currentTime, printbtn, maintable, blocker, blocker_change, blocker_lvl, blocker_mark, blocker_mustsee, screenquery, sheetinfo, overflowbtn, topbar_controls, overflowmenu, barlist, loadblocker, btnback, btnnext, savebtn, currentPerson, People, UserData, commentmenu, manual_sel, manual_div, metadatamenu, getMetadataFromID, clientDb, upload_button_div, new_sheet_manual */
 var staticPath = "../../static";
 const marking_change_btns = [document.getElementById("blocker_btn1"), document.getElementById("blocker_btn2")];
 var markingOptions = new Map();
@@ -655,52 +655,79 @@ async function populatebar(reset) {
     clearInterval(moveid);
     let divs = [];
     for (var i = 0; i < documents[dsMode === false ? currentTime : currentPerson].length; i++) {
-        var barLvlInfo = await getLvlInfo(documents[dsMode === false ? currentTime : currentPerson][i].Level);
+        var sheet = documents[dsMode === false ? currentTime : currentPerson][i];
+        var barLvlInfo = await getLvlInfo(sheet.Level);
         if (xpos + lowdivlength + (reset * lowdivlength) >= barlist.offsetWidth) {//TODO:stop rendering (not working)
             btnnext.disabled = false;
         }
         var newdiv = document.createElement("div");
         var bcodetxt = document.createElement("input");
-        bcodetxt.disabled = (dsMode === false && Settings.approveLockout === true && documents[dsMode === false ? currentTime : currentPerson][i].VerifiedBy !== "") ? true : false;
+        bcodetxt.className = "barcodeinput";
+        bcodetxt.disabled = (dsMode === false && Settings.approveLockout === true && sheet.VerifiedBy !== "") ? true : false;
         bcodetxt.setAttribute("type", "number");
-        if (documents[dsMode === false ? currentTime : currentPerson][i].Barcode !== null) {
-            bcodetxt.value = documents[dsMode === false ? currentTime : currentPerson][i].Barcode;
+        bcodetxt.placeholder = "Barcode";
+        if (sheet.Barcode !== null) {
+            bcodetxt.value = sheet.Barcode;
         } else {
             bcodetxt.value = "0";
         }
         attachUpdate(bcodetxt, i);
-        var lvltxt = document.createElement("label"); //next lines adds # of people beside lvl on bar
+        //start time indicator
+        var timeinput = document.createElement("input");
+        timeinput.type = "time";
+        timeinput.title = "Start Time";
+        timeinput.value = convertTimeReadable(sheet.TimeStart, false);
+        timeinput.className = "sheetstarttime";
+        bindTimeInputChange(timeinput, i);
+        //Level text
+        var lvltxt = document.createElement("label");
         var lvlt = barLvlInfo.Name;
         lvltxt.textContent = lvlt;
-        var delbtn;
-        if (isAccess === false || !documents[dsMode === false ? currentTime : currentPerson][i].UniqueID) {
-            delbtn = document.createElement("button");
-            delbtn.textContent = "Delete Sheet";
-            delbtn.setAttribute("data-sheet", i);
-            delbtn.className = "red bardeletebtn";
-            bindDelSheetbtn(delbtn);
-        }
-        var metabtn;
-        if (Metadata.length > 0) {
-            metabtn = document.createElement("button");
-            metabtn.textContent = "Edit Data";
-            metabtn.setAttribute("data-sheet", i);
-            bindMetadataBtn(metabtn, i);
-        }
-        var apptext = document.createElement(dsMode && documents[dsMode === false ? currentTime : currentPerson][i].VerifiedBy === "" ? "button" : "p");
-        apptext.className = "approvebtn";
-        if (dsMode) {
-            bindApproveBtn(apptext, i);
-        }
-        apptext.textContent = documents[dsMode === false ? currentTime : currentPerson][i].VerifiedBy !== "" ? "Approved" : "Not Approved";
+        //append info
         newdiv.appendChild(lvltxt);
         newdiv.appendChild(bcodetxt);
-        if (delbtn)
-            newdiv.appendChild(delbtn);
-        if (metabtn) {
-            newdiv.appendChild(metabtn);
-        }
+        newdiv.appendChild(timeinput);
+        //Buttons to edit/delete sheet
+        //approval button/indicator
+        var apptext = document.createElement(sheet.VerifiedBy === "" ? "button" : "p");
+        apptext.className = "approvebtn";
+        apptext.textContent = sheet.VerifiedBy !== "" ? "Approved" : "Not Approved";
         newdiv.appendChild(apptext);
+        //create holder for buttons
+        var controlBar = document.createElement("div");
+        controlBar.className = "bar-controlbar";
+        //metadata/notes
+        if (Metadata.length > 0) {
+            var metabtn;
+            metabtn = document.createElement("button");
+            metabtn.setAttribute("data-sheet", i);
+            metabtn.textContent = "edit";
+            metabtn.title = "Metadata";
+            metabtn.className = "material-symbols-outlined";
+            bindMetadataBtn(metabtn, i);
+            controlBar.appendChild(metabtn);
+        }
+        //approve button
+        if (dsMode && sheet.VerifiedBy === "") {
+            var appbtn = document.createElement("button");
+            appbtn.textContent = "done";
+            appbtn.title = "Approve Sheet";
+            appbtn.className = "material-symbols-outlined";
+            controlBar.appendChild(appbtn);
+            bindApproveBtn(appbtn, apptext, i);
+        }
+        //delete button
+        if (isAccess === false || !sheet.UniqueID) {
+            var delbtn;
+            delbtn = document.createElement("button");
+            delbtn.textContent = "delete";
+            delbtn.className = "material-symbols-outlined red";
+            delbtn.title = "Delete";
+            delbtn.setAttribute("data-sheet", i);
+            bindDelSheetbtn(delbtn);
+            controlBar.appendChild(delbtn);
+        }
+        newdiv.appendChild(controlBar);
         newdiv.style.left = xpos + "px";
         newdiv.style.top = 0;
 
@@ -712,6 +739,7 @@ async function populatebar(reset) {
         }
         ;
         barlist.appendChild(newdiv);
+        sizeTextToContainer({element: lvltxt,maxSize: 18});
         controlSheetChange(newdiv, i);
         divs.push(newdiv);
         //}
@@ -744,6 +772,18 @@ function controlSheetChange(div, id) {
         changeSheetInfo(documents[dsMode === false ? currentTime : currentPerson][id].Level, div.getElementsByTagName("input")[0].value);
         renderTable(id);
     });
+}
+
+function bindTimeInputChange(input, i) {
+    input.onchange = function () {
+        var startMark = getTimeFromInput(input);
+        if (startMark !== null) {
+            documents[dsMode === false ? currentTime : currentPerson][i].TimeStart = startMark;
+            changeEditPending(true);
+        } else {
+            input.value = convertTimeReadable(documents[dsMode === false ? currentTime : currentPerson][i].TimeStart, false);
+        }
+    };
 }
 
 const metadataHolder = document.getElementById("metadata-menu-holder");
@@ -790,17 +830,17 @@ function bindMetadataBtn(btn, i) {
     }
 }
 
-async function bindApproveBtn(appbtn, i) {
+async function bindApproveBtn(appbtn, apptext, i) {
     appbtn.onclick = function () {
-        appbtn.textContent = "Approving...";
+        apptext.textContent = "Approving...";
         appbtn.disabled = true;
         setApprove().then(function () {
-            appbtn.disabled = true;
-            appbtn.textContent = "Approved";
+            appbtn.remove();
+            apptext.textContent = "Approved";
             documents[dsMode === false ? currentTime : currentPerson][i].VerifiedBy = firebase.auth().currentUser.uid + ":::" + UserData.PersonalName;
         }).catch((f) => {
             console.log(f);
-            appbtn.textContent = "Approve";
+            apptext.textContent = "Approve";
             appbtn.disabled = false;
             alert("Error setting approval");
         });
@@ -905,10 +945,36 @@ async function getLvlInfo(Level) {
     });
 }
 
+const manual_div = document.getElementById("manual_lvl_div");
+const manual_sel = document.getElementById("manual_selector");
+const manual_time = document.getElementById("manual_time");
+
+new_sheet_manual.onclick = function () {
+    upload_button_div.style.display = "none";
+    manual_div.style.display = "block";
+    manual_time.value = "";
+};
+
+document.getElementById("manual_back_btn").onclick = function () {
+    upload_button_div.style.display = "flex";
+    manual_div.style.display = "none";
+};
+
+const btnnext = document.getElementById("lowbar_next");//not inverted to allow click in same dir
+const btnback = document.getElementById("lowbar_back");//as scrolling
+btnnext.onclick = function () {
+    populatebar(-1);
+};
+
+btnback.onclick = function () {
+    populatebar(1);
+};
+
 document.getElementById("manual_create_btn").onclick = function () {
     var lvl = manual_sel.value;
-    if (lvl !== "") {
-        var toAdd = {"Names": [], "Barcode": "0", "Level": parseInt(lvl), "Marks": [], "MustSees": [], "VerifiedBy": "", "UniqueID": "", "NextLevel": [], "Attendance": [], "Timeblock": programmerMode.split("---")[1], "Facility": programmerMode.split("---")[0], "TimeStart": 0};
+    var startTime = getTimeFromInput(manual_time);
+    if (lvl !== "" && startTime !== null) {
+        var toAdd = {"Names": [], "Barcode": "0", "Level": parseInt(lvl), "Marks": [], "MustSees": [], "VerifiedBy": "", "UniqueID": "", "NextLevel": [], "Attendance": [], "Timeblock": programmerMode.split("---")[1], "Facility": programmerMode.split("---")[0], "TimeStart": startTime};
         getLvlInfo(lvl).then(function () {
             if (Levels[lvl].Settings.CommentEnabled) {
                 toAdd["Comments"] = [];

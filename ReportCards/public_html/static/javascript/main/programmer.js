@@ -25,15 +25,11 @@ const uploadbar = document.getElementById("uploadbar");
 const uploadprogress = document.getElementById("uploadprogress");
 const uploadinfinite = document.getElementById("scanbar");
 const barlist = document.getElementById("barlist");
-const btnnext = document.getElementById("lowbar_next");//not inverted to allow click in same dir
-const btnback = document.getElementById("lowbar_back");//as scrolling
 const upload_button_div = document.getElementById("uploaderdiv");
 const maintable = document.getElementById("maintable");
 const sheetinfo = document.getElementById("sheetinfo");
 const add_row_btn = document.getElementById("add_row_btn");
 const new_sheet_manual = document.getElementById("new_sheet_manual");
-const manual_div = document.getElementById("manual_lvl_div");
-const manual_sel = document.getElementById("manual_selector");
 const topbar_controls = document.getElementById("topbar-controls");
 const overflowbtn = document.getElementById("overflowbtn");
 const lowbar = document.getElementById("lowbar_container");
@@ -372,7 +368,7 @@ window.onload = function () {
                 currentTime = 0;//Facility + "---" + Timeblock;
                 setProgrammer(Facility + "---" + Timeblock);
                 resetloader(true, null, null);
-                getTimeSheets(UID, Timeblock, Facility).then((sheets) => {
+                getTimeSheets(UID, Timeblock, Facility).then(async (sheets) => {
                     resetloader(false, null, null);
                     if (sheets !== "[]") {
                         sheets = JSON.parse(sheets);
@@ -383,9 +379,11 @@ window.onload = function () {
                         People[0] = UsersInfo.filter(user => {
                             return user.Uid === UID;
                         });
+                        await populatebar(0);//if not await, handleresize makes a 
+                        //populatebar call that overlaps with getLevelInfo inside function
+                        //and causes duplicate entries
                         handleresize();
                         renderTable(0);
-                        populatebar(0);
                     } else {
                         alert("No sheets to display");
                     }
@@ -1047,24 +1045,6 @@ window.onload = function () {
             resetloader(false, null, null);
         });
     }
-
-    new_sheet_manual.onclick = function () {
-        upload_button_div.style.display = "none";
-        manual_div.style.display = "block";
-    };
-
-    document.getElementById("manual_back_btn").onclick = function () {
-        upload_button_div.style.display = "flex";
-        manual_div.style.display = "none";
-    };
-
-    btnnext.onclick = function () {
-        populatebar(-1);
-    };
-
-    btnback.onclick = function () {
-        populatebar(1);
-    };
 
     printbtn.onclick = function () {
         resetloader(false, printmenu, "flex");
