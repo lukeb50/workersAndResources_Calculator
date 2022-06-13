@@ -359,27 +359,27 @@ div.next-list-item button.roundaction{
     width:1.25rem!important;
 }
 
-#metadata-list{
+#modifier-list{
     margin: 0!important;
     padding-bottom: 5px;
 }
 
-#metadata-list div{
+#modifier-list div{
     padding: 5px 0 5px 0!important;
     margin-bottom: 0px!important;
 }
 
-#metadata-list div:nth-child(even){
+#modifier-list div:nth-child(even){
     background:rgba(155,155,155,0.1);
 }
 
-#metadata-save-btn{
+#modifier-save-btn{
     margin-top: 2px!important;
     margin-left: 5px;
     margin-bottom: 6px!important;
 }
 
-#metadata-list button:not(#metadata-add){
+#modifier-list button:not(#modifier-add){
     margin: 0!important;
     margin-left: 5px!important;
     background:rgba(155,155,155,0.3);
@@ -388,7 +388,7 @@ div.next-list-item button.roundaction{
     height:24px;
 }
 
-#metadata-add{
+#modifier-add{
     margin: 0!important;
     margin-top: 5px!important;
     margin-left: 5px!important;

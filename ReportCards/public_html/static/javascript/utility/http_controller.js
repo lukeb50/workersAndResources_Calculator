@@ -187,7 +187,6 @@ function sizeTextToContainer( {element, minSize = 1, maxSize = 1000, step = 1}){
     let s = minSize;
     let overflow = false;
     let parentNode = element.parentNode;
-    console.log(parentNode.clientHeight, parentNode.scrollHeight);
     while (!overflow && s < maxSize) {
         element.style.fontSize = s + "px";
         overflow = isOverflown(element);
@@ -292,10 +291,6 @@ function calculateUniqueObjectID(Name, existingObject) {
     function attemptID(Name) {
         return (new Date().getTime() + (Name.charCodeAt(0) - 97)) + Math.floor((Math.random() * 10) + 1);
     }
-}
-
-function getMetadataFromID(Metadata, ID) {
-    return Metadata.filter(m => m.UniqueID === ID)[0];
 }
 
 function convertTimeblockString(Timeblock) {

@@ -1,4 +1,4 @@
-/* global firebase, add_row_btn, documents, currentTime, printbtn, maintable, blocker, blocker_change, blocker_lvl, blocker_mark, blocker_mustsee, screenquery, sheetinfo, overflowbtn, topbar_controls, overflowmenu, barlist, loadblocker, btnback, btnnext, savebtn, currentPerson, People, UserData, commentmenu, manual_sel, manual_div, metadatamenu, getMetadataFromID, clientDb, upload_button_div, new_sheet_manual */
+/* global firebase, add_row_btn, documents, currentTime, printbtn, maintable, blocker, blocker_change, blocker_lvl, blocker_mark, blocker_mustsee, screenquery, sheetinfo, overflowbtn, topbar_controls, overflowmenu, barlist, loadblocker, btnback, btnnext, savebtn, currentPerson, People, UserData, commentmenu, manual_sel, manual_div, notemenu, clientDb, upload_button_div, new_sheet_manual */
 var staticPath = "../../static";
 const marking_change_btns = [document.getElementById("blocker_btn1"), document.getElementById("blocker_btn2")];
 var markingOptions = new Map();
@@ -14,7 +14,7 @@ let allowCorrection = false;
 let isAccess = false;
 var Levels = {};
 var Settings = {};
-var Metadata = [];
+var SheetModifiers = [];
 async function InitRenderer(ds, allowCorrections) {
     if (ds) {
         dsMode = ds;
@@ -503,7 +503,6 @@ function AttachCommentClick(commbtn, id, i) {
     };
     function onSaveBtn() {
         resetloader(false, null, null);
-        console.log(i, id);
         if (documents[dsMode === false ? currentTime : currentPerson][id].Comments[i] !== comment_box.value) {
             changeEditPending(true);
             renderTable(id);
@@ -696,17 +695,15 @@ async function populatebar(reset) {
         //create holder for buttons
         var controlBar = document.createElement("div");
         controlBar.className = "bar-controlbar";
-        //metadata/notes
-        if (Metadata.length > 0) {
-            var metabtn;
-            metabtn = document.createElement("button");
-            metabtn.setAttribute("data-sheet", i);
-            metabtn.textContent = "edit";
-            metabtn.title = "Metadata";
-            metabtn.className = "material-symbols-outlined";
-            bindMetadataBtn(metabtn, i);
-            controlBar.appendChild(metabtn);
-        }
+        //notes
+        var notebtn;
+        notebtn = document.createElement("button");
+        notebtn.setAttribute("data-sheet", i);
+        notebtn.textContent = "edit_note";
+        notebtn.title = "Sheet Information";
+        notebtn.className = "material-symbols-outlined";
+        bindNoteBtn(notebtn, i);
+        controlBar.appendChild(notebtn);
         //approve button
         if (dsMode && sheet.VerifiedBy === "") {
             var appbtn = document.createElement("button");
@@ -737,12 +734,10 @@ async function populatebar(reset) {
                 break;
             }
         }
-        ;
         barlist.appendChild(newdiv);
-        sizeTextToContainer({element: lvltxt,maxSize: 18});
+        sizeTextToContainer({element: lvltxt, maxSize: 18});
         controlSheetChange(newdiv, i);
         divs.push(newdiv);
-        //}
         xpos = xpos + lowdivlength;
     }
     if (reset !== 0) {
@@ -786,49 +781,140 @@ function bindTimeInputChange(input, i) {
     };
 }
 
-const metadataHolder = document.getElementById("metadata-menu-holder");
-function bindMetadataBtn(btn, i) {
+const modifier_select = document.getElementById("note-menu-type-select");
+const note_section = document.getElementById("note-section");
+const noteIndicators = [{Id: 0, Name: "Info", Image: ""}, {Id: 1, Name: "Alert", Image: ""}];
+function bindNoteBtn(btn, i) {
     btn.onclick = function () {
-        metadatamenu.setAttribute("data-id", i);
-        resetloader(false, metadatamenu, "block");
-        clearChildren(metadataHolder);
-        //Ensure metadata is an array
-        if (!documents[dsMode === false ? currentTime : currentPerson][i].Metadata) {
-            documents[dsMode === false ? currentTime : currentPerson][i].Metadata = [];
-        }//wipe outdated metadata
-        for (var m = 0; m < documents[dsMode === false ? currentTime : currentPerson][i].Metadata.length; m++) {
-            var currentM = documents[dsMode === false ? currentTime : currentPerson][i].Metadata[m];
-            if (Metadata.filter(m => m.UniqueID === currentM.MetaID).length === 0) {
-                documents[dsMode === false ? currentTime : currentPerson][i].Metadata.splice(m, 1);
-                m--;
-            }
-        }//Add in any missing metadata
-        for (var m = 0; m < Metadata.length; m++) {
-            if (documents[dsMode === false ? currentTime : currentPerson][i].Metadata.filter(cm => cm.MetaID === (Metadata[m].UniqueID)).length === 0) {
-                documents[dsMode === false ? currentTime : currentPerson][i].Metadata.push({MetaID: Metadata[m].UniqueID, Value: ""});
-            }
+        var sheet = documents[dsMode === false ? currentTime : currentPerson][i];
+        resetloader(false, notemenu, "flex");
+        //Class modifier select
+        clearChildren(modifier_select);
+        modifier_select.setAttribute("data-sheet", i);
+        let noOpt = document.createElement("option");
+        noOpt.value = -1;
+        noOpt.textContent = "None";
+        modifier_select.appendChild(noOpt);
+        SheetModifiers.forEach((modifier) => {
+            let opt = document.createElement("option");
+            opt.value = modifier.UniqueID;
+            opt.textContent = modifier.Name;
+            modifier_select.appendChild(opt);
+        });
+        modifier_select.value = sheet.TimeModifier;
+        //notes
+        clearChildren(note_section);
+        let noteTitle = document.createElement("h1");
+        noteTitle.textContent = "Notes";
+        note_section.appendChild(noteTitle);
+        note_section.className = "scrollbar";
+        //make sure notes exist, otherwise make blank arrays
+        sheet.SheetInformation.Instructor.Notes = sheet.SheetInformation.Instructor.Notes ? sheet.SheetInformation.Instructor.Notes : [];
+        if (dsMode) {//ds notes if applicable
+            sheet.SheetInformation.Lead.Notes = sheet.SheetInformation.Lead.Notes ? sheet.SheetInformation.Lead.Notes : [];
         }
-        for (var x = 0; x < documents[dsMode === false ? currentTime : currentPerson][i].Metadata.length; x++) {
-            var divHolder = document.createElement("div");
-            var lbl = document.createElement("label");
-            lbl.textContent = getMetadataFromID(Metadata, documents[dsMode === false ? currentTime : currentPerson][i].Metadata[x].MetaID).Name;
-            divHolder.appendChild(lbl);
-            var inputBox = document.createElement("input");
-            inputBox.placeholder = "Enter a value";
-            bindChange(inputBox, i, x);
-            inputBox.value = documents[dsMode === false ? currentTime : currentPerson][i].Metadata[x].Value;
-            inputBox.disabled = (dsMode === false && Settings.approveLockout === true && documents[dsMode === false ? currentTime : currentPerson][i].VerifiedBy !== "") ? true : false;
-            divHolder.appendChild(inputBox);
-            metadataHolder.appendChild(divHolder);
+        //Btn holder must be added first due to appending before
+        let noteBtnHolder = document.createElement("span");
+        note_section.appendChild(noteBtnHolder);
+        //show existing notes
+        sheet.SheetInformation.Instructor.Notes.forEach((note) => {
+            showNote(note, false);
+        });
+        if (dsMode) {
+            sheet.SheetInformation.Lead.Notes.forEach((note) => {
+                showNote(note, true);
+            });
+        }
+        newNoteBtn("New Note", noteBtnHolder, false);
+        if (dsMode) {
+            newNoteBtn("New Supervisor Note", noteBtnHolder, true);
+        }
+        function showNote(note, isDs) {
+            //create div
+            let noteContainer = document.createElement("div");
+            //title input
+            let titleInput = document.createElement("input");
+            titleInput.value = note.Title;
+            titleInput.onchange = function () {
+                note.Title = titleInput.value;
+            };
+            noteContainer.appendChild(titleInput);
+            //main text input
+            let txtArea = document.createElement("textarea");
+            txtArea.value = note.Content;
+            txtArea.onchange = function () {
+                note.Content = txtArea.value;
+            };
+            //container for control buttons
+            noteContainer.appendChild(txtArea);
+            let controlHolder = document.createElement("span");
+            noteContainer.appendChild(controlHolder);
+            //control elements
+            //indicator
+            let indicatorLbl = document.createElement("label");
+            indicatorLbl.textContent = "Symbol: ";
+            //commented out until indicator is implemented
+            //controlHolder.appendChild(indicatorLbl);
+            let indicatorSel = document.createElement("select");
+            indicatorLbl.appendChild(indicatorSel);
+            let noIndicator = document.createElement("option");
+            noIndicator.textContent = "None";
+            noIndicator.value = -1;
+            indicatorSel.appendChild(noIndicator);
+            noteIndicators.forEach((indicator) => {
+                let opt = document.createElement("option");
+                opt.textContent = indicator.Name;
+                opt.value = indicator.Id;
+                indicatorSel.appendChild(opt);
+            });
+            indicatorSel.value = note.Indicator;
+            indicatorSel.onchange = function () {
+                note.Indicator = indicatorSel.value;
+            };
+            //delete button
+            let deletebtn = document.createElement("button");
+            deletebtn.textContent = "Delete";
+            deletebtn.className = "delete";
+            deletebtn.onclick = function () {
+                let noteLoc = sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes;
+                sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes = noteLoc.filter(lNote => lNote.UniqueID !== note.UniqueID);
+                noteContainer.remove();
+            };
+            controlHolder.appendChild(deletebtn);
+            //ds notice
+            if (isDs) {
+                let dsNotice = document.createElement("p");
+                dsNotice.textContent = "Lead Note";
+                controlHolder.appendChild(dsNotice);
+            }
+            note_section.insertBefore(noteContainer, noteBtnHolder);
+        }
+
+        function newNoteBtn(text, appendTo, isDs) {
+            var newBtn = document.createElement("button");
+            newBtn.className = "mainround newnotebtn";
+            newBtn.textContent = text;
+            appendTo.appendChild(newBtn);
+            newBtn.onclick = function () {
+                createNewNote(isDs);
+            };
+        }
+
+        function createNewNote(isDs) {
+            //Name is not supplied, always use the same. Will not significantly affect randomness
+            let id = calculateUniqueObjectID("Note", sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes);
+            let newNote = {Title: "", Content: "", Indicator: -1, UniqueID: id};
+            sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes.push(newNote);
+            showNote(newNote, isDs);
         }
     };
-    function bindChange(input, sheetId, metaI) {
-        input.onchange = function () {
-            changeEditPending(true);
-            documents[dsMode === false ? currentTime : currentPerson][sheetId].Metadata[metaI].Value = input.value;
-        };
-    }
 }
+
+modifier_select.onchange = function () {
+    var sheet = parseInt(modifier_select.getAttribute("data-sheet"));
+    documents[dsMode === false ? currentTime : currentPerson][sheet].TimeModifier = parseInt(modifier_select.value);
+    changeEditPending(true);
+};
 
 async function bindApproveBtn(appbtn, apptext, i) {
     appbtn.onclick = function () {
@@ -896,8 +982,8 @@ function attachUpdate(object, i) {
 async function getSettings() {
     return new Promise((resolve, reject) => {
         clientDb.ref("Settings").once('value').then((snap) => {
-            Settings = snap.val().Data;
-            Metadata = snap.val()["Sheet-Metadata"] ? snap.val()["Sheet-Metadata"] : [];
+            Settings = snap.val().Data ? snap.val().Data : {};
+            SheetModifiers = snap.val()["Sheet-Modifiers"] ? snap.val()["Sheet-Modifiers"] : [];
             var settingEvent = new Event("SettingUpdate");
             window.dispatchEvent(settingEvent);
             resolve(snap.val());
@@ -974,7 +1060,10 @@ document.getElementById("manual_create_btn").onclick = function () {
     var lvl = manual_sel.value;
     var startTime = getTimeFromInput(manual_time);
     if (lvl !== "" && startTime !== null) {
-        var toAdd = {"Names": [], "Barcode": "0", "Level": parseInt(lvl), "Marks": [], "MustSees": [], "VerifiedBy": "", "UniqueID": "", "NextLevel": [], "Attendance": [], "Timeblock": programmerMode.split("---")[1], "Facility": programmerMode.split("---")[0], "TimeStart": startTime};
+        var toAdd = {"Names": [], "Barcode": "0", "Level": parseInt(lvl), "Marks": [], "MustSees": [],
+            "VerifiedBy": "", "UniqueID": "", "NextLevel": [], "Attendance": [],
+            "Timeblock": programmerMode.split("---")[1], "Facility": programmerMode.split("---")[0],
+            "TimeStart": startTime, "TimeModifier": -1, "SheetInformation": {"Lead": {}, "Instructor": {}}};
         getLvlInfo(lvl).then(function () {
             if (Levels[lvl].Settings.CommentEnabled) {
                 toAdd["Comments"] = [];

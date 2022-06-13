@@ -671,11 +671,6 @@ div.menuitem h1, div.menuitem p{
     margin-top: 5px;
 }
 
-#time-menu,#notification-menu{
-    display: none;
-    flex-direction: column;
-}
-
 #time-menu-holder{
     width:100%;
     flex: 1 1 10px;
@@ -788,7 +783,7 @@ div.menuitem h1, div.menuitem p{
     }
 }
 
-#print-menu,#email-menu{
+#print-menu,#email-menu,#note-menu,#time-menu,#notification-menu{
     flex-direction: column;
 }
 
@@ -1170,26 +1165,90 @@ select{
     box-sizing: border-box;
 }
 
-#metadata-menu{
-    overflow-y:auto;
-}
-
-#metadata-menu div div{
-    padding: 5px 5px 5px 0;
-    display: flex;
-    width:calc(100% - 5px);
-}
-
-#metadata-menu div div label{
-    margin-left: 5px;
-}
-
-#metadata-menu div div input{
+#note-menu-type-span{
     margin-left: 5px;
     margin-right: 5px;
+    margin-bottom: 5px;
+    display: flex;
+    flex-direction: row;
+}
+
+#note-menu-type-select{
+    flex: 1;
+    margin-left:5px;
+    border:2px solid var(--color-primary);
+}
+
+#note-section{
+    width:100%;
+    flex:1;
+    height: 10px;
+    overflow-y: auto;
+}
+
+#note-section div{
+    margin-top: 10px;
+    box-shadow: 0px 4px 4px 0px var(--color-primary-half-transparent);
+}
+
+#note-section div input{
+    margin-left:5px;
+    width: calc(100% - 10px);
+    box-sizing: border-box;
+    border:2px solid var(--color-primary-dark);
     border-radius: 5px;
-    border:1px solid grey;
-    flex-grow: 1;
+}
+
+#note-section div textarea{
+    resize: vertical;
+    margin:5px;
+    margin-bottom: 0px;
+    width: calc(100% - 10px);
+    box-sizing: border-box;
+    border:2px solid var(--color-primary-dark);
+    border-radius: 5px;
+    min-height: 80px;
+}
+
+#note-section div span{
+    width: calc(100% - 10px);
+    margin-left: 5px;
+    display: block;
+    height: 30px;
+    padding-top:2px;
+    padding-bottom: 2px;
+}
+
+#note-section div span button.delete{
+    height: 100%;
+    background:none;
+    border:none;
+    color:var(--color-red);
+}
+
+#note-section div span select{
+    height: 80%;
+    border:none;
+    border: 2px solid var(--color-primary);
+    box-sizing:border-box;
+    background:white;
+}
+
+#note-section div span p{
+    display: inline;
+    width:fit-content;
+    margin: 0;
+    float:right;
+}
+
+button.newnotebtn{
+    margin: auto;
+    display: block;
+    height: 30px;
+    padding-left: 10px;
+    padding-right: 10px;
+    width:160px;
+    margin-top: 10px;
 }
 
 #prevlookup-container{

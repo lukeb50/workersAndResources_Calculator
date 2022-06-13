@@ -1,4 +1,4 @@
-/* global firebase, getMetadataFromID, clientDb, Organization */
+/* global firebase, clientDb, Organization */
 
 const storage = firebase.app().storage("gs://report-cards-6290-uploads");
 
@@ -13,7 +13,6 @@ window.I = null;
 var currentElement = null;
 var currentHashCode = -1;
 var currentData = null;
-var Metadata = [];
 
 const new_card_img_upload = document.getElementById("new-card-img-upload");
 const new_card_img_select = document.getElementById("image-select-card");
@@ -175,27 +174,6 @@ window.onload = async function () {
         if (user) {
             await initClientDatabase();
             updateNewCardSelector();
-            return new Promise((resolve, reject) => {
-                clientDb.ref("Settings").once('value').then((snap) => {
-                    Metadata = snap.val()["Sheet-Metadata"] ? snap.val()["Sheet-Metadata"] : [];
-                    console.log(Metadata);
-                    if (Metadata.length > 0) {
-                        var optgroup = document.createElement("optgroup");
-                        optgroup.label = "Metadata";
-                        for (var m = 0; m < Metadata.length; m++) {
-                            var opt = document.createElement("option");
-                            opt.value = "metadata";
-                            opt.setAttribute("data-metadata", Metadata[m].UniqueID);
-                            opt.textContent = Metadata[m].Name;
-                            optgroup.appendChild(opt);
-                        }
-                        new_txt_type.appendChild(optgroup);
-                    }
-                    resolve(snap.val());
-                }).catch(() => {
-                    reject(null);
-                });
-            });
         }
     });
 };
@@ -274,7 +252,7 @@ async function updateNewCardSelector() {
     clearChildren(new_card_img_select);
     clearChildren(new_card_back_img_select);
     var listedImages = null;
-    await storage.ref(Organization+"/").listAll().then((res) => {
+    await storage.ref(Organization + "/").listAll().then((res) => {
         listedImages = res;
         return;
     });
@@ -332,7 +310,7 @@ const new_txt_variable = document.getElementById("variablefont-input");
 const new_txt_type = document.getElementById("text-type-select");
 const new_text_insert = document.getElementById("create-text-btn");
 
-const text_prompts = {level: "Current Level", nextlevel: "Next Level to Register In", session: "Current Session Name", instructor: "Truncated Instructor Name", student: "Student Name", barcode: "Course Code", comment: "Comment Text Content", custom: "Select to edit text", metadata: "Metadata value", facility: "Facility Name", facility_short: "Facility Shortform"};
+const text_prompts = {level: "Current Level", nextlevel: "Next Level to Register In", session: "Current Session Name", instructor: "Truncated Instructor Name", student: "Student Name", barcode: "Course Code", comment: "Comment Text Content", custom: "Select to edit text", facility: "Facility Name", facility_short: "Facility Shortform"};
 document.body.onclick = function (e) {
     if (document.getElementById("controlbar") && e.path.indexOf(document.getElementById("controlbar")) === -1 && e.path.indexOf(markup) === -1) {
         clearBar();
@@ -382,7 +360,7 @@ function createTypeControlBar(Type, Details, ControlBar) {
                 createControlButton(ControlBar, "newline", "Add Line", bindAddNewLine);
             }
             createControlInput(ControlBar, "number", currentData.Font, "Font Size", bindTextFontChange);
-            if(Details.isVariable){
+            if (Details.isVariable) {
                 createControlInput(ControlBar, "number", currentData.MaxFont, "Max Font", bindTextVariableFontChange);
             }
             break;
@@ -421,13 +399,11 @@ new_text_insert.onclick = function (event) {
     var addData = {TopLeft: {x: insertPosition.x, y: insertPosition.y}, BottomRight: {x: insertPosition.x + 100, y: insertPosition.y + 100}, Side: insertPosition.Side, Font: parseInt(new_txt_size.value), isMultiline: new_txt_line.checked, isVariable: new_txt_variable.checked, Type: new_txt_type.value};
     if (new_txt_type.value === "custom") {
         addData["Content"] = "";
-    } else if (new_txt_type.value === "metadata") {
-        addData["MetaType"] = parseInt(new_txt_type.options[new_txt_type.selectedIndex].getAttribute("data-metadata"));
     }
     if (new_txt_line.checked === true) {
         addData["Lines"] = [];
     }
-    if(new_txt_variable.checked === true){
+    if (new_txt_variable.checked === true) {
         addData["MaxFont"] = addData.Font;
     }
     LvlInfo[visualEditorI].Text.push(addData);
@@ -527,18 +503,18 @@ function bindTextFontChange(e) {
             el.style.height = parseInt(e.target.value) + "px";
         }
     }
-    if(currentData.isVariable && currentData.MaxFont < currentData.Font){
+    if (currentData.isVariable && currentData.MaxFont < currentData.Font) {
         currentData.MaxFont = currentData.Font;
         //TODO:Attempt to update max font input
     }
     updateHashCode();
 }
 
-function bindTextVariableFontChange(e){
+function bindTextVariableFontChange(e) {
     let newMax = parseInt(e.target.value);
-    if(newMax>currentData.Font){
+    if (newMax > currentData.Font) {
         currentData.MaxFont = newMax;
-    }else{
+    } else {
         e.target.value = currentData.Font;
         currentData.MaxFont = currentData.Font;
     }
@@ -1068,19 +1044,19 @@ function drawTextElement(Data) {
         if (Data.Type === "custom") {
             return Data.Content ? Data.Content : text_prompts[Data.Type];
         } else {
-            return text_prompts[Data.Type] + (Data.Type === "metadata" ? (" (" + getMetadataFromID(Metadata, parseInt(Data.MetaType)).Name + ")") : "");
+            return text_prompts[Data.Type];
         }
     }
 }
 
-function getPrintSetting(Name, LvlInfoRef, Def){
-    if(!LvlInfoRef.PrintSettings){
+function getPrintSetting(Name, LvlInfoRef, Def) {
+    if (!LvlInfoRef.PrintSettings) {
         LvlInfoRef.PrintSettings = {};
     }
-    if(!LvlInfoRef.PrintSettings[Name]){
+    if (!LvlInfoRef.PrintSettings[Name]) {
         LvlInfoRef.PrintSettings[Name] = Def;
         return Def;
-    }else{
+    } else {
         return LvlInfoRef.PrintSettings[Name];
     }
 }

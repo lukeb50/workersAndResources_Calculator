@@ -74,11 +74,11 @@ const instlistparent = document.getElementById("personlist");
 const instlistcollapse = document.getElementById("collapse-personlist");
 const instlist = document.getElementById("personlist-holder");
 const commentmenu = document.getElementById("comment-menu");
-const metadatamenu = document.getElementById("metadata-menu");
+const notemenu = document.getElementById("note-menu");
 const prevlookupmenu = document.getElementById("previouslookup-menu");
 const schedulemenu = document.getElementById("schedule-menu");
 
-const loaditms = [loadspinner, overflower, timemenu, printmenu, emailmenu, usermenu, notifmenu, commentmenu, metadatamenu, prevlookupmenu, schedulemenu]; //items that should be hidden when showing main blocker
+const loaditms = [loadspinner, overflower, timemenu, printmenu, emailmenu, usermenu, notifmenu, commentmenu, notemenu, prevlookupmenu, schedulemenu]; //items that should be hidden when showing main blocker
 
 const screenquery = window.matchMedia("(max-width: 700px)");
 

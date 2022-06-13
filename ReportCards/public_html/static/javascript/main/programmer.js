@@ -76,7 +76,7 @@ const generalmenu = document.getElementById("general-menu-holder");
 const sheetmenu = document.getElementById("table-menu-holder");
 const recordmenu = document.getElementById("record-menu-holder");
 const reportmenu = document.getElementById("report-menu-holder");
-const metadatamenu = document.getElementById("metadata-menu");
+const notemenu = document.getElementById("note-menu");
 const addusermenu = document.getElementById("adduser-menu");
 
 const progscreens = [usermenu, lookupmenu, generalmenu, sheetmenu, recordmenu, reportmenu];
@@ -106,7 +106,7 @@ const worksheet_select_div = document.getElementById("worksheet-multiple-select"
 
 const commentmenu = document.getElementById("comment-menu");
 
-const loaditms = [loadspinner, worksheet_select_div, overflower, printmenu, emailmenu, commentmenu, metadatamenu, addusermenu];//items that should be hidden when showing main blocker
+const loaditms = [loadspinner, worksheet_select_div, overflower, printmenu, emailmenu, commentmenu, notemenu, addusermenu];//items that should be hidden when showing main blocker
 
 const screenquery = window.matchMedia("(max-width: 700px)");
 

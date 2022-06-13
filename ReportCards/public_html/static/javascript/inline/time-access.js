@@ -26,7 +26,7 @@ const sheetinfo = document.getElementById("sheetinfo");
 const printmenu = document.getElementById("print-menu");
 const commentmenu = document.getElementById("comment-menu");
 const visualmenu = document.getElementById("visualmarkingdiv");
-const metadatamenu = document.getElementById("metadata-menu");
+const notemenu = document.getElementById("note-menu");
 const overflower = document.getElementById("topbar-overflow");
 
 const printexecutebtn = document.getElementById("print-menu-execute");
@@ -40,7 +40,7 @@ const savebtn = document.getElementById("savebtn");
 
 const screenquery = window.matchMedia("(max-width: 700px)");
 
-const loaditms = [loadspinner,overflower, printmenu, visualmenu, commentmenu, metadatamenu];//items that should be hidden when showing main blocker
+const loaditms = [loadspinner,overflower, printmenu, visualmenu, commentmenu, notemenu];//items that should be hidden when showing main blocker
 
 window.onload = function () {
     screenquery.addListener(function () {

@@ -10,6 +10,7 @@ var scheduleData = [];
 var People = [];
 var Levels = {};
 var GroupingData = [];
+var Modifiers = [];
 var editMode = true;
 const scheduleTable = document.getElementById("scheduleTable");
 var timeIntervalId = -1;
@@ -50,7 +51,7 @@ function displaySchedule(Time) {
             var isLesson = false;
             for (var s = 0; s < scheduleData[i].length; s++) {
                 var currentSheet = scheduleData[i][s];
-                if (getClassProperty(currentSheet, "TimeStart") === t) {
+                if (parseInt(getClassProperty(currentSheet, "TimeStart")) === t) {
                     isLesson = true;
                     var lessonHolder = document.createElement("td");
                     lessonHolder.className = "lesson";
@@ -58,7 +59,7 @@ function displaySchedule(Time) {
                     lessonHolder.style.backgroundColor = getLevelColor(getClassProperty(currentSheet, "Level"));
                     createSheetListing(lessonHolder, i, s);
                     timerow.appendChild(lessonHolder);
-                } else if (t >= getClassProperty(currentSheet, "TimeStart") && t < getClassProperty(currentSheet, "TimeStart") + getClassDuration(currentSheet)) {
+                } else if (t >= parseInt(getClassProperty(currentSheet, "TimeStart")) && t < parseInt(getClassProperty(currentSheet, "TimeStart")) + getClassDuration(currentSheet)) {
                     isLesson = true;
                 }
             }
@@ -73,12 +74,12 @@ function displaySchedule(Time) {
     var currentTime = new Date();
     clearInterval(timeIntervalId);
     waitMinute();
-    updateCurrentTime();
+    //updateCurrentTime();
     function waitMinute() {
         var current = new Date();
         var timeToNextMinute = (60 - current.getSeconds()) * 1000 - current.getMilliseconds();
         timeIntervalId = setTimeout(function () {
-            updateCurrentTime();
+            //updateCurrentTime();
             waitMinute();
         }, timeToNextMinute);
     }
@@ -149,7 +150,7 @@ function displaySchedule(Time) {
         holder.appendChild(studentText);
         var timeText = document.createElement("label");
         timeText.className = "light";
-        timeText.textContent = convertTimeReadable(getClassProperty(sheet, "TimeStart")) + " - " + convertTimeReadable(getClassProperty(sheet, "TimeStart") + getClassDuration(sheet));
+        timeText.textContent = convertTimeReadable(parseInt(getClassProperty(sheet, "TimeStart"))) + " - " + convertTimeReadable(parseInt(getClassProperty(sheet, "TimeStart")) + getClassDuration(sheet));
         holder.appendChild(timeText);
         bindSheetClick(holder, inst, sheetI);
     }
@@ -266,7 +267,7 @@ function displaySchedule(Time) {
             div.appendChild(titleEdits);
         }
         var time = document.createElement("label");
-        time.textContent = convertTimeReadable(sheet.TimeStart) + " - " + convertTimeReadable(sheet.TimeStart + getClassDuration(sheet));
+        time.textContent = convertTimeReadable(sheet.TimeStart) + " - " + (convertTimeReadable(parseInt(sheet.TimeStart) + getClassDuration(sheet)));
         div.appendChild(time);
         var inst = document.createElement("label");
         inst.textContent = People[instructor].Name;
@@ -377,6 +378,7 @@ function calculateTimeSpacing(sheets) {
             for (var i = s + 1; i < sheets[uI].length; i++) {
                 var nxt = sheets[uI][i];
                 if (nxt.TimeStart === sheet.TimeStart) {
+                    console.log("df");
                     if (getClassDuration(nxt) === getClassDuration(sheet)) {
                         potentialHolder.push(nxt);
                         sheets[uI].splice(i, 1);
@@ -397,7 +399,7 @@ function calculateTimeSpacing(sheets) {
 //how long the class lasts
             var dur = getClassDuration(sheets[uI][sI]);
             firstStart = Math.min(firstStart, getClassProperty(sheets[uI][sI], "TimeStart"));
-            lastEnd = Math.max(lastEnd, getClassProperty(sheets[uI][sI], "TimeStart") + dur);
+            lastEnd = Math.max(lastEnd, parseInt(getClassProperty(sheets[uI][sI], "TimeStart")) + dur);
             if (spacingTimes.indexOf(dur) === -1) {
                 spacingTimes.push(dur); //add duration if it does not yet exist
             }
@@ -415,11 +417,16 @@ function calculateTimeSpacing(sheets) {
 }
 
 function getClassDuration(c) {
-    if (Array.isArray(c)) {
+    if (Array.isArray(c)) {//multiple levels, call function on first individual level
         return getClassDuration(c[0]);
-    } else if (!isNaN(c.Level)) {
-        return parseInt(Levels[c.Level].Settings.Duration);
-    } else if (isNaN(c.Level)) {
+    } else if (!isNaN(c.Level)) {//Level Id
+        c.TimeModifier = parseInt(c.TimeModifier);
+        if (!c.TimeModifier || c.TimeModifier === -1) {//No modifier
+            return parseInt(Levels[c.Level].Settings.Duration);
+        } else {//modifier, return modifier time
+            return Modifiers.filter(mod => mod.UniqueID === c.TimeModifier)[0].Duration;//find modifier w/ filter
+        }
+    } else if (isNaN(c.Level)) {//Custom level (not in DB)
         return c.Duration;
     }
     return 0;
@@ -463,6 +470,12 @@ async function getGroupingData() {
     });
 }
 
+async function getModifierData() {
+    return await clientDb.ref("Settings/Sheet-Modifiers").once('value').then((snap) => {
+        Modifiers = snap.val() ? snap.val() : [];
+    });
+}
+
 async function loadAndDisplaySchedule(timeblock) {
     displaySchedule(); //clear
     if (timeblock === null || !timeblock) {
@@ -501,6 +514,7 @@ window.onload = function () {
             initClientDatabase().then(async() => {
                 await getCompleteLevels();
                 await getGroupingData();
+                await getModifierData();
                 resetloader(false, null, null);
             });
         }
@@ -661,7 +675,7 @@ window.onload = function () {
                         }
                     }
                     //Transfer any custom entries to the new data
-                    console.log("Transfer:"+uPos);
+                    console.log("Transfer:" + uPos);
                     barcodes.forEach((code) => {//any custom entries
                         console.log(uPos, oldScheduleData[uPos]);
                         let index = oldScheduleData[uPos].findIndex(sheet => sheet.Barcode === code);

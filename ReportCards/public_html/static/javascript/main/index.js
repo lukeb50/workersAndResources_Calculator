@@ -65,12 +65,12 @@ const accesslist = document.getElementById("access-time-list");
 const printmenu = document.getElementById("print-menu");
 const commentmenu = document.getElementById("comment-menu");
 const visualmenu = document.getElementById("visualmarkingdiv");
-const metadatamenu = document.getElementById("metadata-menu");
+const notemenu = document.getElementById("note-menu");
 const prevlookupmenu = document.getElementById("previouslookup-menu");
 
 const msvholder = document.getElementById("visualmustseeholder");
 
-const loaditms = [loadspinner, overflower, timemenu, printmenu, visualmenu, commentmenu, metadatamenu, prevlookupmenu];//items that should be hidden when showing main blocker
+const loaditms = [loadspinner, overflower, timemenu, printmenu, visualmenu, commentmenu, notemenu, prevlookupmenu];//items that should be hidden when showing main blocker
 
 const screenquery = window.matchMedia("(max-width: 700px)");
 

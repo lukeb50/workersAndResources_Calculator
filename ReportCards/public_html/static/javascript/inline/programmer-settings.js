@@ -341,7 +341,7 @@ function createLvlSettingListBtn(txt, bindTo, bindFunc, lvl, imgName, posVal) {
     }
     bindTo.appendChild(btn);
     if (bindFunc) {
-        bindFunc(btn, lvl,posVal);
+        bindFunc(btn, lvl, posVal);
     }
     return btn;
 }
@@ -657,45 +657,41 @@ function generateMainLevelConfig(id, lvl) {
     }
 }
 
-const metadata_list = document.getElementById("metadata-list");
-var metadata;
-var metadataChanges = [];
-function generateMetadataList() {
-    document.getElementById("metadata-save-btn").onclick = function () {
+const modifier_list = document.getElementById("modifier-list");
+var modifiers;
+function generateModifierList() {
+    document.getElementById("modifier-save-btn").onclick = function () {
         resetloader(true, null, null);
-        saveMetadata(metadata).then(() => {
+        saveModifiers(modifiers).then(() => {
             resetloader(false, null, null);
-            generateEmailSelectMetadata();
         }).catch((e) => {
             resetloader(false, null, null);
         });
     };
 
-    async function saveMetadata(Data) {
-        return await send_http_request("2/save/customsetting", JSON.stringify(Data), [["location", "Sheet-Metadata"]]);
+    async function saveModifiers(Data) {
+        return await send_http_request("2/save/customsetting", JSON.stringify(Data), [["location", "Sheet-Modifiers"]]);
     }
 
-    clientDb.ref("Settings/Sheet-Metadata").once('value').then((snap) => {
-        if (!metadata) {
-            metadata = snap.val() === null ? [] : snap.val();
+    clientDb.ref("Settings/Sheet-Modifiers").once('value').then((snap) => {
+        if (!modifiers) {
+            modifiers = snap.val() === null ? [] : snap.val();
         }
-        generateEmailSelectMetadata();
-        clearChildren(metadata_list);
-        for (var i = 0; i < metadata.length; i++) {
+        clearChildren(modifier_list);
+        for (var i = 0; i < modifiers.length; i++) {
             createListElement(i);
         }
         function createAddBtn() {
             var addbtn = document.createElement("button");
-            addbtn.textContent = "New Metadata";
-            addbtn.id = "metadata-add";
-            metadata_list.appendChild(addbtn);
+            addbtn.textContent = "New Modifier";
+            addbtn.id = "modifier-add";
+            modifier_list.appendChild(addbtn);
             addbtn.onclick = function () {
-                var newName = prompt("Enter new metadata name:").escapeJSON();
-                if (newName && newName !== "") {
-                    metadata.push({Name: newName, UniqueID: calculateUniqueID(newName, metadata)});
-                    console.log(metadata);
-                    metadataChanged();
-                    createListElement(metadata.length - 1);
+                var newName = prompt("Enter new modifier name:").escapeJSON();
+                var timeLength = prompt("Enter modifier class length (minutes): ");
+                if (newName && newName !== "" && timeLength && !isNaN(parseInt(timeLength))) {
+                    modifiers.push({Name: newName, UniqueID: calculateUniqueID(newName, modifiers), Duration: parseInt(timeLength)});
+                    createListElement(modifiers.length - 1);
                 }
                 addbtn.remove();
                 createAddBtn();
@@ -709,11 +705,12 @@ function generateMetadataList() {
     function createListElement(pos) {
         var newDiv = document.createElement("div");
         var txtlbl = document.createElement("label");
-        txtlbl.textContent = metadata[pos].Name;
+        txtlbl.textContent = modifiers[pos].Name + ": " + modifiers[pos].Duration + " Minutes";
         newDiv.appendChild(txtlbl);
         newDiv.appendChild(createButton("Rename", bindRename, pos));
+        newDiv.appendChild(createButton("Duration", bindDuration, pos));
         newDiv.appendChild(createButton("Delete", bindDelete, pos));
-        metadata_list.appendChild(newDiv);
+        modifier_list.appendChild(newDiv);
         function createButton(txt, bindFunction, pos) {
             var btn = document.createElement("button");
             btn.textContent = txt;
@@ -725,29 +722,34 @@ function generateMetadataList() {
 
     function bindRename(button, div, pos) {
         button.onclick = function () {
-            var newName = prompt("Enter a new metadata name:").escapeJSON();
+            var newName = prompt("Enter a new modifier name:").escapeJSON();
             if (newName && newName !== "") {
-                metadata[pos].Name = newName;
+                modifiers[pos].Name = newName;
                 var lbl = div.getElementsByTagName("LABEL")[0];
-                lbl.textContent = newName;
-                metadataChanged();
+                lbl.textContent = modifiers[pos].Name + ": " + modifiers[pos].Duration + " Minutes";
+            }
+        };
+    }
+    
+    function bindDuration(button, div, pos) {
+        button.onclick = function () {
+            var newDur = prompt("Enter new duration (minutes): ");
+            if (newDur && !isNaN(parseInt(newDur))) {
+                modifiers[pos].Duration = parseInt(newDur);
+                var lbl = div.getElementsByTagName("LABEL")[0];
+                lbl.textContent = modifiers[pos].Name + ": " + modifiers[pos].Duration + " Minutes";
             }
         };
     }
 
     function bindDelete(button, div, pos) {
         button.onclick = function () {
-            if (confirm("Delete this metadata?")) {
-                metadata.splice(pos, 1);
-                metadataChanged();
-                generateMetadataList();
+            if (confirm("Delete this modifier?")) {
+                modifiers.splice(pos, 1);
+                generateModifierList();
             }
         };
     }
-}
-
-function metadataChanged() {
-
 }
 
 const facility_holder = document.getElementById("facility-div");
@@ -1090,11 +1092,7 @@ email_plain_body.onfocus = function () {
 
 add_email_modifier_btn.onclick = function () {
     var addText;
-    if (email_modifier_select.options[email_modifier_select.selectedIndex].getAttribute("data-metadata") === "true") {
-        addText = "%Metadata-" + email_modifier_select.options[email_modifier_select.selectedIndex].value + "%";
-    } else {
-        addText = "%" + email_modifier_select.options[email_modifier_select.selectedIndex].label + "%";
-    }
+    addText = "%" + email_modifier_select.options[email_modifier_select.selectedIndex].label + "%";
     if (email_settings_last_focus.selectionStart || email_settings_last_focus.selectionStart === '0') {
         var startPos = email_settings_last_focus.selectionStart;
         var endPos = email_settings_last_focus.selectionEnd;
@@ -1112,10 +1110,6 @@ function parseEmailContent(parseElement, isHTML) {
     for (var i = 0; i < Keys.length; i++) {
         var regex = new RegExp("%" + Keys[i] + "%", "g");
         txtContent = txtContent.replace(regex, (parseElement !== email_subject || email_preview_replacements[Keys[i]] !== null) ? get_email_replacement(Keys[i], isHTML) : "%" + Keys[i] + "%");
-    }
-    for (var m = 0; m < metadata.length; m++) {
-        var regex = new RegExp("%Metadata-" + metadata[m].UniqueID + "%", "g");
-        txtContent = txtContent.replace(regex, metadata[m].Name);
     }
     return txtContent;
 }
@@ -1153,25 +1147,6 @@ email_html_preview.onclick = function () {
 email_plaintext_preview.onclick = function () {
     showEmailPreview(parseEmailContent(email_subject, false), parseEmailContent(email_plain_body, false), false);
 };
-
-function generateEmailSelectMetadata() {
-    if (document.getElementById("metadata-email-list")) {
-        document.getElementById("metadata-email-list").remove();
-    }
-    if (metadata && metadata.length > 0) {
-        var optg = document.createElement("optgroup");
-        optg.id = "metadata-email-list";
-        optg.label = "Metadata";
-        email_modifier_select.appendChild(optg);
-        for (var m = 0; m < metadata.length; m++) {
-            var opt = document.createElement("option");
-            opt.textContent = metadata[m].Name;
-            opt.setAttribute("data-metadata", "true");
-            opt.value = metadata[m].UniqueID;
-            optg.appendChild(opt);
-        }
-    }
-}
 
 function setLevelEdit(newVal) {
     if (newVal === true) {
@@ -1223,7 +1198,7 @@ window.onload = function () {
                 await initCoreData(true);
                 await getCompleteLevels();
                 generateLvlGroupingSettingsList();//Level Config
-                generateMetadataList();
+                generateModifierList();
                 generateFacilityMenu();
                 generateEmailMenu();
                 resetloader(false, null, null);

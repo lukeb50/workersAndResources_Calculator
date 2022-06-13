@@ -409,12 +409,6 @@ function generateTextGraphics(ctx, LevelMarkup, sheet, student, side, inst) {
                 if (sheet.Comments) {
                     return sheet.Comments[student];
                 }
-            case "metadata":
-                if (sheet.Metadata) {
-                    var pos = sheet.Metadata.filter(el => el.MetaID === currentTxt.MetaType);
-                    return pos.length === 1 ? pos[0].Value : "";
-                }
-                return "";
             case "facility_short":
                 return getArchiveSheetTimeblockData(Facilities, "Facilities", sheet.Facility).Shortform;
             case "facility":
