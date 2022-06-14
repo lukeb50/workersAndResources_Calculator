@@ -430,12 +430,14 @@ window.onload = function () {
                     });
                     //get current timeblocks
                 } else {
-                    if (await PerformServiceWorkerInit(true) === true) {
-                        handleBtn();
-                    } else {
-                        alert("Notification service unavailable or permission denied. Please check your browser settings and allow notifications.");
-                    }
-                    //Notification permission denied or not set
+                    PerformServiceWorkerInit(true).then((res) => {
+                        if (res === true) {
+                            handleBtn();
+                        } else {
+                            alert("Notification service unavailable or permission denied. Please check your browser settings and allow notifications.");
+                            //Notification permission denied or not set
+                        }
+                    });
                 }
             };
         }
