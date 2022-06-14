@@ -431,6 +431,7 @@ window.onload = function () {
                     //get current timeblocks
                 } else {
                     PerformServiceWorkerInit(true).then((res) => {
+                        console.log(res);
                         if (res === true) {
                             handleBtn();
                         } else {
