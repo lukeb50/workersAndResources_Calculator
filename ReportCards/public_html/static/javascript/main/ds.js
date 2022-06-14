@@ -103,11 +103,11 @@ window.onload = function () {
         }
     }
 
-    function PerformServiceWorkerInit(makeRequest) {
+    async function PerformServiceWorkerInit(makeRequest) {
         //if makeRequest is true, can prompt user if not chosen.
         //if makeRequest is false, update db if granted, fail otherwise
         if (('Notification' in window)) {
-            registerServiceWorker(makeRequest).then((e) => {
+            await registerServiceWorker(makeRequest).then((e) => {
                 isNotificationsEnabled = true;
                 var Details = {};
                 Details["Endpoint"] = e.endpoint;
@@ -410,7 +410,7 @@ window.onload = function () {
         }
         function bindCurrentNotif(btn, timeIndex) {
             //User.Timeblocks[timeIndex] // Base name of timeblock
-            btn.onclick = function handleBtn() {
+            btn.onclick = async function handleBtn() {
                 notifmenu.setAttribute("timei", timeIndex);
                 if (isNotificationsEnabled === true) {
                     resetloader(true, null, null);
@@ -430,7 +430,7 @@ window.onload = function () {
                     });
                     //get current timeblocks
                 } else {
-                    if (PerformServiceWorkerInit(true) === true) {
+                    if (await PerformServiceWorkerInit(true) === true) {
                         handleBtn();
                     } else {
                         alert("Notification service unavailable or permission denied. Please check your browser settings and allow notifications.");
