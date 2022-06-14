@@ -36,17 +36,25 @@ function setProgrammer(timeblockString) {
     programmerMode = timeblockString ? timeblockString : "";
 }
 
-function changeEditPending(value) {
+/**
+ * indicates an update has been made and requires saving
+ * @param {boolean} value A boolean indicating true = change made, false = changes saved/discared
+ * @param {boolean} bypassIncrement If true, the corrections count will not be updated
+ * @returns {undefined}
+ */
+function changeEditPending(value, bypassIncrement) {
     if (dsMode === true && value === true && allowCorrection === true) {
         document.getElementById("emailbtn").className = "dsbtn unsaved";
-        People[currentTime][currentPerson].Corrections = People[currentTime][currentPerson].Corrections + 1;
-        if (document.getElementById("correction-input-" + currentPerson)) {
-            document.getElementById("correction-input-" + currentPerson).value = People[currentTime][currentPerson].Corrections;
+        if (!bypassIncrement || bypassIncrement === false) {
+            People[currentTime][currentPerson].Corrections = People[currentTime][currentPerson].Corrections + 1;
+            if (document.getElementById("correction-input-" + currentPerson)) {
+                document.getElementById("correction-input-" + currentPerson).value = People[currentTime][currentPerson].Corrections;
+            }
         }
     }
-    if (EditPending === value) {
+    if (EditPending === value) { // no need to update display
         return;
-    }//remove redundant calls to change value
+    }
     if (value === true) {//New unsaved
         savebtn.className = "unsaved";
     } else {//Saved
@@ -837,6 +845,7 @@ function bindNoteBtn(btn, i) {
             titleInput.value = note.Title;
             titleInput.onchange = function () {
                 note.Title = titleInput.value;
+                changeEditPending(true, true);
             };
             noteContainer.appendChild(titleInput);
             //main text input
@@ -844,6 +853,7 @@ function bindNoteBtn(btn, i) {
             txtArea.value = note.Content;
             txtArea.onchange = function () {
                 note.Content = txtArea.value;
+                changeEditPending(true,true);
             };
             //container for control buttons
             noteContainer.appendChild(txtArea);
@@ -869,6 +879,7 @@ function bindNoteBtn(btn, i) {
             });
             indicatorSel.value = note.Indicator;
             indicatorSel.onchange = function () {
+                changeEditPending(true,true);
                 note.Indicator = indicatorSel.value;
             };
             //delete button
@@ -879,12 +890,13 @@ function bindNoteBtn(btn, i) {
                 let noteLoc = sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes;
                 sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes = noteLoc.filter(lNote => lNote.UniqueID !== note.UniqueID);
                 noteContainer.remove();
+                changeEditPending(true,true);
             };
             controlHolder.appendChild(deletebtn);
             //ds notice
             if (isDs) {
                 let dsNotice = document.createElement("p");
-                dsNotice.textContent = "Lead Note";
+                dsNotice.textContent = "Supervisor Note";
                 controlHolder.appendChild(dsNotice);
             }
             note_section.insertBefore(noteContainer, noteBtnHolder);
@@ -905,6 +917,7 @@ function bindNoteBtn(btn, i) {
             let id = calculateUniqueObjectID("Note", sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes);
             let newNote = {Title: "", Content: "", Indicator: -1, UniqueID: id};
             sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes.push(newNote);
+            changeEditPending(true,true);
             showNote(newNote, isDs);
         }
     };

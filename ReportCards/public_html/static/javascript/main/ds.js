@@ -116,10 +116,12 @@ window.onload = function () {
                 clientDb.ref("FCM-Token/" + firebase.auth().currentUser.uid).set(Details);
                 return true;
             }).catch((f) => {
+                console.error(f);
                 isNotificationsEnabled = false;
                 return f;
             });
         } else {
+            console.warn("Notification service not present");
             isNotificationEnabled = false;//No support in browser
         }
     }
@@ -410,7 +412,7 @@ window.onload = function () {
             //User.Timeblocks[timeIndex] // Base name of timeblock
             btn.onclick = function () {
                 notifmenu.setAttribute("timei", timeIndex);
-                if (isNotificationsEnabled === true) {
+                //if (isNotificationsEnabled === true) {
                     resetloader(true, null, null);
                     var timeSplit = UserData.Timeblocks[timeIndex].split("---");
                     clientDb.ref("FCM/" + timeSplit[0] + "/" + timeSplit[1] + "/" + firebase.auth().currentUser.uid).once('value', (snapshot) => {
@@ -427,10 +429,10 @@ window.onload = function () {
                         }
                     });
                     //get current timeblocks
-                } else {
-                    alert("Notification service unavailable or permission denied. Please check your browser settings and allow notifications.");
+                //} else {
+                    //alert("Notification service unavailable or permission denied. Please check your browser settings and allow notifications.");
                     //Notification permission denied or not set
-                }
+                //}
             };
         }
     }
