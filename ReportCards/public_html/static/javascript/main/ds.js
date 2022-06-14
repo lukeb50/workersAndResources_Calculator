@@ -95,10 +95,9 @@ window.onload = function () {
                 });
                 return subscription;
             } catch (e) {
-                console.log(e);
                 throw new Error(e);
             }
-        } else {
+        } else{
             throw new Error("No Request");
         }
     }
@@ -106,24 +105,28 @@ window.onload = function () {
     async function PerformServiceWorkerInit(makeRequest) {
         //if makeRequest is true, can prompt user if not chosen.
         //if makeRequest is false, update db if granted, fail otherwise
-        if (('Notification' in window)) {
-            await registerServiceWorker(makeRequest).then((e) => {
-                isNotificationsEnabled = true;
-                var Details = {};
-                Details["Endpoint"] = e.endpoint;
-                Details["P256"] = e.toJSON().keys.p256dh;
-                Details["Auth"] = e.toJSON().keys.auth;
-                clientDb.ref("FCM-Token/" + firebase.auth().currentUser.uid).set(Details);
-                return true;
-            }).catch((f) => {
-                console.error(f);
-                isNotificationsEnabled = false;
-                return f;
-            });
-        } else {
-            console.warn("Notification service not present");
-            isNotificationEnabled = false;//No support in browser
-        }
+        return new Promise((resolve, reject) => {
+            if (('Notification' in window)) {
+                registerServiceWorker(makeRequest).then((e) => {
+                    isNotificationsEnabled = true;
+                    var Details = {};
+                    Details["Endpoint"] = e.endpoint;
+                    Details["P256"] = e.toJSON().keys.p256dh;
+                    Details["Auth"] = e.toJSON().keys.auth;
+                    clientDb.ref("FCM-Token/" + firebase.auth().currentUser.uid).set(Details);
+                    resolve(true);
+                }).catch((f) => {
+                    console.error(f);
+                    isNotificationsEnabled = false;
+                    reject("No permission");
+                    return "Error";
+                });
+            } else {
+                console.warn("Notification service not present");
+                isNotificationEnabled = false;//No support in browser
+                reject("No service");
+            }
+        });
     }
 
     close_mainmenu.onclick = function () {
@@ -431,13 +434,10 @@ window.onload = function () {
                     //get current timeblocks
                 } else {
                     PerformServiceWorkerInit(true).then((res) => {
-                        console.log(res);
-                        if (res === true) {
-                            handleBtn();
-                        } else {
-                            alert("Notification service unavailable or permission denied. Please check your browser settings and allow notifications.");
-                            //Notification permission denied or not set
-                        }
+                        handleBtn();
+                    }).catch((e) => {
+                        console.log(e);
+                        alert("Notification service unavailable or permission denied. Please check your browser settings and allow notifications.");
                     });
                 }
             };
