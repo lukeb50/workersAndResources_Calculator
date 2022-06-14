@@ -410,9 +410,9 @@ window.onload = function () {
         }
         function bindCurrentNotif(btn, timeIndex) {
             //User.Timeblocks[timeIndex] // Base name of timeblock
-            btn.onclick = function () {
+            btn.onclick = function handleBtn() {
                 notifmenu.setAttribute("timei", timeIndex);
-                //if (isNotificationsEnabled === true) {
+                if (isNotificationsEnabled === true) {
                     resetloader(true, null, null);
                     var timeSplit = UserData.Timeblocks[timeIndex].split("---");
                     clientDb.ref("FCM/" + timeSplit[0] + "/" + timeSplit[1] + "/" + firebase.auth().currentUser.uid).once('value', (snapshot) => {
@@ -429,21 +429,23 @@ window.onload = function () {
                         }
                     });
                     //get current timeblocks
-                //} else {
-                    //alert("Notification service unavailable or permission denied. Please check your browser settings and allow notifications.");
+                } else {
+                    if (PerformServiceWorkerInit(true) === true) {
+                        handleBtn();
+                    } else {
+                        alert("Notification service unavailable or permission denied. Please check your browser settings and allow notifications.");
+                    }
                     //Notification permission denied or not set
-                //}
+                }
             };
         }
     }
 
     notifsubscribebtn.onclick = function () {
         if (isNotificationsEnabled === false) {//attempt to get permission if not granted
-            if (PerformServiceWorkerInit(true) !== true) {
-                alert("Please turn on notifications in your browser settings.");
-                resetloader(false, null, null);
-                return;
-            }
+            alert("Please turn on notifications in your browser settings.");
+            resetloader(false, null, null);
+            return;
         }
         //Permission must exist at this point
         var timeSplit = UserData.Timeblocks[parseInt(notifmenu.getAttribute("timei"))].split("---");
