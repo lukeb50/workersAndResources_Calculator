@@ -540,6 +540,13 @@ button.roundaction{
     flex-direction: column;
 }
 
+#main-menu.large{
+    top:2%;
+    height: 96%;
+    left: 5%;
+    width:90%;
+}
+
 #topbar-controls button,#topbar-overflow button:not(#topbar-overflow-close){
     background:transparent;
     border: none;

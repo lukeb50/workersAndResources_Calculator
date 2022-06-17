@@ -236,7 +236,7 @@ function renderTable(id) {
                     combtn.textContent = Levels[nxtLvl].Shortform.toUpperCase();
                 }
                 var isOverride = documents[dsMode === false ? currentTime : currentPerson][id].NextLevel[i];
-                combtn.className = (isOverride === getNextLevel(id)) || (isOverride === documents[dsMode === false ? currentTime : currentPerson][id].Level) ? "lvlbtn" : "lvlbtn override";
+                combtn.className = (isOverride === getNextLevel(id)) || (isOverride === parseInt(documents[dsMode === false ? currentTime : currentPerson][id].Level)) ? "lvlbtn" : "lvlbtn override";
                 combtn.disabled = isDisabled;
                 AttachLvlClick(combtn, id, i, comp);
                 comindicator.appendChild(combtn);
@@ -497,7 +497,7 @@ var comment_box = document.getElementById("comment-box");
 var comment_save_btn = document.getElementById("comment-save-btn");
 function AttachCommentClick(commbtn, id, i) {
     commbtn.onclick = function () {
-        resetloader(false, commentmenu, "block");
+        resetloader(false,commentmenu,"block",false);
         var currentLevel = documents[dsMode === false ? currentTime : currentPerson][id].Level;
         comment_box.setAttribute("maxlength", Levels[currentLevel].Text ? getCommentSize(Levels[currentLevel].Text) : 2500);
         comment_box.value = documents[dsMode === false ? currentTime : currentPerson][id].Comments[i];
@@ -510,7 +510,7 @@ function AttachCommentClick(commbtn, id, i) {
         comment_save_btn.addEventListener("click", onSaveBtn);
     };
     function onSaveBtn() {
-        resetloader(false, null, null);
+        resetloader(false,null,null,false);
         if (documents[dsMode === false ? currentTime : currentPerson][id].Comments[i] !== comment_box.value) {
             changeEditPending(true);
             renderTable(id);
@@ -795,7 +795,7 @@ const noteIndicators = [{Id: 0, Name: "Info", Image: ""}, {Id: 1, Name: "Alert",
 function bindNoteBtn(btn, i) {
     btn.onclick = function () {
         var sheet = documents[dsMode === false ? currentTime : currentPerson][i];
-        resetloader(false, notemenu, "flex");
+        resetloader(false,notemenu,"flex",false);
         //Class modifier select
         clearChildren(modifier_select);
         modifier_select.setAttribute("data-sheet", i);

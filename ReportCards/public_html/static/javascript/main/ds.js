@@ -116,10 +116,9 @@ window.onload = function () {
                     clientDb.ref("FCM-Token/" + firebase.auth().currentUser.uid).set(Details);
                     resolve(true);
                 }).catch((f) => {
-                    console.error(f);
+                    console.warn(f);
                     isNotificationsEnabled = false;
                     reject("No permission");
-                    return "Error";
                 });
             } else {
                 console.warn("Notification service not present");
@@ -268,7 +267,6 @@ window.onload = function () {
 
     timebtn.onclick = function () {
         if (EditPending === false) {
-            console.log(Facilities[Object.keys(Facilities)[0]]);
             timemselect.value = UserData.Home ? UserData.Home : Facilities[Object.keys(Facilities)[0]].UniqueID;
             resetloader(false, timemenu, "flex");
             showAvailableTimes();
@@ -398,8 +396,9 @@ window.onload = function () {
             //Check for notification support, show btn if in browser
             if (('Notification' in window)) {
                 var notifbtn = document.createElement("button");
-                notifbtn.textContent = "!";
-                notifbtn.className = "listdot roundaction";
+                notifbtn.textContent = "notifications";
+                notifbtn.title = "Notification settings";
+                notifbtn.className = "listdot roundaction material-symbols-outlined";
                 bindCurrentNotif(notifbtn, i);
                 btndiv.appendChild(notifbtn);
             }
@@ -436,7 +435,6 @@ window.onload = function () {
                     PerformServiceWorkerInit(true).then((res) => {
                         handleBtn();
                     }).catch((e) => {
-                        console.log(e);
                         alert("Notification service unavailable or permission denied. Please check your browser settings and allow notifications.");
                     });
                 }
@@ -452,7 +450,6 @@ window.onload = function () {
         }
         //Permission must exist at this point
         var timeSplit = UserData.Timeblocks[parseInt(notifmenu.getAttribute("timei"))].split("---");
-        console.log(timeSplit);
         var fbref = clientDb.ref("FCM/" + timeSplit[0] + "/" + timeSplit[1] + "/" + firebase.auth().currentUser.uid);
         if (notifsubscribebtn.textContent === "Subscribe") {
             //sub

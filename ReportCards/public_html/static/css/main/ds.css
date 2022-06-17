@@ -355,3 +355,12 @@ button.disablebtn-disabled{
     border:0;
     border-radius: 5px 5px 0 0;
 }
+
+#current-time-list div div button.material-symbols-outlined{
+    font-size: 16px;
+    font-weight: normal;
+}
+
+#current-time-list div div{
+    display: flex;
+}

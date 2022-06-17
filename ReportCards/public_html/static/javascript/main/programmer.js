@@ -447,7 +447,7 @@ window.onload = function () {
                 btitle.innerHTML = results[i].Type;
                 div.appendChild(btitle);
                 var uname = document.createElement("p");
-                uname.innerHTML = "User: <b>" + results[i].SentBy.split(":::")[1] + "</b>";
+                uname.innerHTML = "Committing User: <b>" + results[i].SentBy.split(":::")[1] + "</b>";
                 div.appendChild(uname);
                 var tname = document.createElement("p");
                 tname.innerHTML = "Time: <b>" + timestampToText(results[i].Timestamp) + "</b>";
@@ -647,7 +647,7 @@ window.onload = function () {
                 var txt = document.createElement("label");
                 var Timeblock = getArchiveSheetTimeblockData(Timeblocks, "Timeblock", options[i].Timeblock);
                 var Facility = getArchiveSheetTimeblockData(Facilities, "Facility", options[i].Facility);
-                txt.textContent = options[i].Level + " - " + Timeblock.Name + " (" + Facility.Shortform + ")";
+                txt.textContent = Levels[options[i].Level].Name + " - " + Timeblock.Name + " (" + Facility.Shortform + ")";
                 holder.appendChild(txt);
                 var btn = document.createElement("button");
                 function handleClick(btn, i) {
