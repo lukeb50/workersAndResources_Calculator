@@ -39,17 +39,17 @@ window.onload = function () {
 
     document.getElementById("newlinkbtn").onclick = function () {
         if (email_pattern.test(loginemail_input.value)) {
-            resetloader(true, null, null);
+            resetloader(true ,null ,null ,false);
             send_http_request("send/email/link", loginemail_input.value, [], "authentication").then(() => {
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
                 alert("Please check your inbox for a new link");
             }).catch((err) => {
                 console.log(err);
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
                 alert("Please check the email you entered and try again");
             });
         } else {
-            resetloader(false, null, null);
+            resetloader(false ,null ,null ,false);
             alert("Please enter a valid email in the box.");
         }
     };
@@ -59,14 +59,14 @@ window.onload = function () {
         primary_div.style.display = "none";
         loginemail_div.style.display = "block";
         document.getElementById("loginemail-confirmemail-btn").onclick = function () {
-            resetloader(true, null, null);
+            resetloader(true ,null ,null ,false);
             firebase.auth().signInWithEmailLink(loginemail_input.value, window.location.href).then((result) => {
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
                 document.getElementById("loginemail-confirmemail-btn").disabled = true;
                 document.getElementById("loginemail-provider-panel").style.display = "block";
                 loginemail_div.style.display = "none";
             }).catch((err) => {
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
                 console.log(err);
                 if (err.code === "auth/invalid-action-code") {
                     alert("This link has expired. Please click 'Generate New Link' to receive a new login code.");
@@ -118,9 +118,9 @@ window.onload = function () {
     function emailLogin() {
         sierror.textContent = "";
         if (siemail.value.length > 0 && sipassword.value.length > 0) {
-            resetloader(true, null, null);
+            resetloader(true ,null ,null ,false);
             firebase.auth().signInWithEmailAndPassword(siemail.value, sipassword.value).catch(function (error) {
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
                 var errorCode = error.code;
                 if (errorCode === "auth/internal-error") {
                     sierror.textContent = "Internal error";
@@ -238,7 +238,7 @@ window.onload = function () {
             });
         }
     }, function (error) {
-        resetloader(false, null, null);
+        resetloader(false ,null ,null ,false);
         primary_div.style.display = "block";
         secondary_div.style.display = "none";
     });
@@ -247,7 +247,7 @@ window.onload = function () {
         var userOrgs = await getMainDBValue("Users/" + user.uid);
         if (userOrgs && Object.keys(userOrgs.Organizations).length > 1) {
             showSecondary(userOrgs);
-            resetloader(false, null, null);
+            resetloader(false ,null ,null ,false);
         } else if (userOrgs) {
             send_Claim_Request(Object.keys(userOrgs.Organizations)[0]);
         } else {
@@ -276,17 +276,17 @@ window.onload = function () {
 
     async function send_Claim_Request(OrgId) {
         //Request server set custom claim to given ID
-        resetloader(true, null, null);
+        resetloader(true ,null ,null ,false);
         send_http_request("set/organization", OrgId, [], "authentication").then((res) => {
             firebase.auth().currentUser.getIdTokenResult(true).then((result) => {
                 document.cookie = "token=" + result.token;
                 window.location.href = window.location.href.split("?")[0];
             }).catch((err) => {
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
                 console.log("Error updating user. Please try again soon.");
             });
         }).catch((err) => {
-            resetloader(false, null, null);
+            resetloader(false ,null ,null ,false);
             alert("Error logging in. Please try again soon.");
         });
     }

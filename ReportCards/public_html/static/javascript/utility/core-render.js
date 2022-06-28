@@ -1,4 +1,4 @@
-/* global firebase, add_row_btn, documents, currentTime, printbtn, maintable, blocker, blocker_change, blocker_lvl, blocker_mark, blocker_mustsee, screenquery, sheetinfo, overflowbtn, topbar_controls, overflowmenu, barlist, loadblocker, btnback, btnnext, savebtn, currentPerson, People, UserData, commentmenu, manual_sel, manual_div, notemenu, clientDb, upload_button_div, new_sheet_manual */
+/* global firebase, add_row_btn, documents, currentTime, printbtn, maintable, blocker, blocker_change, blocker_lvl, blocker_mark, blocker_mustsee, screenquery, sheetinfo, overflowbtn, topbar_controls, overflowmenu, barlist, loadblocker, btnback, btnnext, savebtn, currentPerson, People, UserData, commentmenu, manual_sel, manual_div, notemenu, clientDb, upload_button_div, new_sheet_manual, getSheetModifier, getLvlInfo */
 var staticPath = "../../static";
 const marking_change_btns = [document.getElementById("blocker_btn1"), document.getElementById("blocker_btn2")];
 var markingOptions = new Map();
@@ -106,14 +106,12 @@ function renderTable(id) {
             }
             add_row_btn.style.display = "block";
             add_row_btn.disabled = isDisabled;
-            if (documents[dsMode === false ? currentTime : currentPerson][id].Names.length <= 25) {
+            if (documents[dsMode === false ? currentTime : currentPerson][id].Names.length < 25) {
                 add_row_btn.style.display = "block";
             } else {
                 add_row_btn.style.display = "none";
             }
-            while (maintable.firstChild) {//delete existing table
-                maintable.removeChild(maintable.firstChild);
-            }
+            clearChildren(maintable);
             var row = document.createElement("tr");
             row.id = "inforow";
             var Nameheader = document.createElement("th");
@@ -244,18 +242,16 @@ function renderTable(id) {
                 maintable.appendChild(row);
             }
             if (documents[dsMode === false ? currentTime : currentPerson][id].Barcode) {
-                changeSheetInfo(documents[dsMode === false ? currentTime : currentPerson][id].Level, documents[dsMode === false ? currentTime : currentPerson][id].Barcode);
+                changeSheetInfo(documents[dsMode === false ? currentTime : currentPerson][id], documents[dsMode === false ? currentTime : currentPerson][id].Barcode);
             } else {
-                changeSheetInfo(documents[dsMode === false ? currentTime : currentPerson][id].Level, 0);
+                changeSheetInfo(documents[dsMode === false ? currentTime : currentPerson][id], 0);
             }
         });
     } else {//no table to render, delete existing
         add_row_btn.style.display = "none";
         printbtn.style.display = "none";
-        changeSheetInfo("", 0);
-        while (maintable.firstChild) {//delete existing table
-            maintable.removeChild(maintable.firstChild);
-        }
+        changeSheetInfo(null, 0);
+        clearChildren(maintable);
     }
 
     async function doLevelLoad(lvlID) {
@@ -497,7 +493,7 @@ var comment_box = document.getElementById("comment-box");
 var comment_save_btn = document.getElementById("comment-save-btn");
 function AttachCommentClick(commbtn, id, i) {
     commbtn.onclick = function () {
-        resetloader(false,commentmenu,"block",false);
+        resetloader(false, commentmenu, "block", false);
         var currentLevel = documents[dsMode === false ? currentTime : currentPerson][id].Level;
         comment_box.setAttribute("maxlength", Levels[currentLevel].Text ? getCommentSize(Levels[currentLevel].Text) : 2500);
         comment_box.value = documents[dsMode === false ? currentTime : currentPerson][id].Comments[i];
@@ -510,7 +506,7 @@ function AttachCommentClick(commbtn, id, i) {
         comment_save_btn.addEventListener("click", onSaveBtn);
     };
     function onSaveBtn() {
-        resetloader(false,null,null,false);
+        resetloader(false, null, null, false);
         if (documents[dsMode === false ? currentTime : currentPerson][id].Comments[i] !== comment_box.value) {
             changeEditPending(true);
             renderTable(id);
@@ -621,9 +617,9 @@ function attachCheckUpdate(object, id, i, p, msindex) {
     });
 }
 
-function changeSheetInfo(level, code, resize) {
-    if (level !== "") {
-        sheetinfo.textContent = Levels[level].Name + (screenquery.matches === true ? "" : " #" + code);
+function changeSheetInfo(sheet, code) {
+    if (sheet !== null) {
+        sheetinfo.textContent = Levels[sheet.Level].Name + (screenquery.matches === true ? "" : " " + createModifierText(sheet) + " #" + code);
     } else {
         sheetinfo.textContent = "No Selection";
     }
@@ -689,6 +685,7 @@ async function populatebar(reset) {
         //Level text
         var lvltxt = document.createElement("label");
         var lvlt = barLvlInfo.Name;
+        lvlt += " " + createModifierText(sheet);
         lvltxt.textContent = lvlt;
         //append info
         newdiv.appendChild(lvltxt);
@@ -772,7 +769,7 @@ function controlSheetChange(div, id) {
         }
     });
     div.getElementsByTagName("input")[0].addEventListener('blur', function () {
-        changeSheetInfo(documents[dsMode === false ? currentTime : currentPerson][id].Level, div.getElementsByTagName("input")[0].value);
+        changeSheetInfo(documents[dsMode === false ? currentTime : currentPerson][id], div.getElementsByTagName("input")[0].value);
         renderTable(id);
     });
 }
@@ -795,7 +792,7 @@ const noteIndicators = [{Id: 0, Name: "Info", Image: ""}, {Id: 1, Name: "Alert",
 function bindNoteBtn(btn, i) {
     btn.onclick = function () {
         var sheet = documents[dsMode === false ? currentTime : currentPerson][i];
-        resetloader(false,notemenu,"flex",false);
+        resetloader(false, notemenu, "flex", false);
         //Class modifier select
         clearChildren(modifier_select);
         modifier_select.setAttribute("data-sheet", i);
@@ -853,7 +850,7 @@ function bindNoteBtn(btn, i) {
             txtArea.value = note.Content;
             txtArea.onchange = function () {
                 note.Content = txtArea.value;
-                changeEditPending(true,true);
+                changeEditPending(true, true);
             };
             //container for control buttons
             noteContainer.appendChild(txtArea);
@@ -879,7 +876,7 @@ function bindNoteBtn(btn, i) {
             });
             indicatorSel.value = note.Indicator;
             indicatorSel.onchange = function () {
-                changeEditPending(true,true);
+                changeEditPending(true, true);
                 note.Indicator = indicatorSel.value;
             };
             //delete button
@@ -890,7 +887,7 @@ function bindNoteBtn(btn, i) {
                 let noteLoc = sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes;
                 sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes = noteLoc.filter(lNote => lNote.UniqueID !== note.UniqueID);
                 noteContainer.remove();
-                changeEditPending(true,true);
+                changeEditPending(true, true);
             };
             controlHolder.appendChild(deletebtn);
             //ds notice
@@ -917,7 +914,7 @@ function bindNoteBtn(btn, i) {
             let id = calculateUniqueObjectID("Note", sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes);
             let newNote = {Title: "", Content: "", Indicator: -1, UniqueID: id};
             sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes.push(newNote);
-            changeEditPending(true,true);
+            changeEditPending(true, true);
             showNote(newNote, isDs);
         }
     };
@@ -927,6 +924,8 @@ modifier_select.onchange = function () {
     var sheet = parseInt(modifier_select.getAttribute("data-sheet"));
     documents[dsMode === false ? currentTime : currentPerson][sheet].TimeModifier = parseInt(modifier_select.value);
     changeEditPending(true);
+    changeSheetInfo(documents[dsMode === false ? currentTime : currentPerson][sheet], documents[dsMode === false ? currentTime : currentPerson][sheet].Barcode);
+    populatebar(0);
 };
 
 async function bindApproveBtn(appbtn, apptext, i) {
@@ -985,7 +984,7 @@ function attachUpdate(object, i) {
         documents[dsMode === false ? currentTime : currentPerson][i].Barcode = object.value;
         changeEditPending(true);
         if (!screenquery.matches) {
-            changeSheetInfo(documents[dsMode === false ? currentTime : currentPerson][i].Level, object.value);
+            changeSheetInfo(documents[dsMode === false ? currentTime : currentPerson][i], object.value);
             handleresize();
         }
         renderTable(i);
@@ -1029,21 +1028,6 @@ async function DataPull() {
     });
 }
 
-async function getLvlInfo(Level) {
-    return new Promise((resolve, reject) => {
-        if (Levels[Level] === undefined) {
-            clientDb.ref("Levels/" + Level).once('value').then((lvlSnap) => {
-                Levels[Level] = processLoadedLevel(lvlSnap.val());
-                resolve(Levels[Level]);
-            }).catch((err) => {
-                reject(err);
-            });
-        } else {
-            resolve(Levels[Level]);
-        }
-    });
-}
-
 const manual_div = document.getElementById("manual_lvl_div");
 const manual_sel = document.getElementById("manual_selector");
 const manual_time = document.getElementById("manual_time");
@@ -1083,9 +1067,10 @@ document.getElementById("manual_create_btn").onclick = function () {
             }
         });
         documents[dsMode === false ? currentTime : currentPerson].push(toAdd);
+        documents[dsMode === false ? currentTime : currentPerson].sort((a, b) => parseInt(a.TimeStart) - parseInt(b.TimeStart));
         populatebar(0);
         changeEditPending(true);
-        renderTable(documents[dsMode === false ? currentTime : currentPerson].length - 1);
+        renderTable(documents[dsMode === false ? currentTime : currentPerson].indexOf(toAdd));
         upload_button_div.style.display = "flex";
         manual_div.style.display = "none";
     }

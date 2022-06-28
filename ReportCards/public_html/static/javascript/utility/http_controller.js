@@ -1,4 +1,4 @@
-/* global firebase, loaditms, storage, loadblocker, loadspinner, billing_table, mainmenu, Levels */
+/* global firebase, loaditms, storage, loadblocker, loadspinner, billing_table, mainmenu, Levels, SheetModifiers, getLvlInfo */
 const email_pattern = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 const firebaseConfig = {
     apiKey: "AIzaSyCG2ONqpyLey1OP8B9135Yqk3dfrT9J9ts",
@@ -154,20 +154,24 @@ function clearChildren(el) {
     }
 }
 
-function resetloader(isLoad, itemToShow, displayType) {
+function resetloader(isLoad, itemToShow, displayType, isLarge) {
+    //Hide all menu elements
     if (typeof loaditms !== 'undefined') {
         for (var i = 0; i < loaditms.length; i++) {
             loaditms[i].style.display = itemToShow === loaditms[i] ? displayType : "none";
         }
     }
+    //show load spinner or menu
     if (isLoad === true) {
         if (typeof mainmenu !== 'undefined') {
             mainmenu.style.display = "none";
+        } else {
+            return;
         }
         loadblocker.style.display = "block";
         loadspinner.style.display = "block";
     } else if (isLoad === false && itemToShow !== null) {
-        if (typeof mainmenu !== 'undefined') {
+        if (typeof mainmenu !== 'undefined') {//show
             mainmenu.style.display = "flex";
         }
         loadblocker.style.display = "block";
@@ -179,6 +183,8 @@ function resetloader(isLoad, itemToShow, displayType) {
         loadblocker.style.display = "none";
         loadspinner.style.display = "none";
     }
+    //Handle size
+    mainmenu.className = isLarge === true ? "large" : "";
 }
 
 const isOverflown = ({clientHeight, scrollHeight}) => scrollHeight > clientHeight;
@@ -377,9 +383,7 @@ function showBilling() {
     const billing_month = document.getElementById("billing-month-select");
     const billing_year = document.getElementById("billing-year-select");
     send_http_request("get/currentmonth", "", [], "billing").then((bData) => {
-        console.log("Billing:" + bData);
         var BillingData = JSON.parse(bData);
-        console.log(BillingData);
         clearChildren(billing_month);
         Months.forEach((month, i) => {
             let m = document.createElement("option");
@@ -446,11 +450,11 @@ if (document.getElementById("general-save-btn")) {
         for (var i = 0; i < General_Settings.length; i++) {
             toSend[General_Settings[i].Name] = General_Settings[i].Element[General_Settings[i].Type === "checkbox" ? "checked" : "value"];
         }
-        resetloader(true, null, null);
+        resetloader(true, null, null, false);
         setValue(toSend).then(() => {
-            resetloader(false, null, null);
+            resetloader(false, null, null, false);
         }).catch((err) => {
-            resetloader(false, null, null);
+            resetloader(false, null, null, false);
             alert("Error changing settings. Please refresh and try again");
             console.log(err);
         });
@@ -458,4 +462,40 @@ if (document.getElementById("general-save-btn")) {
             return await send_http_request("2/set/value", JSON.stringify(Object), []);
         }
     };
+}
+
+function getSheetModifier(sheet) {
+    if (sheet.TimeModifier && parseInt(sheet.TimeModifier) !== -1) {
+        let  mods = SheetModifiers.filter((m) => m.UniqueID === parseInt(sheet.TimeModifier));
+        if(mods.length === 1){
+            return mods[0];
+        }else{
+            return {UniqueID: 0, Name: "Error", Duration:parseInt(Levels[sheet.Level].Settings.Duration)};
+        }
+    }
+    return null;
+}
+
+function createModifierText(sheet){
+    var txt = "";
+    var mod = getSheetModifier(sheet);
+    if(mod !== null){
+        txt = "("+mod.Name+")";
+    }
+    return txt;
+}
+
+async function getLvlInfo(Level) {
+    return new Promise((resolve, reject) => {
+        if (Levels[Level] === undefined) {
+            clientDb.ref("Levels/" + Level).once('value').then((lvlSnap) => {
+                Levels[Level] = processLoadedLevel(lvlSnap.val());
+                resolve(Levels[Level]);
+            }).catch((err) => {
+                reject(err);
+            });
+        } else {
+            resolve(Levels[Level]);
+        }
+    });
 }

@@ -1,4 +1,4 @@
-/* global firebase, initClientDatabase, clientDb, XLSX */
+/* global firebase, initClientDatabase, clientDb, XLSX, getSheetModifier */
 
 const loadspinner = document.getElementById("loadspinner");
 const sheetinfomenu = document.getElementById("sheetinfo-menu");
@@ -8,9 +8,10 @@ const close_mainmenu = document.getElementById("main-menu-close-btn");
 const loaditms = [loadspinner, sheetinfomenu, configmenu];
 var scheduleData = [];
 var People = [];
+var sheetGroupingInfo = [];
 var Levels = {};
 var GroupingData = [];
-var Modifiers = [];
+var SheetModifiers = [];
 var editMode = true;
 const scheduleTable = document.getElementById("scheduleTable");
 var timeIntervalId = -1;
@@ -51,16 +52,23 @@ function displaySchedule(Time) {
             var isLesson = false;
             for (var s = 0; s < scheduleData[i].length; s++) {
                 var currentSheet = scheduleData[i][s];
-                if (parseInt(getClassProperty(currentSheet, "TimeStart")) === t) {
-                    isLesson = true;
-                    var lessonHolder = document.createElement("td");
-                    lessonHolder.className = "lesson";
-                    lessonHolder.rowSpan = getClassDuration(currentSheet) / tableInformation.increment;
-                    lessonHolder.style.backgroundColor = getLevelColor(getClassProperty(currentSheet, "Level"));
-                    createSheetListing(lessonHolder, i, s);
-                    timerow.appendChild(lessonHolder);
-                } else if (t >= parseInt(getClassProperty(currentSheet, "TimeStart")) && t < parseInt(getClassProperty(currentSheet, "TimeStart")) + getClassDuration(currentSheet)) {
-                    isLesson = true;
+                let groupPos = checkIfGrouped(currentSheet, i);
+                if (groupPos.Position === false || groupPos.Position === 0) {
+                    if (parseInt(getClassProperty(currentSheet, "TimeStart")) === t) {
+                        isLesson = true;
+                        var lessonHolder = document.createElement("td");
+                        lessonHolder.className = "lesson";
+                        lessonHolder.rowSpan = getClassDuration(currentSheet) / tableInformation.increment;
+                        lessonHolder.style.backgroundColor = getLevelColor(getClassProperty(currentSheet, "Level"));
+                        if (groupPos.Position === false) {//not grouped
+                            createSheetListing(lessonHolder, currentSheet, i);
+                        } else if (groupPos.Position === 0) {//first in group, show
+                            createSheetListing(lessonHolder, groupPos.Group, i);
+                        }
+                        timerow.appendChild(lessonHolder);
+                    } else if (t >= parseInt(getClassProperty(currentSheet, "TimeStart")) && t < parseInt(getClassProperty(currentSheet, "TimeStart")) + getClassDuration(currentSheet)) {
+                        isLesson = true;
+                    }
                 }
             }
             if (isLesson === false) {
@@ -69,6 +77,17 @@ function displaySchedule(Time) {
             }
         }
         scheduleTable.appendChild(timerow);
+    }
+
+    function checkIfGrouped(sheet, instructorI) {
+        for (var i = 0; i < sheetGroupingInfo[instructorI].length; i++) {
+            let group = sheetGroupingInfo[instructorI][i];
+            let sheetPos = group.indexOf(sheet);
+            if (sheetPos !== -1) {
+                return {Position: sheetPos, Group: group};
+            }
+        }
+        return {Position: false, Group: null};
     }
 
     var currentTime = new Date();
@@ -108,19 +127,18 @@ function displaySchedule(Time) {
         }
     }
 
-    function createSheetListing(table, inst, sheetI) {
-        var sheet = scheduleData[inst][sheetI];
+    function createSheetListing(table, sheet, instructor) {
         var isCombo = Array.isArray(sheet);
         var holder = document.createElement("div");
         table.appendChild(holder);
         //create labels
         var lvlText = document.createElement("b");
         if (!isCombo) {
-            lvlText.textContent = getLevelName(sheet);
+            lvlText.textContent = getLevelName(sheet) + " " + createModifierText(sheet);
         } else {
             var lvlNameArr = [];
             for (var i = 0; i < sheet.length; i++) {
-                lvlNameArr.push(getLevelName(sheet[i]));
+                lvlNameArr.push(getLevelName(sheet[i]) + " " + createModifierText(sheet[i]));
             }
             lvlText.textContent = lvlNameArr.join(", ");
         }
@@ -152,35 +170,34 @@ function displaySchedule(Time) {
         timeText.className = "light";
         timeText.textContent = convertTimeReadable(parseInt(getClassProperty(sheet, "TimeStart"))) + " - " + convertTimeReadable(parseInt(getClassProperty(sheet, "TimeStart")) + getClassDuration(sheet));
         holder.appendChild(timeText);
-        bindSheetClick(holder, inst, sheetI);
+        bindSheetClick(holder, sheet, instructor);
     }
 
     function getLevelName(sheet) {
         return Levels[sheet.Level] ? Levels[sheet.Level].Name : sheet.Level;
     }
 
-    function bindSheetClick(div, i, s) {
+    function bindSheetClick(div, sheet, instructor) {
         div.onclick = function () {
-            displaySheetMenu(i, s);
+            displaySheetMenu(sheet, instructor);
         };
     }
 
-    function displaySheetMenu(i, s) {
+    function displaySheetMenu(sheet, instructor) {
         clearChildren(sheetinfomenu);
-        sheet = scheduleData[i][s];
         if (Array.isArray(sheet)) {
-            sheet.forEach((c) => {
-                createSheetMenu(sheetinfomenu, c, i, s);
+            sheet.forEach((c) => {//TODO: Rerender of individual sheet removes all other grouped sheets
+                createSheetMenu(sheetinfomenu, c, instructor, sheet);
             });
         } else {
-            createSheetMenu(sheetinfomenu, sheet, i, s);
+            createSheetMenu(sheetinfomenu, sheet, instructor, sheet);
         }
-        resetloader(false, sheetinfomenu, "flex");
+        resetloader(false, sheetinfomenu, "block", false);
     }
 
-    function createSheetMenu(div, sheet, instructor, sheeti) {
+    function createSheetMenu(div, sheet, instructor, allsheets) {
         var title = document.createElement("h1");
-        title.textContent = getLevelName(sheet) + " - " + sheet.Barcode;
+        title.textContent = getLevelName(sheet) + " " + createModifierText(sheet) + " - " + sheet.Barcode;
         div.appendChild(title);
         if (editMode === true) {
             var titleEdits = document.createElement("span");
@@ -193,14 +210,14 @@ function displaySchedule(Time) {
                     if (potentialLvlId) {
                         sheet.Level = potentialLvlId;
                         delete sheet.Duration;
-                        displaySheetMenu(instructor, sheeti);
+                        displaySheetMenu(allsheets, instructor);
                         displaySchedule(true);
                     } else {
                         var dur = parseInt(prompt("Enter lesson duration in minutes"));
                         if (!isNaN(dur) && dur > 0) {
                             sheet.Level = newLevel;
                             sheet.Duration = dur;
-                            displaySheetMenu(instructor, sheeti);
+                            displaySheetMenu(sheet, instructor);
                             displaySchedule(true);
                         } else {
                             alert("No change made, invalid time");
@@ -215,7 +232,7 @@ function displaySchedule(Time) {
                 var newCode = prompt("Enter new barcode");
                 if (newCode && !isNaN(parseInt(newCode))) {
                     sheet.Barcode = parseInt(newCode);
-                    displaySheetMenu(instructor, sheeti);
+                    displaySheetMenu(allsheets, instructor);
                     displaySchedule(true);
                 }
             };
@@ -226,7 +243,7 @@ function displaySchedule(Time) {
                 var newTime = prompt("Enter new start time in 12h format (MM:HH PM)");
                 if (newTime && convertToTimeStartTwelveHour(newTime)) {
                     sheet.TimeStart = convertToTimeStartTwelveHour(newTime);
-                    displaySheetMenu(instructor, sheeti);
+                    displaySheetMenu(allsheets, instructor);
                     displaySchedule(true);
                 }
             };
@@ -239,7 +256,7 @@ function displaySchedule(Time) {
                     var dur = parseInt(prompt("Enter lesson duration in minutes"));
                     if (!isNaN(dur) && dur > 0) {
                         sheet.Duration = dur;
-                        displaySheetMenu(instructor, sheeti);
+                        displaySheetMenu(allsheets, instructor);
                         displaySchedule(true);
                     }
                 };
@@ -248,19 +265,10 @@ function displaySchedule(Time) {
             var deleteEdits = document.createElement("button");
             deleteEdits.textContent = "Delete";
             deleteEdits.onclick = function () {
-                console.log(sheeti);
                 if (confirm("Delete this sheet?")) {
-                    if (Array.isArray(scheduleData[instructor][sheeti])) {
-                        console.log(sheeti);
-                        scheduleData[instructor][sheeti].splice(scheduleData[instructor][sheeti].indexOf(sheet), 1);
-                        if (scheduleData[instructor][sheeti].length === 1) {
-                            scheduleData[instructor][sheeti] = scheduleData[instructor][sheeti][0];
-                        }
-                    } else {
-                        scheduleData[instructor].splice(sheeti, 1);
-                    }
+                    scheduleData[instructor].splice(scheduleData[instructor].indexOf(sheet), 1);
                     displaySchedule(true);
-                    resetloader(false, null, null);
+                    resetloader(false, null, null, false);
                 }
             };
             titleEdits.appendChild(deleteEdits);
@@ -281,11 +289,11 @@ function displaySchedule(Time) {
             if (editMode === true) {
                 var editbtn = document.createElement("button");
                 editbtn.textContent = "Change";
-                bindStudentNameChange(editbtn, sheet, sheeti, instructor, i);
+                bindStudentNameChange(editbtn, sheet, instructor, i, allsheets);
                 item.appendChild(editbtn);
                 var delbtn = document.createElement("button");
                 delbtn.textContent = "-";
-                bindStudentDelete(delbtn, sheet, sheeti, instructor, i);
+                bindStudentDelete(delbtn, sheet, instructor, i, allsheets);
                 item.appendChild(delbtn);
             }
         });
@@ -297,29 +305,39 @@ function displaySchedule(Time) {
                 var newName = prompt("Enter new student name");
                 if (newName) {
                     sheet.Names.push(newName);
-                    displaySheetMenu(instructor, sheeti);
+                    displaySheetMenu(allsheets, instructor);
                     displaySchedule(true);
                 }
             };
             div.appendChild(addbtn);
         }
+        //code to get main site (outside of iframe) to display the sheet. For DS mode
+        if (editMode === false) {
+            var viewBtn = document.createElement("button");
+            viewBtn.textContent = "View Sheet";
+            viewBtn.className = "viewsheetbtn";
+            sheetinfomenu.appendChild(viewBtn);
+            viewBtn.onclick = function () {
+                window.parent.handleScheduleViewSheet(instructor, sheet);
+            };
+        }
     }
 
-    function bindStudentNameChange(btn, sheet, sheeti, instructor, studentI) {
+    function bindStudentNameChange(btn, sheet, instructor, studentI, allsheets) {
         btn.onclick = function () {
             var newName = prompt("Enter new name");
             if (newName) {
                 sheet.Names[studentI] = newName;
-                displaySheetMenu(instructor, sheeti);
+                displaySheetMenu(allsheets, instructor);
             }
         };
     }
 
-    function bindStudentDelete(btn, sheet, sheeti, instructor, studentI) {
+    function bindStudentDelete(btn, sheet, instructor, studentI, allsheets) {
         btn.onclick = function () {
             if (confirm("Delete " + sheet.Names[studentI] + "?")) {
                 sheet.Names.splice(studentI, 1);
-                displaySheetMenu(instructor, sheeti);
+                displaySheetMenu(allsheets, instructor);
                 displaySchedule(true);
             }
         };
@@ -365,10 +383,12 @@ function getLevelColor(LevelId) {
 //Function to calculate data for main table
 //including start, end times & display interval
 function calculateTimeSpacing(sheets) {
+    sheetGroupingInfo = [];
     var firstStart = Number.MAX_SAFE_INTEGER; //Large number for math.min, when first class starts
     var lastEnd = 0; //time the last class ends
     var spacingTimes = []; //Array of all durations in the schedule
     for (var uI = 0; uI < sheets.length; uI++) {
+        sheetGroupingInfo[uI] = [];
         sheets[uI].sort((a, b) => {//sort so we can pull prev sheet to calculate breaks
             return parseInt(a.TimeStart) - parseInt(b.TimeStart);
         });
@@ -377,22 +397,17 @@ function calculateTimeSpacing(sheets) {
             var potentialHolder = [];
             for (var i = s + 1; i < sheets[uI].length; i++) {
                 var nxt = sheets[uI][i];
-                if (nxt.TimeStart === sheet.TimeStart) {
-                    console.log("df");
+                if (parseInt(nxt.TimeStart) === parseInt(sheet.TimeStart)) {
                     if (getClassDuration(nxt) === getClassDuration(sheet)) {
                         potentialHolder.push(nxt);
-                        sheets[uI].splice(i, 1);
                     } else {
-                        console.log("Sheet cannot be grouped, discarding");
-                        alert("Two sheets exist with the same instructor and starting time, but do not finish at the same time. Only one sheet will still display.");
-                        sheets[uI].splice(i, 1);
+                        console.log("Sheet cannot be grouped");
                     }
                 }
             }
             if (potentialHolder.length > 0) {
                 potentialHolder.unshift(sheet);
-                sheets[uI].splice(s, 1);
-                sheets[uI].splice(s, 0, potentialHolder);
+                sheetGroupingInfo[uI].push(potentialHolder);
             }
         }
         for (var sI = 0; sI < sheets[uI].length; sI++) {
@@ -413,6 +428,7 @@ function calculateTimeSpacing(sheets) {
             }
         }
     }
+    console.log(spacingTimes);
     return {firstStart: firstStart, lastEnd: lastEnd, increment: multiGCD(spacingTimes)};
 }
 
@@ -424,7 +440,7 @@ function getClassDuration(c) {
         if (!c.TimeModifier || c.TimeModifier === -1) {//No modifier
             return parseInt(Levels[c.Level].Settings.Duration);
         } else {//modifier, return modifier time
-            return Modifiers.filter(mod => mod.UniqueID === c.TimeModifier)[0].Duration;//find modifier w/ filter
+            return getSheetModifier(c).Duration;//find modifier w/ filter
         }
     } else if (isNaN(c.Level)) {//Custom level (not in DB)
         return c.Duration;
@@ -472,23 +488,40 @@ async function getGroupingData() {
 
 async function getModifierData() {
     return await clientDb.ref("Settings/Sheet-Modifiers").once('value').then((snap) => {
-        Modifiers = snap.val() ? snap.val() : [];
+        SheetModifiers = snap.val() ? snap.val() : [];
     });
 }
 
-async function loadAndDisplaySchedule(timeblock) {
+async function loadAndDisplayScheduleData(Users, Data, Timeblock) {
+    displaySchedule();
+    if (Users === null || Data === null) {
+        return;
+    }
+    resetloader(true, null, null, false);
+    People = Users;
+    scheduleData = Data;
+    for (var p = 0; p < scheduleData.length; p++) {
+        if (scheduleData[p].length === 0) {
+            scheduleData[p] = JSON.parse(await getUserSheets(People[p], Timeblock));
+        }
+    }
+    resetloader(false, null, null, false);
+    displaySchedule(Timeblock);
+}
+
+async function loadAndDisplayScheduleTimeblock(timeblock) {
     displaySchedule(); //clear
     if (timeblock === null || !timeblock) {
         return;
     }
-    resetloader(true, null, null);
+    resetloader(true, null, null, false);
     People = JSON.parse(await getCurrentInstructors(timeblock));
     scheduleData = [];
     for (var p = 0; p < People.length; p++) {
         var person = People[p];
         scheduleData[p] = JSON.parse(await getUserSheets(person, timeblock));
     }
-    resetloader(false, null, null);
+    resetloader(false, null, null, false);
     displaySchedule(timeblock);
 }
 
@@ -505,17 +538,17 @@ async function getCurrentInstructors(time) {
 }
 
 close_mainmenu.onclick = function () {
-    resetloader(false, null, null);
+    resetloader(false, null, null, false);
 };
 window.onload = function () {
-    resetloader(true, null, null);
+    resetloader(true, null, null, false);
     firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
             initClientDatabase().then(async() => {
                 await getCompleteLevels();
                 await getGroupingData();
                 await getModifierData();
-                resetloader(false, null, null);
+                resetloader(false, null, null, false);
             });
         }
     });
@@ -526,13 +559,13 @@ window.onload = function () {
         var config = JSON.parse(prompt("Enter config"));
         People = config.People;
         scheduleData = config.Data;
-        resetloader(false, null, null);
+        resetloader(false, null, null, false);
         displaySchedule(true);
     };
     var tmpPeople = [];
     var tmpPeopleBarcodes = [];
     document.getElementById("createConfig").onclick = function () {
-        resetloader(false, configmenu, "flex");
+        resetloader(false, configmenu, "flex", false);
         tmpPeople = JSON.parse(JSON.stringify(People));
         tmpPeopleBarcodes = getTmpBarcodes();
         renderTmpPeopleList();
@@ -629,7 +662,7 @@ window.onload = function () {
     }
 
     document.getElementById("configCreateBtn").onclick = async function () {
-        resetloader(true, null, null);
+        resetloader(true, null, null, false);
         HandleSpeadsheetUpload().then((cData) => {
             var oldScheduleData = scheduleData;
             scheduleData = [];
@@ -662,7 +695,6 @@ window.onload = function () {
             }
             for (var p = 0; p < tmpPeople.length; p++) {
                 var uPos = People.findIndex(inst => inst.Uid === tmpPeople[p].Uid);
-                console.log(uPos);
                 if (uPos !== -1) {
                     //uPos is the position of the temp person in the old person list. If it exists, this user is being carried over
                     var dataArray = [];
@@ -689,10 +721,10 @@ window.onload = function () {
             }
             People = tmpPeople;
             displaySchedule(true);
-            resetloader(false, null, null);
+            resetloader(false, null, null, false);
         }).catch((e) => {
             console.log(e);
-            resetloader(false, null, null);
+            resetloader(false, null, null, false);
         });
     };
 };

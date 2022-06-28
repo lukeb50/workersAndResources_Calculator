@@ -137,7 +137,7 @@ window.onload = function () {
     });
 
     function closeMenuBind() {
-        resetloader(false, null, null);
+        resetloader(false ,null ,null ,false);
     }
     ;
 
@@ -165,7 +165,7 @@ window.onload = function () {
         }
     }
 
-    resetloader(true, null, null);
+    resetloader(true ,null ,null ,false);
     resetProgScreens(null, null, null);
 
     function internalResetProgScreens(toShow, initFunction, displayType) {
@@ -184,15 +184,15 @@ window.onload = function () {
     function showUserMenu() {
         clearChildren(user_menu_list);
         if (UsersInfo === null) {
-            resetloader(true, null, null);
+            resetloader(true ,null ,null ,false);
             getUsers().then((Users) => {
                 UsersInfo = JSON.parse(Users);
                 displayUserMenu();
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
             }).catch((f) => {
                 alert("Error getting users");
                 console.log(f);
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
             });
         } else {
             displayUserMenu();
@@ -206,12 +206,12 @@ window.onload = function () {
         close_mainmenu.onclick = closeUserMenu;
         clearChildren(adduser_history);
         adduser_input.value = "";
-        resetloader(false, addusermenu, "block");
+        resetloader(false ,addusermenu ,"block" ,false);
     };
 
     function closeUserMenu() {
         close_mainmenu.onclick = closeMenuBind;
-        resetloader(false, null, null);
+        resetloader(false ,null ,null ,false);
         UsersInfo = null;
         showUserMenu();
     }
@@ -324,13 +324,13 @@ window.onload = function () {
         function handleAccBtns(User, Delete) {
             Delete.onclick = function () {
                 if (confirm("You are about to delete user " + (User.Name ? User.Name : User.Email) + ". This action cannot be undone.")) {
-                    resetloader(true, null, null);
+                    resetloader(true ,null ,null ,false);
                     DeleteUser(User.Uid).then((res) => {
                         UsersInfo = null;
                         showUserMenu();
                     }).catch((err) => {
                         alert("Error deleting user. Please try again later");
-                        resetloader(false, null, null);
+                        resetloader(false ,null ,null ,false);
                     });
                 }
             };
@@ -344,11 +344,11 @@ window.onload = function () {
             select.onchange = function () {
                 var newPermission = select.value;
                 if (initialValue !== 2 || (initialValue === 2)) {// && confirm("You are about to downgrade a Programmer. They will be notified by email of this action."))) {
-                    resetloader(true, null, null);
+                    resetloader(true ,null ,null ,false);
                     updatePermission(userId, newPermission).then((result) => {
-                        resetloader(false, null, null);
+                        resetloader(false ,null ,null ,false);
                     }).catch((f) => {
-                        resetloader(false, null, null);
+                        resetloader(false ,null ,null ,false);
                         console.log(f);
                         select.value = initialValue;
                         alert("Error changing permission");
@@ -367,9 +367,9 @@ window.onload = function () {
             button.onclick = function () {
                 currentTime = 0;//Facility + "---" + Timeblock;
                 setProgrammer(Facility + "---" + Timeblock);
-                resetloader(true, null, null);
+                resetloader(true ,null ,null ,false);
                 getTimeSheets(UID, Timeblock, Facility).then(async (sheets) => {
-                    resetloader(false, null, null);
+                    resetloader(false ,null ,null ,false);
                     if (sheets !== "[]") {
                         sheets = JSON.parse(sheets);
                         resetProgScreens(sheetmenu, null, "flex");
@@ -388,7 +388,7 @@ window.onload = function () {
                         alert("No sheets to display");
                     }
                 }).catch((f) => {
-                    resetloader(false, null, null);
+                    resetloader(false ,null ,null ,false);
                     alert("error");
                     console.log(f);
                 });
@@ -429,9 +429,9 @@ window.onload = function () {
     }
 
     function search_Records(useCursor) {
-        resetloader(true, null, null);
+        resetloader(true ,null ,null ,false);
         getRecordResults(useCursor).then((results) => {
-            resetloader(false, null, null);
+            resetloader(false ,null ,null ,false);
             results = JSON.parse(results);
             if (results.CursorQuery === false) {
                 while (record_results.firstChild) {
@@ -471,7 +471,7 @@ window.onload = function () {
                 record_results.appendChild(morediv);
             }
         }).catch((f) => {
-            resetloader(false, null, null);
+            resetloader(false ,null ,null ,false);
             alert("error");
             console.log(f);
         });
@@ -565,13 +565,13 @@ window.onload = function () {
 
     document.getElementById("reset-all-btn").onclick = function () {
         if (confirm("Are you sure you want to archive all active sheets?")) {
-            resetloader(true, null, null);
+            resetloader(true ,null ,null ,false);
             send_http_request("2/reset/all", "", []).then(() => {
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
             }).catch((err) => {
                 alert("Error clearing sheets, please try again.");
                 console.log(err);
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
             });
         }
     };
@@ -592,7 +592,7 @@ window.onload = function () {
     };
 
     function Lookup_Sheet(Barcode, isArchive) {//run lookup for barcode
-        resetloader(true, null, null);
+        resetloader(true ,null ,null ,false);
         lookuperror.style.display = "none";
         getWithBarcode(Barcode).then((sheet) => {
             if (JSON.parse(sheet).length > 0) {
@@ -605,23 +605,23 @@ window.onload = function () {
                     document.getElementById("tablecontainer").className = "";
                     documents = [[sheet[0]]];
                     displayWorksheet(isArchive);
-                    resetloader(false, null, null);
+                    resetloader(false ,null ,null ,false);
                 } else if (sheet.length > 1) {
                     PromptWorksheet(sheet).then((pos) => {
                         resetProgScreens(sheetmenu, null, "flex");
                         document.getElementById("tablecontainer").className = "";
-                        resetloader(false, null, null);
+                        resetloader(false ,null ,null ,false);
                         documents = [[sheet[pos]]];
                         displayWorksheet(isArchive);
                     });
                 }
             } else {
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
                 lookuperror.style.display = "block";
             }
         }).catch((f) => {
             console.log(f);
-            resetloader(false, null, null);
+            resetloader(false ,null ,null ,false);
             alert("Error getting sheet");
         });
         async function getWithBarcode(barcode) {
@@ -647,7 +647,7 @@ window.onload = function () {
                 var txt = document.createElement("label");
                 var Timeblock = getArchiveSheetTimeblockData(Timeblocks, "Timeblock", options[i].Timeblock);
                 var Facility = getArchiveSheetTimeblockData(Facilities, "Facility", options[i].Facility);
-                txt.textContent = Levels[options[i].Level].Name + " - " + Timeblock.Name + " (" + Facility.Shortform + ")";
+                txt.textContent = Levels[options[i].Level].Name + " " + createModifierText(options[i]) + " - " + Timeblock.Name + " (" + Facility.Shortform + ")";
                 holder.appendChild(txt);
                 var btn = document.createElement("button");
                 function handleClick(btn, i) {
@@ -722,7 +722,7 @@ window.onload = function () {
                 th.textContent = name;
                 thead.appendChild(th);
             });
-            resetloader(true, null, null);
+            resetloader(true ,null ,null ,false);
             send_http_request("2/get/reports", "", [], "report").then((data) => {
                 let repdata = JSON.parse(data);
                 //repdata = [{Target:"Instructor",Type:"SSummary",Time:23143424,UniqueId:-1},{Target:"Instructor",Type:"SSummary",Time:-1,UniqueId:-1},{Target:"Instructor",Type:"SSummary",Time:23143424,UniqueId:-1}];
@@ -759,9 +759,9 @@ window.onload = function () {
                         bindReportView(statusb, data.UniqueId, data.Target);
                     }
                 });
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
             }).catch((err) => {
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
                 alert("Error getting report information");
                 console.log(err);
             });
@@ -788,20 +788,20 @@ window.onload = function () {
 
     function bindReportView(btn, id, target) {
         btn.onclick = function () {
-            resetloader(true, null, null);
+            resetloader(true ,null ,null ,false);
             var timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             window.open("https://report-cards-6290.appspot.com/report?operationId=" + id + "&operationTarget=" + target + "&time=" + timeZone, '_blank');
-            resetloader(false, null, null);
+            resetloader(false ,null ,null ,false);
         };
     }
 
     report_run.onclick = function () {
-        resetloader(true, null, null);
+        resetloader(true ,null ,null ,false);
         send_http_request("2/run/report", "", [["operationTarget", report_target_select.value]], "report").then(() => {
             showReportMenu();
         }).catch((err) => {
             console.log(err);
-            resetloader(false, null, null);
+            resetloader(false ,null ,null ,false);
             alert("Error running report");
         });
     };
@@ -928,7 +928,7 @@ window.onload = function () {
     };
 
     async function getUser() {
-        resetloader(true, null, null);
+        resetloader(true ,null ,null ,false);
         UserData = JSON.parse(await send_http_request("-1/get/user", ""));
         UserData.Timeblocks = [""];
         if (UserData !== null) {
@@ -943,7 +943,7 @@ window.onload = function () {
             //selectfile.style.display = "none";
             alert("Unexpected error fetching your data - please try again later");
         }
-        resetloader(false, null, null);
+        resetloader(false ,null ,null ,false);
         //resetProgScreens(usermenu, showUserMenu,"block");
     }
 
@@ -1019,7 +1019,7 @@ window.onload = function () {
     };
 
     function saveSheets(approved) {
-        resetloader(true, null, null);
+        resetloader(true ,null ,null ,false);
         saveCurrentSheets(approved).then((f) => {
             if (f) {
                 for (var p = 0; p < People[0].length; p++) {
@@ -1038,16 +1038,16 @@ window.onload = function () {
                 }
             }
             changeEditPending(false);
-            resetloader(false, null, null);
+            resetloader(false ,null ,null ,false);
         }).catch((f) => {
             console.log(f);
             alert("An error occured. Please check your connection and try again");
-            resetloader(false, null, null);
+            resetloader(false ,null ,null ,false);
         });
     }
 
     printbtn.onclick = function () {
-        resetloader(false, printmenu, "flex");
+        resetloader(false ,printmenu ,"flex" ,false);
         printExclusions = [];
         printShowTimeList();
         printsheet.classList.add("print-selected");
@@ -1064,13 +1064,13 @@ window.onload = function () {
     };
 
     overflowbtn.onclick = function () {
-        resetloader(false, overflower, "block");
+        resetloader(false ,overflower ,"block" ,false);
 
     };
 
     emailbtn.onclick = function () {
         if (EditPending === false) {
-            resetloader(false, emailmenu, "flex");
+            resetloader(false ,emailmenu ,"flex" ,false);
             FillEmailList();
         } else {
             alert("You must save before sending emails");
@@ -1179,7 +1179,7 @@ window.onload = function () {
             }
         } else {//Send Emails
             if (confirm("Please confirm")) {
-                resetloader(true, null, null);
+                resetloader(true ,null ,null ,false);
                 async function sendUpdate() {
                     let docstate = JSON.parse(JSON.stringify(documents[currentPerson]));
                     for (var i = 0; i < docstate.length; i++) {
@@ -1190,9 +1190,9 @@ window.onload = function () {
                     return send_http_request("1/send/emails", JSON.stringify(docstate) + "&&&" + JSON.stringify(EmailParameters), [["instructor", People[0][currentPerson].Uid]]);
                 }
                 sendUpdate().then(function () {
-                    resetloader(false, null, null);
+                    resetloader(false ,null ,null ,false);
                 }).catch((f) => {
-                    resetloader(false, null, null);
+                    resetloader(false ,null ,null ,false);
                     if (f === "409") {
                         alert("One of the classes has been updated by a different user since you loaded this page. Please save to overwrite those changes or refresh to see them. No emails have been sent.");
                     } else {
@@ -1241,7 +1241,7 @@ window.onload = function () {
 
     firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
-            resetloader(true, null, null);
+            resetloader(true ,null ,null ,false);
             initClientDatabase().then(async() => {
                 await initCoreData(true);
                 startCardGenerator(true, Facilities, Timeblocks);

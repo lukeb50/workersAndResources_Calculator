@@ -55,8 +55,7 @@
 }
 
 #sheetinfo-menu{
-    flex-direction: column;
-    overflow-y: auto;
+    overflow-y:auto;
 }
 
 #sheetinfo-menu label{
@@ -74,10 +73,14 @@
     margin-bottom: 0px;
     margin-left: 5px;
     padding-left: 20px;
+    flex: 1;
+    overflow-y: auto;
 }
 
 #sheetinfo-menu span.edit_title{
     text-align: center;
+    width:100%;
+    display: block;
 }
 
 #sheetinfo-menu span.edit_title button{
@@ -103,6 +106,18 @@
     border:2px solid var(--color-primary);
     margin-left: 5px;
     border-radius: 5px;
+}
+
+#sheetinfo-menu button.viewsheetbtn{
+    height: 30px;
+    width:100%;
+    margin-top:4px;
+    text-align: left;
+    background: var(--color-primary-mostly-transparent);
+    border: none;
+    border-top: 1px solid var(--color-primary-half-transparent);
+    border-bottom: 1px solid var(--color-primary-half-transparent);
+    display: block;
 }
 
 #config-menu{

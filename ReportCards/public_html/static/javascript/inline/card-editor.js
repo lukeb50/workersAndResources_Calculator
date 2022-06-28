@@ -310,7 +310,7 @@ const new_txt_variable = document.getElementById("variablefont-input");
 const new_txt_type = document.getElementById("text-type-select");
 const new_text_insert = document.getElementById("create-text-btn");
 
-const text_prompts = {level: "Current Level", nextlevel: "Next Level to Register In", session: "Current Session Name", instructor: "Truncated Instructor Name", student: "Student Name", barcode: "Course Code", comment: "Comment Text Content", custom: "Select to edit text", facility: "Facility Name", facility_short: "Facility Shortform"};
+const text_prompts = {level: "Current Level", nextlevel: "Next Level to Register In", session: "Current Session Name", instructor: "Truncated Instructor Name", student: "Student Name", barcode: "Course Code", comment: "Comment Text Content", custom: "Select to edit text", facility: "Facility Name", facility_short: "Facility Shortform",time_modifier: "Class Type",time_start_12:"Start Time"};
 document.body.onclick = function (e) {
     if (document.getElementById("controlbar") && e.path.indexOf(document.getElementById("controlbar")) === -1 && e.path.indexOf(markup) === -1) {
         clearBar();

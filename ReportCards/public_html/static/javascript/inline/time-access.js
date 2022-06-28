@@ -55,7 +55,7 @@ window.onload = function () {
     });
 
     close_mainmenu.onclick = function () {
-        resetloader(false, null, null);
+        resetloader(false ,null ,null ,false);
     };
 };
 
@@ -71,7 +71,7 @@ async function saveCurrentSheets() {
 }
 
 function SaveSheets() {//Should be set to save all timeblocks
-    resetloader(true, null, null);
+    resetloader(true ,null ,null ,false);
     saveCurrentSheets().then((IdArray) => {
         if (IdArray) {
             for (var i = 0; i < IdArray.length; i++) {
@@ -83,10 +83,10 @@ function SaveSheets() {//Should be set to save all timeblocks
             }
         }
         changeEditPending(false);
-        resetloader(false, null, null);
+        resetloader(false ,null ,null ,false);
     }).catch((f) => {
         alert("An error occured. Please check your connection and try again");
-        resetloader(false, null, null);
+        resetloader(false ,null ,null ,false);
     });
 }
 
@@ -95,7 +95,7 @@ savebtn.onclick = function () {
 };
 
 printbtn.onclick = function () {
-    resetloader(false, printmenu, "flex");
+    resetloader(false ,printmenu ,"flex" ,false);
     printExclusions = [];
     printShowTimeList();
     printsheet.classList.add("print-selected");
@@ -228,7 +228,7 @@ function PrepareScreen() {
 }
 
 function HandleLoad() {
-    resetloader(true, null, null);
+    resetloader(true ,null ,null ,false);
     getCurrentSheets().then((f) => {
         if (JSON.parse(f).length > 0) {
             documents[currentTime] = JSON.parse(f);
@@ -238,11 +238,11 @@ function HandleLoad() {
             renderTable(-1);
         }
         populatebar(0);
-        resetloader(false, null, null);
+        resetloader(false ,null ,null ,false);
     }).catch((f) => {
         console.log(f);
         alert("An error occured. Please check your connection and try again");
-        resetloader(false, null, null);
+        resetloader(false ,null ,null ,false);
     });
 
     async function getCurrentSheets() {
@@ -255,7 +255,7 @@ function HandleLoad() {
 }
 
 async function getUser() {
-    resetloader(true, null, null);
+    resetloader(true ,null ,null ,false);
     UserData = JSON.parse(await send_http_request("-1/get/user", ""));
     if (UserData !== null) {
         new_sheet_manual.style.display = "block";
@@ -264,7 +264,7 @@ async function getUser() {
         new_sheet_manual.style.display = "none";
         //selectfile.style.display = "none";
         alert("Unexpected error fetching your data - please try again later");
-        resetloader(false, null, null);
+        resetloader(false ,null ,null ,false);
     }
 }
 

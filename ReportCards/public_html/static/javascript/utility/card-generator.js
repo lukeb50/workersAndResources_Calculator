@@ -1,4 +1,4 @@
-/* global firebase, Levels, UserData, getArchiveSheetTimeblockData, clientDb, staticPath */
+/* global firebase, Levels, UserData, getArchiveSheetTimeblockData, clientDb, staticPath, getSheetModifier */
 var session = "";
 var isDsMode = false;
 var Facilities = {};
@@ -413,6 +413,15 @@ function generateTextGraphics(ctx, LevelMarkup, sheet, student, side, inst) {
                 return getArchiveSheetTimeblockData(Facilities, "Facilities", sheet.Facility).Shortform;
             case "facility":
                 return getArchiveSheetTimeblockData(Facilities, "Facilities", sheet.Facility).Name;
+            case "time_modifier":
+                let mod = getSheetModifier(sheet);
+                if (mod !== null) {//If modifier exists
+                    return mod.Name;
+                } else {//No modifier
+                    return "";
+                }
+            case "time_start_12":
+                return convertTimeReadable(sheet.TimeStart, true);
             default:
                 return "Error, Please contact system maintainers";
         }

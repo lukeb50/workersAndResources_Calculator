@@ -167,12 +167,12 @@ async function generateLvlGroupingSettingsList() {
 
     function bindColorChange(btn, i) {
         btn.onclick = function () {
-            resetloader(false, groupmenu, "block");
+            resetloader(false ,groupmenu ,"block" ,false);
             document.getElementById("regex-menu").style.display = "none";
             document.getElementById("group-color-menu").style.display = "block";
             document.getElementById("color-input").value = GroupingData[i].Color;
             getUserInput().then((newVal) => {
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
                 GroupingData[i].Color = newVal;
                 setLevelEdit(true);
             });
@@ -188,12 +188,12 @@ async function generateLvlGroupingSettingsList() {
 
     function bindMatchChange(btn, i) {
         btn.onclick = function () {
-            resetloader(false, groupmenu, "block");
+            resetloader(false ,groupmenu ,"block" ,false);
             document.getElementById("regex-menu").style.display = "block";
             document.getElementById("group-color-menu").style.display = "none";
             document.getElementById("regex-input").value = GroupingData[i].Regex;
             getUserInput().then((newVal) => {
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
                 GroupingData[i].Regex = newVal;
                 generateLvlSettingsList();//Regen level list, may change groups
                 setLevelEdit(true);
@@ -661,11 +661,11 @@ const modifier_list = document.getElementById("modifier-list");
 var modifiers;
 function generateModifierList() {
     document.getElementById("modifier-save-btn").onclick = function () {
-        resetloader(true, null, null);
+        resetloader(true ,null ,null ,false);
         saveModifiers(modifiers).then(() => {
-            resetloader(false, null, null);
+            resetloader(false ,null ,null ,false);
         }).catch((e) => {
-            resetloader(false, null, null);
+            resetloader(false ,null ,null ,false);
         });
     };
 
@@ -1010,17 +1010,17 @@ async function generateFacilityMenu() {
     }
 
     document.getElementById("facility-save-btn").onclick = function () {
-        resetloader(true, null, null);
+        resetloader(true ,null ,null ,false);
         saveData(Facilities, "Facilities").then(() => {
             saveData(Timeblocks, "Timeblocks").then(() => {
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
                 generateFacilityMenu();
             }).catch((e) => {
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
                 alert("Error saving data");
             });
         }).catch((e) => {
-            resetloader(false, null, null);
+            resetloader(false ,null ,null ,false);
             alert("Error saving facility data");
         });
     };
@@ -1158,13 +1158,13 @@ function setLevelEdit(newVal) {
 }
 
 save_email_btn.onclick = function () {
-    resetloader(true, null, null);
+    resetloader(true ,null ,null ,false);
     var saveData = {Subject: email_subject.value, HTML: email_body.value, Plain: email_plain_body.value};
     saveEmailData(saveData).then(function () {
-        resetloader(false, null, null);
+        resetloader(false ,null ,null ,false);
     }).catch((err) => {
         alert("Error saving data");
-        resetloader(false, null, null);
+        resetloader(false ,null ,null ,false);
     });
 
     async function saveEmailData(Data) {
@@ -1173,13 +1173,13 @@ save_email_btn.onclick = function () {
 };
 
 document.getElementById("save-lvl-settings-btn").onclick = function () {
-    resetloader(true, null, null);
+    resetloader(true ,null ,null ,false);
     saveLevelData().then(() => {
         setLevelEdit(false);
-        resetloader(false, null, null);
+        resetloader(false ,null ,null ,false);
     }).catch((err) => {
         alert("Error saving data");
-        resetloader(false, null, null);
+        resetloader(false ,null ,null ,false);
         console.log(err);
     });
     async function saveLevelData() {
@@ -1191,7 +1191,7 @@ document.getElementById("save-lvl-settings-btn").onclick = function () {
 };
 
 window.onload = function () {
-    resetloader(true, null, null);
+    resetloader(true ,null ,null ,false);
     firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
             initClientDatabase().then(async() => {
@@ -1201,9 +1201,9 @@ window.onload = function () {
                 generateModifierList();
                 generateFacilityMenu();
                 generateEmailMenu();
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
             }).catch((f) => {
-                resetloader(false, null, null);
+                resetloader(false ,null ,null ,false);
                 alert("Error logging in - please try again later");
                 console.log(f);
             });
