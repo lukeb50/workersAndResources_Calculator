@@ -1039,7 +1039,7 @@ const email_plain_body = document.getElementById("email-settings-plain-body");
 const email_plaintext_preview = document.getElementById("email-plaintext-btn");
 const email_html_preview = document.getElementById("email-html-btn");
 const save_email_btn = document.getElementById("save-email-btn");
-const email_preview_replacements = {'Skill List': null, 'Current Level': "CURRENT LEVEL", 'Next Level': "NEXT LEVEL", 'Session': "SESSION", 'Instructor Name': "INSTRUCTOR NAME", 'Student Name': "STUDENT NAME", 'Class Code': "BARCODE #", 'Facility Name': "FACILITY_NAME", 'Facility Shortform': "FACILITY_SHORT_NAME", 'Comment': "COMMENT"};
+const email_preview_replacements = {'Skill List': null, 'Current Level': "CURRENT LEVEL", 'Next Level': "NEXT LEVEL", 'Session': "SESSION", 'Instructor Name': "INSTRUCTOR NAME", 'Student Name': "STUDENT NAME", 'Class Code': "BARCODE #", 'Facility Name': "FACILITY_NAME", 'Facility Shortform': "FACILITY_SHORT_NAME", 'Class Start Time': "CLASS_START_TIME", 'Class Type': "CLASS_TYPE", 'Comment': "COMMENT"};
 function get_email_replacement(Key, isHTML) {
     if (email_preview_replacements[Key] !== null) {
         return email_preview_replacements[Key];
