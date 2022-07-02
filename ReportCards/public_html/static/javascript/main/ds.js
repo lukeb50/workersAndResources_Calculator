@@ -534,10 +534,10 @@ async function saveCurrentSheets(approved) {//Save for 1 time
         let CorrectionCount = {}; //Save corrections
         for (var i = 0; i < People[currentTime].length; i++) {
             if (documents[i] !== undefined) {
-                CorrectionCount[People[currentTime][i].Uid] = People[currentTime][i].Corrections;
+                CorrectionCount[People[currentTime][i].Uid] = People[currentTime][i].UserInformation;
             }
         }
-        await send_http_request("1/set/corrections", JSON.stringify(CorrectionCount), [["facility", currentTime.split("---")[0]], ["timeblock", currentTime.split("---")[1]]]);
+        await send_http_request("1/set/userinformation", JSON.stringify(CorrectionCount), [["facility", currentTime.split("---")[0]], ["timeblock", currentTime.split("---")[1]]]);
     }
     return result;
 }
@@ -656,7 +656,7 @@ function generateInstList() {
         let input = document.createElement("input");
         input.type = "number";
         input.id = "correction-input-" + i;
-        input.value = People[currentTime][i].Corrections;
+        input.value = People[currentTime][i].UserInformation.Corrections;
         input.disabled = false;
         handleCorrectionInput(input, i);
         div.appendChild(input);
@@ -801,8 +801,8 @@ function handleAccessButton(accessbtn, personI) {
 
 function handleCorrectionInput(input, user) {
     input.onblur = function () {
-        People[currentTime][user].Corrections = parseInt(input.value) - 1; //Offset 1 added automatically by function
-        changeEditPending(true);
+        People[currentTime][user].UserInformation.Corrections = parseInt(input.value);
+        changeEditPending(true,true);//bypass incrementing corrections on change
     };
 }
 
@@ -933,7 +933,7 @@ function FillEmailList() {
         var title = document.createElement("b");
         title.className = "levelTitle";
         div.className = "levelDiv";
-        title.textContent = documents[currentPerson][i].Level + " #" + documents[currentPerson][i].Barcode;
+        title.textContent = Levels[documents[currentPerson][i].Level].Name + " " + createModifierText(documents[currentPerson][i]) + " #" + documents[currentPerson][i].Barcode;
         div.appendChild(title);
         email_maindiv.appendChild(div);
         for (var s = 0; s < documents[currentPerson][i].Names.length; s++) {
@@ -1003,7 +1003,7 @@ document.getElementById("email-menu-execute").onclick = function () {
                 for (var x = 0; x < EmailParameters[i].Details.Positions.length; x++) {
                     var title = document.createElement("b");
                     //title.className = "levelTitle";
-                    title.textContent = obj.Names[EmailParameters[i].Details.Positions[x]] + " - #" + obj.Barcode;
+                    title.textContent = obj.Names[EmailParameters[i].Details.Positions[x]] + " - " + Levels[obj.Level].Name + " " + createModifierText(obj) + " #" + obj.Barcode;
                     div.appendChild(title);
                     for (var e = 0; e < EmailParameters[i].Details.Emails[x].length; e++) {
                         var lbl = document.createElement("label");

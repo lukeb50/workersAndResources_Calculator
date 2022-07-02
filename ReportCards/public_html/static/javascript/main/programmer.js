@@ -1088,7 +1088,7 @@ window.onload = function () {
             var title = document.createElement("b");
             title.className = "levelTitle";
             div.className = "levelDiv";
-            title.textContent = documents[currentPerson][i].Level + " #" + documents[currentPerson][i].Barcode;
+            title.textContent = Levels[documents[currentPerson][i].Level].Name + " " + createModifierText(documents[currentPerson][i]) + " #" + documents[currentPerson][i].Barcode;
             div.appendChild(title);
             email_maindiv.appendChild(div);
             for (var s = 0; s < documents[currentPerson][i].Names.length; s++) {
@@ -1158,7 +1158,7 @@ window.onload = function () {
                     for (var x = 0; x < EmailParameters[i].Details.Positions.length; x++) {
                         var title = document.createElement("b");
                         //title.className = "levelTitle";
-                        title.textContent = obj.Names[EmailParameters[i].Details.Positions[x]] + " - #" + obj.Barcode;
+                        title.textContent = obj.Names[EmailParameters[i].Details.Positions[x]] + " - " + Levels[obj.Level].Name + " " + createModifierText(obj) + " #" + obj.Barcode;
                         div.appendChild(title);
                         for (var e = 0; e < EmailParameters[i].Details.Emails[x].length; e++) {
                             var lbl = document.createElement("label");

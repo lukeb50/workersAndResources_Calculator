@@ -46,9 +46,9 @@ function changeEditPending(value, bypassIncrement) {
     if (dsMode === true && value === true && allowCorrection === true) {
         document.getElementById("emailbtn").className = "dsbtn unsaved";
         if (!bypassIncrement || bypassIncrement === false) {
-            People[currentTime][currentPerson].Corrections = People[currentTime][currentPerson].Corrections + 1;
+            People[currentTime][currentPerson].UserInformation.Corrections = People[currentTime][currentPerson].UserInformation.Corrections + 1;
             if (document.getElementById("correction-input-" + currentPerson)) {
-                document.getElementById("correction-input-" + currentPerson).value = People[currentTime][currentPerson].Corrections;
+                document.getElementById("correction-input-" + currentPerson).value = People[currentTime][currentPerson].UserInformation.Corrections;
             }
         }
     }
