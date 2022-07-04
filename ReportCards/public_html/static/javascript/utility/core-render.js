@@ -115,9 +115,22 @@ function renderTable(id) {
             var row = document.createElement("tr");
             row.id = "inforow";
             var Nameheader = document.createElement("th");
-            Nameheader.textContent = "Name";
             Nameheader.className = "namehead";
             row.appendChild(Nameheader);
+            var stickyBtn = document.createElement("button");
+            stickyBtn.textContent = "lock_open";
+            stickyBtn.className = "stickbtn material-symbols-outlined";
+            stickyBtn.title = "Name column is unlocked";
+            stickyBtn.onclick = function () {
+                //Handle locking & unlocking name column
+                maintable.classList.toggle("stick");
+                stickyBtn.title = "Name column is "+(stickyBtn.textContent === "lock" ? "unlocked" : "locked");
+                stickyBtn.textContent = stickyBtn.textContent === "lock" ? "lock_open" : "lock";
+            };
+            Nameheader.appendChild(stickyBtn);
+            var nameText = document.createElement("label");
+            nameText.textContent = "Name";
+            Nameheader.appendChild(nameText);
             for (var i = 0; i < Levels[documents[dsMode === false ? currentTime : currentPerson][id].Level].Skills.length; i++) {//add in skills for Level
                 var header = document.createElement("th");
                 header.textContent = Levels[documents[dsMode === false ? currentTime : currentPerson][id].Level].Skills[i].Name;
@@ -841,7 +854,7 @@ function bindNoteBtn(btn, i) {
             let titleInput = document.createElement("input");
             titleInput.value = note.Title;
             titleInput.onchange = function () {
-                note.Title = titleInput.value;
+                note.Title = titleInput.value.escapeJSON();
                 changeEditPending(true, true);
             };
             noteContainer.appendChild(titleInput);
@@ -849,7 +862,7 @@ function bindNoteBtn(btn, i) {
             let txtArea = document.createElement("textarea");
             txtArea.value = note.Content;
             txtArea.onchange = function () {
-                note.Content = txtArea.value;
+                note.Content = txtArea.value.escapeJSON();
                 changeEditPending(true, true);
             };
             //container for control buttons

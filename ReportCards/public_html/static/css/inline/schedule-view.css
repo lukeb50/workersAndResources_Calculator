@@ -13,7 +13,7 @@
     overflow: auto;
 }
 
-#scheduleTable th:not(:nth-child(1)), #scheduleTable td:not(:nth-child(1)){
+#scheduleTable tr th:not(:nth-child(1)),#scheduleTable tr:not(:nth-child(2)) td:not(:nth-child(1)), #scheduleTable tr:nth-child(2) td{
     border-left: 1px solid black;
     width: 10em;
 }
@@ -28,6 +28,26 @@
 }
 
 #scheduleTable tr:nth-child(1){
+    background:var(--color-primary-half-transparent);
+}
+
+#scheduleTable tr:nth-child(2) td{
+    padding: 0;
+}
+
+#scheduleTable tr td input{
+    border:none;
+    background:transparent;
+    padding:0;
+    width:calc(100% - 4px);
+    padding-left: 2px;
+    height: 100%;
+    display: block;
+    font-size: 13px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+#scheduleTable tr:nth-child(2) td{
     background:var(--color-primary-mostly-transparent);
 }
 

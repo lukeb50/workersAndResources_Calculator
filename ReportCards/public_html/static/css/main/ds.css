@@ -227,11 +227,25 @@ button.disablebtn-disabled{
     color:rgba(100,0,0,0.8);
 }
 
+#user-menu h1{
+    font-size: 20px;
+}
+
+#user-menu p{
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 3px;
+    font-size: 16px;
+}
+
 #user-menu div{
     height: 25px;
     padding:5px;
     line-height: 25px;
-    font-weight: bold;
+    box-sizing: content-box;
+}
+
+#user-menu div{
+    border-bottom: 2px solid var(--color-primary);
 }
 
 #user-menu div:nth-child(odd){
@@ -244,7 +258,9 @@ button.disablebtn-disabled{
 
 #user-menu div button.roundaction{
     float:right;
-    border:1px solid rgba(0,0,0,0.4);
+    outline:1px solid var(--color-primary-dark);
+    background: var(--color-primary-light);
+    transition: 0.3s;
 }
 
 #user-menu{

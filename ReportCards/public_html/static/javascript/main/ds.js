@@ -758,6 +758,12 @@ function handleAccessButton(accessbtn, personI) {
                 list = JSON.parse(list);
                 resetloader(false, usermenu, "block", false);
                 clearChildren(usermenu);
+                var title = document.createElement("h1");
+                title.textContent = "Manage Access";
+                var titleName = document.createElement("p");
+                titleName.textContent = People[currentTime][personI].Name;
+                usermenu.appendChild(title);
+                usermenu.appendChild(titleName);
                 list.forEach((user) => {
                     if (user.Uid !== firebase.auth().currentUser.uid && user.Uid !== People[currentTime][personI].Uid) {
                         let holder = document.createElement("div");

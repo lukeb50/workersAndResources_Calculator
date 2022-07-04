@@ -22,9 +22,11 @@ function displaySchedule(Time) {
     }
     //create top row with instructor names
     var headerRow = document.createElement("tr");
+    var noteRow = document.createElement("tr");
     //Time text
     var timeBox = document.createElement("th");
     timeBox.textContent = "Time";
+    timeBox.rowSpan = 2;
     headerRow.appendChild(timeBox);
     //Create instructors
     for (var p = 0; p < People.length; p++) {
@@ -34,9 +36,18 @@ function displaySchedule(Time) {
             bindAddClassClick(instHeader, p);
         }
         headerRow.appendChild(instHeader);
+        //note row
+        var instNote = document.createElement("td");
+        var instNoteInput = document.createElement("input");
+        instNoteInput.value = People[p].UserInformation.ScheduleNote;
+        instNoteInput.placeholder = "Note";
+        bindScheduleNoteChange(instNoteInput, People[p]);
+        instNote.appendChild(instNoteInput);
+        noteRow.appendChild(instNote);
     }
     //append row to table
     scheduleTable.appendChild(headerRow);
+    scheduleTable.appendChild(noteRow);
     //calculate table spacing
     var tableInformation = calculateTimeSpacing(scheduleData);
     //create intervals
@@ -77,6 +88,17 @@ function displaySchedule(Time) {
             }
         }
         scheduleTable.appendChild(timerow);
+    }
+
+    function bindScheduleNoteChange(input, person) {
+        input.onchange = function () {
+            person.UserInformation.ScheduleNote = input.value.escapeJSON();
+            try {
+                window.parent.changeEditPending(true,true);
+            } catch (e) {
+                //Not iframed, do nothing
+            }
+        };
     }
 
     function checkIfGrouped(sheet, instructorI) {
@@ -590,7 +612,7 @@ window.onload = function () {
     document.getElementById("config-add-instructor").onclick = function () {
         var name = prompt("Enter instructor name:");
         if (name) {
-            tmpPeople.push({Name: name, Uid: genUid()});
+            tmpPeople.push({Name: name, Uid: genUid(),UserInformation:{Corrections:0,ScheduleNote:""}});
             tmpPeopleBarcodes.push([]);
             renderTmpPeopleList();
         }

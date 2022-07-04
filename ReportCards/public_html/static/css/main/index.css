@@ -299,7 +299,7 @@ button.roundaction{
     width:200px;
 }
 
-#maintable tr th:nth-child(1) button{
+#maintable tr th:nth-child(1) button:not(.stickbtn){
     height: 26px;
     width: 26px;
     margin-top: 7px;
@@ -312,18 +312,48 @@ button.roundaction{
 }
 
 #maintable th,#maintable td{
-    border-collapse: collapse;
-    border-right:2px solid var(--color-primary);
-    border-bottom: 2px solid var(--color-primary);
     width: 100px;
     font-size: 0.9em;
+    border-bottom: 2px solid var(--color-primary);
+    border-right:2px solid var(--color-primary);
 }
 
 #maintable.stick tr th:nth-child(1){
     position: sticky;
     left: 0;
-    background:white;
-    border-right: 2px solid #46bebe;
+    background:white;   
+}
+
+#add_row_btn.stick{
+    position: sticky;
+    left: 5px;
+}
+
+#inforow th:nth-child(1) button{
+    /*sticky 1st column button*/
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    padding: 5px;
+    border:2px solid var(--color-primary-light);
+    box-sizing: content-box;
+    border-radius: 50%;
+    background:transparent;
+    font-size: 14px;
+    height: 14px;
+    width: 14px;
+    color:var(--color-primary-dark);
+    background:var(--color-primary-light-background-transparent);
+    transition: 0.3s;
+}
+
+#inforow th:nth-child(1) button:hover{
+    /*sticky 1st column button hover*/
+    background:var(--color-primary-light);
+}
+
+#maintable tr th:nth-child(1){
+    position: relative;
 }
 
 #maintable th input{
@@ -353,7 +383,7 @@ button.roundaction{
     height: 50%;
     margin-top: 20px;
     margin-left:-1px;
-    border-top:02px solid var(--color-primary);
+    border-top:2px solid var(--color-primary);
     border-right:2px solid var(--color-primary);
     border-radius: 0 5px;
     padding:0;
@@ -464,7 +494,7 @@ button.roundaction{
     height: fit-content;
     width: max-content;
     border-top: none;
-    border-collapse: collapse;
+    border-spacing: 0px;
 }
 
 #tablecontainer{
