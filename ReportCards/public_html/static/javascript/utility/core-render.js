@@ -124,6 +124,7 @@ function renderTable(id) {
             stickyBtn.onclick = function () {
                 //Handle locking & unlocking name column
                 maintable.classList.toggle("stick");
+                add_row_btn.classList.toggle("stick");
                 stickyBtn.title = "Name column is "+(stickyBtn.textContent === "lock" ? "unlocked" : "locked");
                 stickyBtn.textContent = stickyBtn.textContent === "lock" ? "lock_open" : "lock";
             };
