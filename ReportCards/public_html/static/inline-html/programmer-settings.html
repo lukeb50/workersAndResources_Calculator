@@ -19,18 +19,26 @@
         <div class="blocker" id="loadblocker">
             <div class="load" id="loadspinner"></div>
             <div id="main-menu">
-                <div class="menuitem" id="group-menu">
-                    <div id="regex-menu">
-                        <p>Use a <a target='_blank' href="https://regexr.com/">Regex</a> pattern or a list separated by '|' to indicate which levels belong to this group</p>
-                        <input id="regex-input" type="text" placeholder="Kinderswim|Waterbabies|Preschool Prep|Other">
-                        <button id="applyRegex" class="mainround">Apply</button>
-                    </div>
-                    <div id="group-color-menu">
-                        <p>Select a color to represent this group. A familiar color such as the worksheet color is recommended.</p>
-                        <input id="color-input" type="color">
-                        <button id="applyColor" class="mainround">Apply</button>
+                <div id="regex-menu" class="menuitem">
+                    <p>Use a <a target='_blank' href="https://regexr.com/">Regex</a> pattern or a list separated by '|' to indicate which levels belong to this group</p>
+                    <input id="regex-input" type="text" placeholder="Kinderswim|Waterbabies|Preschool Prep|Other">
+                    <button id="applyRegex" class="mainround">Apply</button>
+                </div>
+                <div id="group-color-menu" class="menuitem">
+                    <p>Select a color to represent this group. A familiar color such as the worksheet color is recommended.</p>
+                    <input id="color-input" type="color">
+                    <button id="applyColor" class="mainround">Apply</button>
+                </div>
+                <div id="progression-edit-menu" class="menuitem">
+                    <h1>Edit Progression</h1>
+                    <div id="prog-box-superholder">
+                        <textarea id="prog-input" resize="false"></textarea>
+                        <pre aria-hidden="true" id="prog-hightlight-holder">
+                        <code contenteditable="true" id="prog-highlight-code"></code>
+                        </pre>
                     </div>
                 </div>
+                <button class="mainround" id="main-menu-close-btn">Close</button>
             </div>
         </div>
         <div class="altmenu" id="general-menu-holder">
@@ -47,6 +55,7 @@
                         <div id="lvl-settings-skills-container">
                             <div id="main-lvl-config-container"></div>
                         </div>
+                        <div id="plan-config-container"></div>
                         <div id="main-lvl-config-side-container">
                             <div id="sidebar-lvl-settings">
                                 <label>Level Settings</label>
@@ -106,7 +115,7 @@
                         <option value="facility">Facility Name</option>
                         <option value="facility_short">Facility Shortform</option>
                         <option value="time_modifier">Class Type</option>
-                            <option value="time_start_12">Class Start Time</option>
+                        <option value="time_start_12">Class Start Time</option>
                         <option id="commentoption" value="comment">Comment</option>
                         <optgroup label="Complex Modifiers">
                             <option value="list">Skill List</option>

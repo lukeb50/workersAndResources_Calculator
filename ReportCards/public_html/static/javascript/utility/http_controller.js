@@ -184,7 +184,9 @@ function resetloader(isLoad, itemToShow, displayType, isLarge) {
         loadspinner.style.display = "none";
     }
     //Handle size
-    mainmenu.className = isLarge === true ? "large" : "";
+    if (typeof mainmenu !== 'undefined') {
+        mainmenu.className = isLarge === true ? "large" : "";
+    }
 }
 
 const isOverflown = ({clientHeight, scrollHeight}) => scrollHeight > clientHeight;
@@ -361,7 +363,8 @@ const General_Settings = [{Element: document.getElementById("general-session-inp
     {Element: document.getElementById("general-lockout-checkbox"), Name: "approveLockout", Type: "checkbox"},
     {Element: document.getElementById("general-email-checkbox"), Name: "supervisorEmail", Type: "checkbox"},
     {Element: document.getElementById("general-attendance-checkbox"), Name: "useAttendance", Type: "checkbox"},
-    {Element: document.getElementById("general-lookup-checkbox"), Name: "allowLookup", Type: "checkbox"}
+    {Element: document.getElementById("general-lookup-checkbox"), Name: "allowLookup", Type: "checkbox"},
+    {Element: document.getElementById("general-plan-checkbox"), Name: "useLessonPlans", Type: "checkbox"}
 ];
 function showSettings() {
     for (var i = 0; i < General_Settings.length; i++) {
@@ -374,6 +377,22 @@ function showSettings() {
             General_Settings[i].Element[General_Settings[i].Type === "checkbox" ? "checked" : "value"] = snapshot.val();
         });
     }
+}
+
+var Settings = {};
+
+async function getSettings() {
+    return new Promise((resolve, reject) => {
+        clientDb.ref("Settings").once('value').then((snap) => {
+            Settings = snap.val().Data ? snap.val().Data : {};
+            SheetModifiers = snap.val()["Sheet-Modifiers"] ? snap.val()["Sheet-Modifiers"] : [];
+            var settingEvent = new Event("SettingUpdate");
+            window.dispatchEvent(settingEvent);
+            resolve(snap.val());
+        }).catch(() => {
+            resolve({});
+        });
+    });
 }
 
 const Billing_Columns = ["Item Name", "Quantity Used", "Rate", "Total"];
@@ -467,20 +486,20 @@ if (document.getElementById("general-save-btn")) {
 function getSheetModifier(sheet) {
     if (sheet.TimeModifier && parseInt(sheet.TimeModifier) !== -1) {
         let  mods = SheetModifiers.filter((m) => m.UniqueID === parseInt(sheet.TimeModifier));
-        if(mods.length === 1){
+        if (mods.length === 1) {
             return mods[0];
-        }else{
-            return {UniqueID: 0, Name: "Error", Duration:parseInt(Levels[sheet.Level].Settings.Duration)};
+        } else {
+            return {UniqueID: 0, Name: "Error", Duration: parseInt(Levels[sheet.Level].Settings.Duration)};
         }
     }
     return null;
 }
 
-function createModifierText(sheet){
+function createModifierText(sheet) {
     var txt = "";
     var mod = getSheetModifier(sheet);
-    if(mod !== null){
-        txt = "("+mod.Name+")";
+    if (mod !== null) {
+        txt = "(" + mod.Name + ")";
     }
     return txt;
 }
@@ -498,4 +517,142 @@ async function getLvlInfo(Level) {
             resolve(Levels[Level]);
         }
     });
+}
+
+//functions to handle notes
+const noteIndicators = [{Id: 0, Name: "Info", Image: ""}, {Id: 1, Name: "Alert", Image: ""}];
+function showNoteSection(sheet, dsMode,div) {
+    const note_section = div;
+    clearChildren(note_section);
+    let noteTitle = document.createElement("h1");
+    noteTitle.textContent = "Notes";
+    note_section.appendChild(noteTitle);
+    //make sure notes exist, otherwise make blank arrays
+    sheet.SheetInformation.Instructor.Notes = sheet.SheetInformation.Instructor.Notes ? sheet.SheetInformation.Instructor.Notes : [];
+    if (dsMode) {//ds notes if applicable
+        sheet.SheetInformation.Lead.Notes = sheet.SheetInformation.Lead.Notes ? sheet.SheetInformation.Lead.Notes : [];
+    }
+    //Btn holder must be added first due to appending before
+    let noteBtnHolder = document.createElement("span");
+    note_section.appendChild(noteBtnHolder);
+    //show existing notes
+    sheet.SheetInformation.Instructor.Notes.forEach((note) => {
+        showNote(note, false);
+    });
+    if (dsMode) {
+        sheet.SheetInformation.Lead.Notes.forEach((note) => {
+            showNote(note, true);
+        });
+    }
+    newNoteBtn("New Note", noteBtnHolder, false);
+    if (dsMode) {
+        newNoteBtn("New Supervisor Note", noteBtnHolder, true);
+    }
+    function showNote(note, isDs) {
+        //create div
+        let noteContainer = document.createElement("div");
+        //title input
+        let titleInput = document.createElement("input");
+        titleInput.value = note.Title;
+        titleInput.onchange = function () {
+            note.Title = titleInput.value.escapeJSON();
+            attemptEditPending();
+        };
+        noteContainer.appendChild(titleInput);
+        //main text input
+        let txtArea = document.createElement("textarea");
+        txtArea.value = note.Content;
+        txtArea.onchange = function () {
+            note.Content = txtArea.value.escapeJSON();
+            attemptEditPending();
+        };
+        //container for control buttons
+        noteContainer.appendChild(txtArea);
+        let controlHolder = document.createElement("span");
+        noteContainer.appendChild(controlHolder);
+        //control elements
+        //indicator
+        let indicatorLbl = document.createElement("label");
+        indicatorLbl.textContent = "Symbol: ";
+        //commented out until indicator is implemented
+        //controlHolder.appendChild(indicatorLbl);
+        let indicatorSel = document.createElement("select");
+        indicatorLbl.appendChild(indicatorSel);
+        let noIndicator = document.createElement("option");
+        noIndicator.textContent = "None";
+        noIndicator.value = -1;
+        indicatorSel.appendChild(noIndicator);
+        noteIndicators.forEach((indicator) => {
+            let opt = document.createElement("option");
+            opt.textContent = indicator.Name;
+            opt.value = indicator.Id;
+            indicatorSel.appendChild(opt);
+        });
+        indicatorSel.value = note.Indicator;
+        indicatorSel.onchange = function () {
+            attemptEditPending();
+            note.Indicator = indicatorSel.value;
+        };
+        //delete button
+        let deletebtn = document.createElement("button");
+        deletebtn.textContent = "Delete";
+        deletebtn.className = "delete";
+        deletebtn.onclick = function () {
+            let noteLoc = sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes;
+            sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes = noteLoc.filter(lNote => lNote.UniqueID !== note.UniqueID);
+            noteContainer.remove();
+            attemptEditPending();
+        };
+        controlHolder.appendChild(deletebtn);
+        //ds notice
+        if (isDs) {
+            let dsNotice = document.createElement("p");
+            dsNotice.textContent = "Supervisor Note";
+            controlHolder.appendChild(dsNotice);
+        }
+        note_section.insertBefore(noteContainer, noteBtnHolder);
+    }
+
+    function newNoteBtn(text, appendTo, isDs) {
+        var newBtn = document.createElement("button");
+        newBtn.className = "mainround newnotebtn";
+        newBtn.textContent = text;
+        appendTo.appendChild(newBtn);
+        newBtn.onclick = function () {
+            createNewNote(isDs);
+        };
+    }
+
+    function createNewNote(isDs) {
+        //Name is not supplied, always use the same. Will not significantly affect randomness
+        let id = calculateUniqueObjectID("Note", sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes);
+        let newNote = {Title: "", Content: "", Indicator: -1, UniqueID: id};
+        sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes.push(newNote);
+        attemptEditPending();
+        showNote(newNote, isDs);
+    }
+
+    function attemptEditPending() {
+        var editPendingAvailable = !typeof (changeEditPending) === "undefined";
+        if(editPendingAvailable === true){
+            changeEditPending(true,true);
+        }
+        try {
+            window.parent.changeEditPending(true, true);
+        } catch (e) {
+            //Not iframed, do nothing
+        }
+    }
+}
+
+/**
+ * Converts a full name to truncated name
+ * @param {type} Name The full name i.e John Doe
+ * @returns {String} Truncated name John D.
+ */
+function getInstructorName(Name) {
+    if (!Name || Name === "") {
+        return "";
+    }
+    return Name.split(" ")[0] + " " + (Name.split(" ")[1] !== undefined ? Name.split(" ")[1].charAt(0) + "." : "");
 }

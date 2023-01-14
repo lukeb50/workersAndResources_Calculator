@@ -11,10 +11,6 @@ input[type="text"]:disabled,input[type="number"]:disabled,textarea:disabled, sel
     background:rgba(200,200,200,0.15);
 }
 
-button.mainround{
-    border-radius: 5px!important;
-}
-
 #general-menu-holder p{
     margin: 5px;
     text-decoration: underline;
@@ -74,8 +70,7 @@ button.mainround{
 
 #level-settings-container div{
     height: 40em;
-    flex-grow:1;
-    width:fit-content;
+    flex:1;
 }
 
 #level-settings-container div div:not(#level-settings-container){
@@ -188,7 +183,7 @@ button.mainround{
     text-align: center;
 }
 
-#group-menu select{
+#color-menu select,#regex-menu select, #progression-edit-menu select{
     color:black!important;
     border-color:grey;
     width:96%;
@@ -196,14 +191,14 @@ button.mainround{
     padding:5px;
 }
 
-#group-menu input{
+#color-menu input,#regex-menu input, #progression-edit-menu input{
     width:96%;
     margin: 5px 0px 5px 0px;
     border-radius: 5px;
     padding:5px;
 }
 
-#group-menu button{
+#color-menu button,#regex-menu button, #progression-edit-menu button{
     margin-bottom: 5px;
 }
 
@@ -303,15 +298,12 @@ button.mainround{
     height: fit-content;
     width: 100%;
     display: inline-block;
+    outline: 1px solid grey;
 }
 #lvl-settings-skills-container div.btnholder{
     padding-top: 3px!important;
     background:rgba(155,155,155,0.2);
-}
-
-#lvl-settings-skills-container div:not(:nth-child(1)){
-    outline: 1px solid grey;
-}
+} 
 
 #lvl-settings-skills-container div label{
     background:rgba(155,155,155,0.3);
@@ -345,6 +337,29 @@ button.mainround{
 
 #lvl-settings-skills-container div button {
     display: inline-block;
+}
+
+#plan-config-container div{
+    height: fit-content;
+    outline: 1px solid grey;
+}
+
+#plan-config-container div label{
+    background:rgba(155,155,155,0.3);
+    display: block;
+    padding:0px;
+    padding-top: 1px;
+    margin:0;
+    width:100%;
+
+}
+
+#plan-config-container div button.newprog{
+    background:none;
+    border:none;
+    padding-bottom: 3px;
+    color:darkgreen;
+    font-weight: bold;
 }
 
 #Add-Passing-Level, #Add-Constant-Level{
@@ -559,6 +574,62 @@ i{
 
 #open-editor-btn{
     margin-left: 5px;
+}
+
+#plan-config-container{
+    overflow-y: scroll;
+}
+
+#prog-box-superholder{
+    position: relative;
+    width:100%;
+    height: fit-content;
+}
+
+#prog-input{
+    z-index: 1;
+    background:transparent;
+    color:transparent;
+    caret-color:black;
+}
+
+#prog-hightlight-holder{
+    z-index: 0;
+}
+
+#prog-input, #prog-hightlight-holder, #prog-highlight-code{
+    width: 100%;
+    height: 100px;
+    border:none!important;
+    padding:0;
+    margin: 0;
+    position: absolute;
+    top:0;
+    left:0;
+    resize:none;
+    font-size: 1em;
+    font-family: Roboto;
+    line-height: 1.4em;
+    white-space: pre-line;
+}
+
+#prog-highlight-code span{
+    color: transparent;
+    background:var(--color-primary-light);
+    display: inline;
+    overflow: hidden;
+    position: relative;
+    border-radius: 5px;
+}
+
+#prog-highlight-code span p{
+    color:black;
+    height: 100%;
+    width:100%;
+    position: absolute;
+    left:0;
+    top:-0.33333em;
+    line-height: 1.25em;
 }
 
 body::-webkit-scrollbar {

@@ -21,21 +21,35 @@
             <div id="main-menu">
                 <div class="menuitem" id="sheetinfo-menu"></div>
                 <div class="menuitem" id="config-menu">
-                    <h2>Save & Load</h2>
-                    <button id="getMasterConfig">Copy Master Config</button>
-                    <button id="inputMasterConfig">Input Master Config</button>
-                    <hr>
-                    <h2>Create & Update</h2>
-                    <label>All barcodes entered in this menu must exist in the report. If you wish to custom enter a class, do not enter the barcode here</label>
-                    <h3>Instructors</h3>
-                    <div id="person-config-div"></div>
-                    <button id="config-add-instructor">Add Instructor</button>
-                    <label>Upload an Activity Attendance Sheet report in Excel format</label>
-                    <button onclick="document.getElementById('excelUpload').click()" id="excelUploadExt">Select file</button>
-                    <input type="file" id="excelUpload" style="display: none" onchange="document.getElementById('configCreateBtn').disabled = document.getElementById('excelUpload').value===null"/>
-                    <div style="width:100%;text-align: center;margin-top: 5px">
-                        <button id="configCreateBtn" class="mainround">Create Config</button>
+                    <h2>Create</h2>
+                    <div class="button-centering-div">
+                        <button id="newMasterConfig" class="mainround">New Schedule</button>
                     </div>
+                    <div class="button-centering-div">
+                        <button id="inputMasterConfig" class="mainround">Import Schedule</button>
+                    </div>
+                    <div class="button-centering-div">
+                        <button onclick="document.getElementById('excelNewUpload').click()" id="excelNewExt" class="mainround">From Excel</button>
+                        <input type="file" id="excelNewUpload" style="display: none"/>
+                    </div>
+                    <label class="uploadprompt">Upload an Activity Attendance Sheet report in Excel format</label>
+                    <h2>Export</h2>
+                    <div class="button-centering-div">
+                        <button id="getMasterConfig" class="mainround">Export Schedule</button>
+                    </div>
+                    <h2>Update</h2>
+                    <div class="button-centering-div">
+                        <button onclick="document.getElementById('excelUpdateUpload').click()" id="excelUploadExt" class="mainround">From Excel</button>
+                        <input type="file" id="excelUpdateUpload" style="display: none"/>
+                    </div>
+                    <label class="uploadprompt">Upload an Activity Attendance Sheet report in Excel format</label>
+                    <div class="button-centering-div">
+                        <button id="configUpdatePeopleBtn" class="mainround">Modify People</button>
+                    </div>
+                </div>
+                <div class="menuitem" id="config-assignment-menu">
+                    <div id="config-assignment-list"></div>
+                    <button id="config-assignment-confirm">Confirm</button>
                 </div>
                 <button class="mainround" id="main-menu-close-btn">Close</button>
             </div>
@@ -43,7 +57,7 @@
         <div class="scrollbar" id="main-schedule-holder">
             <table id="scheduleTable"></table>
             <div id="uploadSection">        
-                <button id="createConfig">Create Config File</button>
+                <button id="configMenuBtn">Schedule Management</button>
             </div>
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>

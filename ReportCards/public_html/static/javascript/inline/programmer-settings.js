@@ -1,4 +1,4 @@
-/* global LevelConfigs, clientDb, initClientDatabase, firebase, email_pattern */
+/* global LevelConfigs, clientDb, initClientDatabase, firebase, email_pattern, Settings, resetloader */
 
 var GroupingData = null;
 var isLevelEdit = false;
@@ -8,13 +8,17 @@ var Timeblocks = {};
 
 Levels = {};
 
-const groupmenu = document.getElementById("group-menu");
+const regexmenu = document.getElementById("regex-menu");
+const progressionmenu = document.getElementById("progression-edit-menu");
+const colormenu = document.getElementById("group-color-menu");
 
 const loadblocker = document.getElementById("loadblocker");
 
 const mainmenu = document.getElementById("main-menu");
+const close_mainmenu = document.getElementById("main-menu-close-btn");
 
-const loaditms = [groupmenu];
+
+const loaditms = [regexmenu, progressionmenu, colormenu];
 
 document.querySelectorAll('.setting-arrow').forEach(function (arrow) {
     arrow.onclick = function () {
@@ -25,6 +29,107 @@ document.querySelectorAll('.setting-arrow').forEach(function (arrow) {
         }
     };
 });
+
+close_mainmenu.onclick = function () {
+    resetloader(false, null, null, false);
+};
+
+const prog_edit_area = document.getElementById("prog-input");
+const prog_edit_display = document.getElementById("prog-highlight-code");
+    const progRegexes = {ListData: {Name: "List", InternalName: "lidata", TextMatch: /List/gi, InternalMatch: /~~lidata\([0-9]+\)~~/g},
+    NumberData: {Name: "NumberBox", InternalName: "nmdata", TextMatch: /Numberbox/gi, InternalMatch: /~~nmdata\([0-9]+\)~~/g},
+    TextData: {Name: "TextBox", InternalName: "txdata", TextMatch: /Textbox/gi, InternalMatch: /~~txdata\([0-9]+\)~~/g}};
+
+function loadProgressionDisplay(lvl, skill, progid) {
+    lvl.Skills[skill].Progressions = lvl.Skills[skill].Progressions ? lvl.Skills[skill].Progressions : [];
+    var progData;
+    if (progid >= 0) {
+        progData = lvl.Skills[skill].Progressions[progid];
+        refactorProgressionData(progData);
+        prog_edit_area.value = progData.Text;
+        displayUpdatedProgressionText(progData);
+    } else {
+        progData = refactorProgressionData({});
+        lvl.Skills[skill].Progressions.push(progData);
+        prog_edit_area.value = "";
+        prog_edit_display.innerHTML = "";
+    }
+    prog_edit_area.oninput = function (e) {
+        progData.Text = convertInputIntoJSON(progData, prog_edit_area);
+        displayUpdatedProgressionText(progData);
+        prog_edit_area.value = progData.Text;
+        if (e.inputType === "deleteContentBackward") {
+            //delete action
+            for (var type of Object.keys(progRegexes)) {
+                let regexInfo = getRegexLocations(new RegExp("~~"+progRegexes[type].InternalName+"\\([0-9]+\\)~", "g"), progData.Text);
+                let regexLocationIndex = regexInfo.Indexes.indexOf(prog_edit_area.selectionStart);
+                if (regexLocationIndex >= 0) {
+                    //delete the tag from Text & reflect
+                    progData.Text = progData.Text.substring(0, prog_edit_area.selectionStart - regexInfo.Lengths[regexLocationIndex]) +
+                            progData.Text.substring(prog_edit_area.selectionStart);
+                    displayUpdatedProgressionText(progData);
+                    prog_edit_area.value = progData.Text;
+                }
+            }
+        }
+        //scanInputForAdds();
+    };
+}
+
+//Take a loaded progression data object and make
+//sure it complies with the lastest version of the progression
+//specification (contains a Text:String and all needed data types
+function refactorProgressionData(data) {
+    if (!data.Text) {
+        data.Text = "";
+    }
+    for (var k of Object.keys(progRegexes)) {
+        if (!data[k]) {
+            data[k] = [];
+        }
+    }
+    return data;
+}
+
+function getRegexLocations(regexp, text) {
+    let locations = [];
+    let lengths = [];
+    console.log(text);
+    while ((match = regexp.exec(text)) !== null) {
+        locations.push(regexp.lastIndex);
+        lengths.push(match[0].length);
+    }
+    return {Indexes: locations, Lengths: lengths};
+}
+
+function displayUpdatedProgressionText(progression) {
+    let inputText = progression.Text;
+    //Replace control characters
+    inputText = inputText.replace(new RegExp("&", "g"), "&amp").replace(new RegExp("<", "g"), "&lt");
+    for (var type of Object.keys(progRegexes)) {
+        inputText = inputText.replace(progRegexes[type].InternalMatch, "<span>$&<p>" + progRegexes[type].Name + "</p></span>");
+    }
+    prog_edit_display.innerHTML = inputText;
+}
+
+function convertInputIntoJSON(progData, inputBox) {
+    var str = inputBox.value;
+    for (var type of Object.keys(progRegexes)) {
+        var uniqueID = createUniqueID(progData[type]);
+        str = str.replace(progRegexes[type].TextMatch, "~~" + progRegexes[type].InternalName + "(" + uniqueID + ")~~");
+    }
+    return str;
+}
+//[{ID:2343432, ...}]
+function createUniqueID(existingData){
+    let possibleID = Math.floor(Math.random() * (10000 - 1000) + 1000);
+    isUsed = existingData.filter(entry=>{entry.ID===possibleID;}).length>0;
+    if(isUsed ===false){
+        return possibleID;
+    }else{
+        return createUniqueID(existingData);
+    }
+}
 
 function toggleSettingsSection(btn, useMargins) {
     var state = "";
@@ -50,6 +155,7 @@ function toggleSettingsSection(btn, useMargins) {
 
 
 const GroupList = document.getElementById("lvl-list-settings-groups");
+const planListConfig = document.getElementById("plan-config-container");
 async function generateLvlGroupingSettingsList() {
     if (GroupingData === null) {
         GroupingData = await getGroups();
@@ -57,6 +163,9 @@ async function generateLvlGroupingSettingsList() {
             GroupingData = [];
         }
     }
+    // Show/Hide plan panel depending on settings
+    var isPlanUsed = Settings.useLessonPlans;
+    planListConfig.style.display = isPlanUsed === true ? "block" : "none";
     clearChildren(GroupList);
     for (var i = 0; i < GroupingData.length; i++) {
         var currentGroup = GroupingData[i];
@@ -167,12 +276,10 @@ async function generateLvlGroupingSettingsList() {
 
     function bindColorChange(btn, i) {
         btn.onclick = function () {
-            resetloader(false ,groupmenu ,"block" ,false);
-            document.getElementById("regex-menu").style.display = "none";
-            document.getElementById("group-color-menu").style.display = "block";
+            resetloader(false, colormenu, "block", false);
             document.getElementById("color-input").value = GroupingData[i].Color;
             getUserInput().then((newVal) => {
-                resetloader(false ,null ,null ,false);
+                resetloader(false, null, null, false);
                 GroupingData[i].Color = newVal;
                 setLevelEdit(true);
             });
@@ -188,12 +295,10 @@ async function generateLvlGroupingSettingsList() {
 
     function bindMatchChange(btn, i) {
         btn.onclick = function () {
-            resetloader(false ,groupmenu ,"block" ,false);
-            document.getElementById("regex-menu").style.display = "block";
-            document.getElementById("group-color-menu").style.display = "none";
+            resetloader(false, regexmenu, "block", false);
             document.getElementById("regex-input").value = GroupingData[i].Regex;
             getUserInput().then((newVal) => {
-                resetloader(false ,null ,null ,false);
+                resetloader(false, null, null, false);
                 GroupingData[i].Regex = newVal;
                 generateLvlSettingsList();//Regen level list, may change groups
                 setLevelEdit(true);
@@ -388,6 +493,7 @@ function generateMainLevelConfig(id, lvl) {
 
     function initMainConfig(id, lvl) {
         clearChildren(mainLevelConfig);
+        clearChildren(planListConfig);
         if (lvl === null) {
             return;
         }
@@ -397,6 +503,7 @@ function generateMainLevelConfig(id, lvl) {
             lvl.Skills = [];
         }
         for (var c = 0; c < lvl.Skills.length; c++) {
+            //Handle Skill list
             var div = document.createElement("div");
             var lbl = document.createElement("label");
             lbl.textContent = lvl.Skills[c].Name;
@@ -424,6 +531,23 @@ function generateMainLevelConfig(id, lvl) {
             }
             mainLevelConfig.appendChild(div);
             bindSkillClick(lbl, lvl, c);//Send to card editor
+            //Handle lesson plan list
+            var planSkillDiv = document.createElement("div");
+            var planSkillName = document.createElement("label");
+            planSkillName.textContent = lvl.Skills[c].Name;
+            planSkillDiv.appendChild(planSkillName);
+            planListConfig.appendChild(planSkillDiv);
+            //Show progressions for skills
+            if (lvl.Skills[c].Progressions) {
+                //show all progressions
+            } else {
+                lvl.Skills[c].Progressions = [];
+            }
+            var addProgBtn = document.createElement("button");
+            addProgBtn.textContent = "New Progression";
+            addProgBtn.className = "newprog";
+            planSkillDiv.appendChild(addProgBtn);
+            bindAddProgressionButton(addProgBtn, lvl, c);
         }
         //New Skill
         var div = document.createElement("div");
@@ -538,6 +662,13 @@ function generateMainLevelConfig(id, lvl) {
                 lvl.Skills.splice(c, 1);
                 generateMainLevelConfig(id, lvl);
                 setLevelEdit(true);
+            };
+        }
+
+        function bindAddProgressionButton(btn, lvl, c) {//c = skill id
+            btn.onclick = function () {
+                resetloader(false, progressionmenu, "block", false);
+                loadProgressionDisplay(lvl, c, -1);
             };
         }
     }
@@ -661,11 +792,11 @@ const modifier_list = document.getElementById("modifier-list");
 var modifiers;
 function generateModifierList() {
     document.getElementById("modifier-save-btn").onclick = function () {
-        resetloader(true ,null ,null ,false);
+        resetloader(true, null, null, false);
         saveModifiers(modifiers).then(() => {
-            resetloader(false ,null ,null ,false);
+            resetloader(false, null, null, false);
         }).catch((e) => {
-            resetloader(false ,null ,null ,false);
+            resetloader(false, null, null, false);
         });
     };
 
@@ -730,7 +861,7 @@ function generateModifierList() {
             }
         };
     }
-    
+
     function bindDuration(button, div, pos) {
         button.onclick = function () {
             var newDur = prompt("Enter new duration (minutes): ");
@@ -1010,17 +1141,17 @@ async function generateFacilityMenu() {
     }
 
     document.getElementById("facility-save-btn").onclick = function () {
-        resetloader(true ,null ,null ,false);
+        resetloader(true, null, null, false);
         saveData(Facilities, "Facilities").then(() => {
             saveData(Timeblocks, "Timeblocks").then(() => {
-                resetloader(false ,null ,null ,false);
+                resetloader(false, null, null, false);
                 generateFacilityMenu();
             }).catch((e) => {
-                resetloader(false ,null ,null ,false);
+                resetloader(false, null, null, false);
                 alert("Error saving data");
             });
         }).catch((e) => {
-            resetloader(false ,null ,null ,false);
+            resetloader(false, null, null, false);
             alert("Error saving facility data");
         });
     };
@@ -1158,13 +1289,13 @@ function setLevelEdit(newVal) {
 }
 
 save_email_btn.onclick = function () {
-    resetloader(true ,null ,null ,false);
+    resetloader(true, null, null, false);
     var saveData = {Subject: email_subject.value, HTML: email_body.value, Plain: email_plain_body.value};
     saveEmailData(saveData).then(function () {
-        resetloader(false ,null ,null ,false);
+        resetloader(false, null, null, false);
     }).catch((err) => {
         alert("Error saving data");
-        resetloader(false ,null ,null ,false);
+        resetloader(false, null, null, false);
     });
 
     async function saveEmailData(Data) {
@@ -1173,13 +1304,13 @@ save_email_btn.onclick = function () {
 };
 
 document.getElementById("save-lvl-settings-btn").onclick = function () {
-    resetloader(true ,null ,null ,false);
+    resetloader(true, null, null, false);
     saveLevelData().then(() => {
         setLevelEdit(false);
-        resetloader(false ,null ,null ,false);
+        resetloader(false, null, null, false);
     }).catch((err) => {
         alert("Error saving data");
-        resetloader(false ,null ,null ,false);
+        resetloader(false, null, null, false);
         console.log(err);
     });
     async function saveLevelData() {
@@ -1191,19 +1322,20 @@ document.getElementById("save-lvl-settings-btn").onclick = function () {
 };
 
 window.onload = function () {
-    resetloader(true ,null ,null ,false);
+    resetloader(true, null, null, false);
     firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
             initClientDatabase().then(async() => {
                 await initCoreData(true);
                 await getCompleteLevels();
+                await getSettings();
                 generateLvlGroupingSettingsList();//Level Config
                 generateModifierList();
                 generateFacilityMenu();
                 generateEmailMenu();
-                resetloader(false ,null ,null ,false);
+                resetloader(false, null, null, false);
             }).catch((f) => {
-                resetloader(false ,null ,null ,false);
+                resetloader(false, null, null, false);
                 alert("Error logging in - please try again later");
                 console.log(f);
             });

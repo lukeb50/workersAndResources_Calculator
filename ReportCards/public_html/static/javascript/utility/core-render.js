@@ -1,4 +1,4 @@
-/* global firebase, add_row_btn, documents, currentTime, printbtn, maintable, blocker, blocker_change, blocker_lvl, blocker_mark, blocker_mustsee, screenquery, sheetinfo, overflowbtn, topbar_controls, overflowmenu, barlist, loadblocker, btnback, btnnext, savebtn, currentPerson, People, UserData, commentmenu, manual_sel, manual_div, notemenu, clientDb, upload_button_div, new_sheet_manual, getSheetModifier, getLvlInfo */
+/* global firebase, add_row_btn, documents, currentTime, printbtn, maintable, blocker, blocker_change, blocker_lvl, blocker_mark, blocker_mustsee, screenquery, sheetinfo, overflowbtn, topbar_controls, overflowmenu, barlist, loadblocker, btnback, btnnext, savebtn, currentPerson, People, UserData, commentmenu, manual_sel, manual_div, notemenu, clientDb, upload_button_div, new_sheet_manual, getSheetModifier, getLvlInfo, Settings */
 var staticPath = "../../static";
 const marking_change_btns = [document.getElementById("blocker_btn1"), document.getElementById("blocker_btn2")];
 var markingOptions = new Map();
@@ -13,7 +13,6 @@ let programmerMode = "";
 let allowCorrection = false;
 let isAccess = false;
 var Levels = {};
-var Settings = {};
 var SheetModifiers = [];
 async function InitRenderer(ds, allowCorrections) {
     if (ds) {
@@ -801,8 +800,6 @@ function bindTimeInputChange(input, i) {
 }
 
 const modifier_select = document.getElementById("note-menu-type-select");
-const note_section = document.getElementById("note-section");
-const noteIndicators = [{Id: 0, Name: "Info", Image: ""}, {Id: 1, Name: "Alert", Image: ""}];
 function bindNoteBtn(btn, i) {
     btn.onclick = function () {
         var sheet = documents[dsMode === false ? currentTime : currentPerson][i];
@@ -822,115 +819,7 @@ function bindNoteBtn(btn, i) {
         });
         modifier_select.value = sheet.TimeModifier;
         //notes
-        clearChildren(note_section);
-        let noteTitle = document.createElement("h1");
-        noteTitle.textContent = "Notes";
-        note_section.appendChild(noteTitle);
-        note_section.className = "scrollbar";
-        //make sure notes exist, otherwise make blank arrays
-        sheet.SheetInformation.Instructor.Notes = sheet.SheetInformation.Instructor.Notes ? sheet.SheetInformation.Instructor.Notes : [];
-        if (dsMode) {//ds notes if applicable
-            sheet.SheetInformation.Lead.Notes = sheet.SheetInformation.Lead.Notes ? sheet.SheetInformation.Lead.Notes : [];
-        }
-        //Btn holder must be added first due to appending before
-        let noteBtnHolder = document.createElement("span");
-        note_section.appendChild(noteBtnHolder);
-        //show existing notes
-        sheet.SheetInformation.Instructor.Notes.forEach((note) => {
-            showNote(note, false);
-        });
-        if (dsMode) {
-            sheet.SheetInformation.Lead.Notes.forEach((note) => {
-                showNote(note, true);
-            });
-        }
-        newNoteBtn("New Note", noteBtnHolder, false);
-        if (dsMode) {
-            newNoteBtn("New Supervisor Note", noteBtnHolder, true);
-        }
-        function showNote(note, isDs) {
-            //create div
-            let noteContainer = document.createElement("div");
-            //title input
-            let titleInput = document.createElement("input");
-            titleInput.value = note.Title;
-            titleInput.onchange = function () {
-                note.Title = titleInput.value.escapeJSON();
-                changeEditPending(true, true);
-            };
-            noteContainer.appendChild(titleInput);
-            //main text input
-            let txtArea = document.createElement("textarea");
-            txtArea.value = note.Content;
-            txtArea.onchange = function () {
-                note.Content = txtArea.value.escapeJSON();
-                changeEditPending(true, true);
-            };
-            //container for control buttons
-            noteContainer.appendChild(txtArea);
-            let controlHolder = document.createElement("span");
-            noteContainer.appendChild(controlHolder);
-            //control elements
-            //indicator
-            let indicatorLbl = document.createElement("label");
-            indicatorLbl.textContent = "Symbol: ";
-            //commented out until indicator is implemented
-            //controlHolder.appendChild(indicatorLbl);
-            let indicatorSel = document.createElement("select");
-            indicatorLbl.appendChild(indicatorSel);
-            let noIndicator = document.createElement("option");
-            noIndicator.textContent = "None";
-            noIndicator.value = -1;
-            indicatorSel.appendChild(noIndicator);
-            noteIndicators.forEach((indicator) => {
-                let opt = document.createElement("option");
-                opt.textContent = indicator.Name;
-                opt.value = indicator.Id;
-                indicatorSel.appendChild(opt);
-            });
-            indicatorSel.value = note.Indicator;
-            indicatorSel.onchange = function () {
-                changeEditPending(true, true);
-                note.Indicator = indicatorSel.value;
-            };
-            //delete button
-            let deletebtn = document.createElement("button");
-            deletebtn.textContent = "Delete";
-            deletebtn.className = "delete";
-            deletebtn.onclick = function () {
-                let noteLoc = sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes;
-                sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes = noteLoc.filter(lNote => lNote.UniqueID !== note.UniqueID);
-                noteContainer.remove();
-                changeEditPending(true, true);
-            };
-            controlHolder.appendChild(deletebtn);
-            //ds notice
-            if (isDs) {
-                let dsNotice = document.createElement("p");
-                dsNotice.textContent = "Supervisor Note";
-                controlHolder.appendChild(dsNotice);
-            }
-            note_section.insertBefore(noteContainer, noteBtnHolder);
-        }
-
-        function newNoteBtn(text, appendTo, isDs) {
-            var newBtn = document.createElement("button");
-            newBtn.className = "mainround newnotebtn";
-            newBtn.textContent = text;
-            appendTo.appendChild(newBtn);
-            newBtn.onclick = function () {
-                createNewNote(isDs);
-            };
-        }
-
-        function createNewNote(isDs) {
-            //Name is not supplied, always use the same. Will not significantly affect randomness
-            let id = calculateUniqueObjectID("Note", sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes);
-            let newNote = {Title: "", Content: "", Indicator: -1, UniqueID: id};
-            sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes.push(newNote);
-            changeEditPending(true, true);
-            showNote(newNote, isDs);
-        }
+        showNoteSection(sheet, dsMode,document.getElementsByClassName("note-section")[0]);
     };
 }
 
@@ -1002,20 +891,6 @@ function attachUpdate(object, i) {
             handleresize();
         }
         renderTable(i);
-    });
-}
-
-async function getSettings() {
-    return new Promise((resolve, reject) => {
-        clientDb.ref("Settings").once('value').then((snap) => {
-            Settings = snap.val().Data ? snap.val().Data : {};
-            SheetModifiers = snap.val()["Sheet-Modifiers"] ? snap.val()["Sheet-Modifiers"] : [];
-            var settingEvent = new Event("SettingUpdate");
-            window.dispatchEvent(settingEvent);
-            resolve(snap.val());
-        }).catch(() => {
-            resolve({});
-        });
     });
 }
 

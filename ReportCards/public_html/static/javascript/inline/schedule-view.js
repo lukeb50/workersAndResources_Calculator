@@ -3,9 +3,10 @@
 const loadspinner = document.getElementById("loadspinner");
 const sheetinfomenu = document.getElementById("sheetinfo-menu");
 const configmenu = document.getElementById("config-menu");
+const config_assignmenu = document.getElementById("config-assignment-menu");
 const mainmenu = document.getElementById("main-menu");
 const close_mainmenu = document.getElementById("main-menu-close-btn");
-const loaditms = [loadspinner, sheetinfomenu, configmenu];
+const loaditms = [loadspinner, sheetinfomenu, configmenu, config_assignmenu];
 var scheduleData = [];
 var People = [];
 var sheetGroupingInfo = [];
@@ -50,6 +51,10 @@ function displaySchedule(Time) {
     scheduleTable.appendChild(noteRow);
     //calculate table spacing
     var tableInformation = calculateTimeSpacing(scheduleData);
+    if (tableInformation.increment <= 0) {
+        alert("Error calculating schedule display");
+        return;
+    }
     //create intervals
     for (var t = tableInformation.firstStart; t < tableInformation.lastEnd; t = t + tableInformation.increment) {
         var timerow = document.createElement("tr");
@@ -94,7 +99,7 @@ function displaySchedule(Time) {
         input.onchange = function () {
             person.UserInformation.ScheduleNote = input.value.escapeJSON();
             try {
-                window.parent.changeEditPending(true,true);
+                window.parent.changeEditPending(true, true);
             } catch (e) {
                 //Not iframed, do nothing
             }
@@ -319,6 +324,7 @@ function displaySchedule(Time) {
                 item.appendChild(delbtn);
             }
         });
+        //add student btn in edit mode
         if (editMode === true) {
             var addbtn = document.createElement("button");
             addbtn.textContent = "Add Student";
@@ -333,6 +339,11 @@ function displaySchedule(Time) {
             };
             div.appendChild(addbtn);
         }
+        //Notes section
+        let noteSection = document.createElement("div");
+        noteSection.className = "note-section scrollbar";
+        div.appendChild(noteSection);
+        showNoteSection(sheet, true, noteSection);
         //code to get main site (outside of iframe) to display the sheet. For DS mode
         if (editMode === false) {
             var viewBtn = document.createElement("button");
@@ -373,14 +384,14 @@ function displaySchedule(Time) {
             //determineLevelId
             if (lvl && !isNaN(code) && start !== null) {
                 if (determineLevelId(lvl) !== null) {
-                    scheduleData[p].push({Level: determineLevelId(lvl), Barcode: code, Names: [], TimeStart: start});
+                    scheduleData[p].push({Level: determineLevelId(lvl), Barcode: code, Names: [], TimeStart: start, SheetInformation: {Lead: {}, Instructor: {}}});
                     displaySchedule(true);
                 } else {
                     var dur = prompt("Enter class duration in minutes");
                     if (!dur || isNaN(parseInt(dur))) {
                         return;
                     }
-                    scheduleData[p].push({Level: lvl, Barcode: code, Names: [], TimeStart: start, Duration: parseInt(dur)});
+                    scheduleData[p].push({Level: lvl, Barcode: code, Names: [], TimeStart: start, Duration: parseInt(dur), TimeModifier: -1, SheetInformation: {Lead: {}, Instructor: {}}});
                     displaySchedule(true);
                 }
             }
@@ -559,9 +570,12 @@ async function getCurrentInstructors(time) {
     return await send_http_request("1/get/list", "", [["facility", time.split("---")[0]], ["timeblock", time.split("---")[1]]]);
 }
 
-close_mainmenu.onclick = function () {
+function closeMenuBind() {
     resetloader(false, null, null, false);
-};
+}
+
+close_mainmenu.onclick = closeMenuBind;
+
 window.onload = function () {
     resetloader(true, null, null, false);
     firebase.auth().onAuthStateChanged(function (user) {
@@ -574,185 +588,170 @@ window.onload = function () {
             });
         }
     });
+
+    document.getElementById("configUpdatePeopleBtn").onclick = function () {
+        resetloader(false, config_assignmenu, null, false);
+        handleConfigAssignmentMenu({People: People, ScheduleData: scheduleData, rawData: []}).then((result) => {
+            scheduleData = result.ScheduleData;
+            People = result.People;
+            resetloader(false, null, null, false);
+            displaySchedule(true);
+        }).catch((err) => {
+            resetloader(false, null, null, false);
+            alert("Error creating schedule: " + err);
+        });
+    };
+
+    document.getElementById("configMenuBtn").onclick = function () {
+        resetloader(false, configmenu, "flex", false);
+    };
+
     document.getElementById("getMasterConfig").onclick = function () {
-        navigator.clipboard.writeText(JSON.stringify({People: People, Data: scheduleData}));
+        navigator.clipboard.writeText(JSON.stringify({People: People, ScheduleData: scheduleData}));
+        alert("Schedule data exported to clipboard");
     };
     document.getElementById("inputMasterConfig").onclick = function () {
         var config = JSON.parse(prompt("Enter config"));
         People = config.People;
-        scheduleData = config.Data;
+        scheduleData = config.ScheduleData;
         resetloader(false, null, null, false);
         displaySchedule(true);
     };
-    var tmpPeople = [];
-    var tmpPeopleBarcodes = [];
-    document.getElementById("createConfig").onclick = function () {
-        resetloader(false, configmenu, "flex", false);
-        tmpPeople = JSON.parse(JSON.stringify(People));
-        tmpPeopleBarcodes = getTmpBarcodes();
-        renderTmpPeopleList();
-        document.getElementById("excelUpload").value = null;
-    };
-    function getTmpBarcodes() {
-        var res = [];
-        for (var i = 0; i < scheduleData.length; i++) {
-            res.push([]);
-            for (var s = 0; s < scheduleData[i].length; s++) {
-                if (Array.isArray(scheduleData[i][s])) {
-                    for (var x = 0; x < scheduleData[i][s].length; x++) {
-                        res[i].push(scheduleData[i][s][x].Barcode);
-                    }
-                } else {
-                    res[i].push(scheduleData[i][s].Barcode);
-                }
-            }
-        }
-        return res;
-    }
-    document.getElementById("config-add-instructor").onclick = function () {
-        var name = prompt("Enter instructor name:");
-        if (name) {
-            tmpPeople.push({Name: name, Uid: genUid(),UserInformation:{Corrections:0,ScheduleNote:""}});
-            tmpPeopleBarcodes.push([]);
-            renderTmpPeopleList();
-        }
-    };
-    function genUid() {
-        try {
-            return Math.random().toString(36).slice(2, 7);
-        } catch (err) {
-            return genUid();
-        }
-    }
 
-    var tmpPeopleDiv = document.getElementById("person-config-div");
-    function renderTmpPeopleList() {
-        clearChildren(tmpPeopleDiv);
-        var plist = document.createElement("ul");
-        tmpPeopleDiv.appendChild(plist);
-        for (var p = 0; p < tmpPeople.length; p++) {
-            var lbl = document.createElement("li");
-            lbl.textContent = tmpPeople[p].Name;
-            plist.appendChild(lbl);
-            var delbtn = document.createElement("button");
-            delbtn.textContent = "Delete";
-            bindDeleteTmpInstructor(delbtn, p);
-            lbl.appendChild(delbtn);
-            var codes = tmpPeopleBarcodes[p];
-            var codelist = document.createElement("ul");
-            plist.appendChild(codelist);
-            for (var c = 0; c < codes.length; c++) {
-                var codeli = document.createElement("li");
-                codeli.textContent = codes[c];
-                codelist.appendChild(codeli);
-                var delbtn = document.createElement("button");
-                delbtn.textContent = "Delete";
-                bindDeleteTmpBarcode(delbtn, p, c);
-                codeli.appendChild(delbtn);
-            }
-            var addcodebtn = document.createElement("button");
-            addcodebtn.textContent = "Add barcode";
-            bindAddTmpBarcode(addcodebtn, p);
-            plist.appendChild(addcodebtn);
-        }
-    }
-
-    function bindDeleteTmpInstructor(btn, instI) {
-        btn.onclick = function () {
-            tmpPeople.splice(instI, 1);
-            tmpPeopleBarcodes.splice(instI, 1);
-            renderTmpPeopleList();
-        };
-    }
-
-    function bindAddTmpBarcode(btn, instI) {
-        btn.onclick = function () {
-            var code = prompt("Enter barcode");
-            if (code && !isNaN(parseInt(code))) {
-                tmpPeopleBarcodes[instI].push(parseInt(code));
-                renderTmpPeopleList();
-                document.getElementById("configCreateBtn").disabled = document.getElementById("excelUpload").value ? false : true;
-            }
-        };
-    }
-
-    function bindDeleteTmpBarcode(btn, instI, barcodeI) {
-        btn.onclick = function () {
-            tmpPeopleBarcodes[instI].splice(barcodeI, 1);
-            renderTmpPeopleList();
-        };
-    }
-
-    document.getElementById("configCreateBtn").onclick = async function () {
-        resetloader(true, null, null, false);
-        HandleSpeadsheetUpload().then((cData) => {
-            var oldScheduleData = scheduleData;
-            scheduleData = [];
-            if (tmpPeople.length > 0) {
-                //Nothing, but don't alert error
-            } else if (document.getElementById("paste-person-config").value !== "") {
-                var t = JSON.parse(document.getElementById("paste-person-config").value);
-                tmpPeople = t.People;
-                for (var p = 0; p < People.length; p++) {
-                    tmpPeopleBarcodes[p] = [];
-                    for (var c = 0; c < t.Data[p].length; c++) {
-                        tmpPeopleBarcodes[p].push(t.Data[p][c].Barcode);
-                    }
-                }
-            } else {
-                alert("No instructor data provided");
-            }
-            //remove any groupings to simplify indexing, groupings will be re-calculated on table display
-            for (var p = 0; p < oldScheduleData.length; p++) {
-                var allMerged = [];
-                for (var c = oldScheduleData[p].length; c >= 0; c--) {
-                    if (Array.isArray(oldScheduleData[p][c])) {
-                        for (var x = 0; x < oldScheduleData[p][c].length; x++) {
-                            allMerged.push(oldScheduleData[p][c][x]);
-                        }
-                        oldScheduleData[p].splice(c, 1);
-                    }
-                }
-                oldScheduleData[p] = oldScheduleData[p].concat(allMerged);
-            }
-            for (var p = 0; p < tmpPeople.length; p++) {
-                var uPos = People.findIndex(inst => inst.Uid === tmpPeople[p].Uid);
-                if (uPos !== -1) {
-                    //uPos is the position of the temp person in the old person list. If it exists, this user is being carried over
-                    var dataArray = [];
-                    var barcodes = tmpPeopleBarcodes[p];
-                    for (var c = 0; c < cData.length; c++) {
-                        var Class = cData[c];
-                        if (barcodes.indexOf(Class.Barcode) !== -1) {
-                            dataArray.push(Class);
-                            barcodes.splice(barcodes.indexOf(Class.Barcode), 1);
-                        }
-                    }
-                    //Transfer any custom entries to the new data
-                    console.log("Transfer:" + uPos);
-                    barcodes.forEach((code) => {//any custom entries
-                        console.log(uPos, oldScheduleData[uPos]);
-                        let index = oldScheduleData[uPos].findIndex(sheet => sheet.Barcode === code);
-                        dataArray.push(JSON.parse(JSON.stringify(oldScheduleData[uPos][index])));
-                        oldScheduleData[uPos].splice(index, 1);
-                    });
-                    scheduleData.push(dataArray);
-                } else {
-                    scheduleData.push([]);
-                }
-            }
-            People = tmpPeople;
-            displaySchedule(true);
+    document.getElementById("newMasterConfig").onclick = function () {
+        resetloader(false, config_assignmenu, null, false);
+        handleConfigAssignmentMenu({People: [], ScheduleData: [], rawData: []}).then((result) => {
+            scheduleData = result.ScheduleData;
+            People = result.People;
             resetloader(false, null, null, false);
+            displaySchedule(true);
+        }).catch((err) => {
+            //Cancelled by user
+        });
+    };
+
+    document.getElementById("excelNewUpload").oninput = async function () {
+        resetloader(true, null, null, false);
+        HandleSpeadsheetUpload(document.getElementById("excelNewUpload")).then((cData) => {
+            //Do stuff
+            resetloader(false, config_assignmenu, null, false);
+            handleConfigAssignmentMenu({People: [], ScheduleData: [], rawData: cData}).then((result) => {
+                scheduleData = result.ScheduleData;
+                People = result.People;
+                resetloader(false, null, null, false);
+                displaySchedule(true);
+            }).catch((err) => {
+                resetloader(false, null, null, false);
+                alert("Error creating schedule: " + err);
+            });
         }).catch((e) => {
+            alert("Error reading spreadsheet, please ensure document is valid");
             console.log(e);
             resetloader(false, null, null, false);
         });
+        document.getElementById("excelNewUpload").value = null;
+    };
+
+    document.getElementById("excelUpdateUpload").oninput = async function () {
+        resetloader(true, null, null, false);
+        HandleSpeadsheetUpload(document.getElementById("excelUpdateUpload")).then((cData) => {
+            //Update all data
+            for (var p = 0; p < People.length; p++) {
+                for (var s = 0; s < scheduleData[p].length; s++) {
+                    //for every sheet, look for an update
+                    var index = cData.findIndex((sheet) => {
+                        return parseInt(sheet.Barcode) === parseInt(scheduleData[p][s].Barcode);
+                    });
+                    console.log(index);
+                    if (index !== -1) {
+                        scheduleData[p][s] = cData[index];
+                    }
+                }
+            }
+            displaySchedule(true);
+            resetloader(false, null, null, false);
+        }).catch((e) => {
+            alert("Error reading spreadsheet, please ensure document is valid");
+            console.log(e);
+            resetloader(false, null, null, false);
+        });
+        document.getElementById("excelUpdateUpload").value = null;
     };
 };
-function HandleSpeadsheetUpload() {
+
+const configPersonList = document.getElementById("config-assignment-list");
+function handleConfigAssignmentMenu(inData) {
     return new Promise((resolve, reject) => {
-        var fileUpload = document.getElementById("excelUpload");
+        //Handle leaving the menu with confirmation
+        document.getElementById("config-assignment-confirm").onclick = function () {
+            delete inData.rawData;
+            resolve(inData);
+        };
+        displayConfigPersonList(inData);
+        //override default close menu button to capture click and reject
+        close_mainmenu.onclick = function () {
+            reject("User terminated operation");
+            close_mainmenu.onclick = closeMenuBind;//reset default behaviour
+        };
+    });
+}
+
+function displayConfigPersonList(displayData) {
+    clearChildren(configPersonList);
+    //Create list of people
+    for (var p = 0; p < displayData.People.length; p++) {
+        var personDiv = document.createElement("div");
+        configPersonList.appendChild(personDiv);
+        var personText = document.createElement("label");
+        personText.textContent = displayData.People[p].Name;
+        personDiv.appendChild(personText);
+        //show all barcodes
+        str = "";
+        for (b = 0; b < displayData.ScheduleData[p].length; b++) {
+            str += displayData.ScheduleData[p][b].Barcode + ", ";
+        }
+        var lbl = document.createElement("label");
+        lbl.textContent = str;
+        personDiv.appendChild(lbl);
+        var personBarcodeBtn = document.createElement("button");
+        personBarcodeBtn.textContent = "Add Barcodes";
+        personDiv.appendChild(personBarcodeBtn);
+        bindAddBarcodesBtn(personBarcodeBtn, p);
+    }
+    function bindAddBarcodesBtn(btn, p) {
+        btn.onclick = function () {
+            var codes = prompt("Enter barcodes(s) seperated by a comma").replaceAll(" ", "").split(",");
+            //codes is an array with one code per index, spaces removed
+            for (var c = 0; c < codes.length; c++) {
+                var loc = displayData.rawData.findIndex((course) => {
+                    return parseInt(course.Barcode) === parseInt(codes[c]);
+                });
+                //Exists in raw data and not already added to user
+                if (loc > -1 && displayData.ScheduleData[p].findIndex((course) => {
+                    return parseInt(course.Barcode) === parseInt(codes[c]);
+                }) === -1) {
+                    displayData.ScheduleData[p].push(displayData.rawData[loc]);
+                }
+            }
+            displayConfigPersonList(displayData);
+        };
+    }
+    //new person button
+    var newPersonBtn = document.createElement("button");
+    newPersonBtn.textContent = "New Person";
+    configPersonList.appendChild(newPersonBtn);
+    newPersonBtn.onclick = function () {
+        var name = prompt("Enter Person Name");
+        if (name) {
+            displayData.ScheduleData.push([]);
+            displayData.People.push({Name: name, Uid: genUid(), UserInformation: {Corrections: 0, ScheduleNote: ""}});
+            displayConfigPersonList(displayData);
+        }
+    };
+}
+
+function HandleSpeadsheetUpload(fileUpload) {
+    return new Promise((resolve, reject) => {
         //Validate whether File is valid Excel file.
         var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.xls|.xlsx)$/;
         if (regex.test(fileUpload.value.toLowerCase())) {
@@ -766,6 +765,14 @@ function HandleSpeadsheetUpload() {
             reject("Please upload a valid Excel file.");
         }
     });
+}
+
+function genUid() {
+    try {
+        return Math.random().toString(36).slice(2, 7);
+    } catch (err) {
+        return genUid();
+    }
 }
 
 function extractExcelClasses(data) {
@@ -786,7 +793,7 @@ function extractExcelClasses(data) {
             if (row.DataRow && classRegex.test(row.DataRow) === true) {
                 var matchArray = row.DataRow.match(/^([\s\S]+) - ([0-9]+)/);
                 var lvlDetermined = determineLevelId(matchArray[1]);
-                builtClass = {Barcode: parseInt(matchArray[2]), Level: lvlDetermined ? lvlDetermined : matchArray[1], Names: []};
+                builtClass = {Barcode: parseInt(matchArray[2]), Level: lvlDetermined ? lvlDetermined : matchArray[1], Names: [], TimeModifier: -1, SheetInformation: {Lead: {}, Instructor: {}}};
             }
         } else {//a class is being read
             if (row.Meta1 && row.Meta1 === "Time:") {//Handle TimeStart

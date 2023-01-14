@@ -694,13 +694,19 @@ function generateInstList() {
             resetloader(true, null, null, false);
             getUserList().then((list) => {
                 list = JSON.parse(list);
-
                 clearChildren(usermenu);
                 //Create a list of hidden UIDs
                 let hiddenUids = [];
                 for (var i = 0; i < People[currentTime].length; i++) {
                     hiddenUids.push(People[currentTime][i].Uid);
                 }
+                //create header labels
+                let title = document.createElement("h1");
+                title.textContent = "Add Instructor";
+                usermenu.appendChild(title);
+                let subtitle = document.createElement("h2");
+                subtitle.textContent = "Add an instructor to the current time";
+                usermenu.appendChild(subtitle);
                 for (var i = 0; i < list.length; i++) {
                     if (hiddenUids.indexOf(list[i].Uid) === -1 && list[i].Uid !== firebase.auth().currentUser.uid) {//Don't show logged in user
                         var ulistitm = document.createElement("div");
@@ -760,9 +766,12 @@ function handleAccessButton(accessbtn, personI) {
                 clearChildren(usermenu);
                 var title = document.createElement("h1");
                 title.textContent = "Manage Access";
+                var subtitle = document.createElement("h2");
+                subtitle.textContent = "Manage instructors who can access these sheets";
                 var titleName = document.createElement("p");
                 titleName.textContent = People[currentTime][personI].Name;
                 usermenu.appendChild(title);
+                usermenu.appendChild(subtitle);
                 usermenu.appendChild(titleName);
                 list.forEach((user) => {
                     if (user.Uid !== firebase.auth().currentUser.uid && user.Uid !== People[currentTime][personI].Uid) {

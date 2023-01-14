@@ -1,6 +1,7 @@
-/* global firebase, linfo */
+/* global firebase, linfo, initClientDatabase */
 
 var UserData;
+var Levels = {};
 var dragObject = null;
 var isDragMoving = false;//true = moving an exisiting element, false new insert
 var insertBefore = 0;
@@ -12,7 +13,6 @@ var filterCount = 0;
 var SheetData = [];
 var SharedData = [];
 var isSharedMode = false;
-var lvlinfo = {};
 var games = {};
 const dayMappings = {mon: "Monday", tue: "Tuesday", wed: "Wednesday", thu: "Thursday", fri: "Friday", sat: "Saturday", sun: "Sunday"};
 
@@ -23,16 +23,16 @@ const topbar = document.getElementById("topbar");
 const bottombar = document.getElementById("bottombar");
 
 const skillBar = document.getElementById("right");
-function generateSkills(Levels) {
+function generateSkills(Lvls) {
     while (skillBar.firstChild) {
         skillBar.removeChild(skillBar.firstChild);
     }
-    Levels.forEach(function (Level) {
-        createElement(Level, false, null);
-        for (var i = 1; i < lvlinfo[Level].length - 1; i++) {
-            createElement(lvlinfo[Level][i].Name, true, handleMouseDown, Level, i);
+    Lvls.forEach(function (Level) {
+        createElement(Levels[Level].Name, false, null);
+        for (var i = 0; i < Levels[Level].Skills.length; i++) {
+            createElement(Levels[Level].Skills[i].Name, true, handleMouseDown, Level, i);
         }
-        createElement("Games", true, handleMouseDown, Level, lvlinfo[Level].length + 1);
+        //createElement("Games", true, handleMouseDown, Level, lvlinfo[Level].length + 1);
     });
 
     function createElement(text, canclick, eventhandler, level, position) {
@@ -222,9 +222,7 @@ function RenderPlan(Week) {
         skillBar.appendChild(txt);
     }
     //Clear existing data
-    while (mainDrawer.firstChild) {
-        mainDrawer.removeChild(mainDrawer.firstChild);
-    }
+    clearChildren(mainDrawer);
     snap = document.createElement("div");
     snap.id = "snap-point";
     //add snap and populate list
@@ -236,7 +234,7 @@ function RenderPlan(Week) {
         var div = document.createElement("div");
         div.setAttribute("data-i", i);
         var lbltitle = document.createElement("label");
-        lbltitle.textContent = Level;
+        lbltitle.textContent = Levels[Level].Name;
         lbltitle.className = "bold";
         div.appendChild(lbltitle);
         var controls = document.createElement("div");
@@ -256,8 +254,8 @@ function RenderPlan(Week) {
             div.appendChild(controls);
         }
         var skilltitle = document.createElement("p");
-        if (parseInt(Item) !== lvlinfo[Level].length + 1) {
-            skilltitle.textContent = lvlinfo[Level][Item].Name;
+        if (parseInt(Item) !== Levels[Level].Skills.length + 1) {
+            skilltitle.textContent = Levels[Level].Skills[Item].Name;
         } else {
             skilltitle.textContent = "Games";
         }
@@ -292,19 +290,17 @@ function RenderPlan(Week) {
             }
             div.appendChild(pdiv);
         }
-        if (lvlinfo[Level][Item].Progressions) {
-            if (lvlinfo[Level][Item].Progressions.length > 0 && isSharedMode === false) {
-                var plusdiv = document.createElement("div");
-                var addbtn = document.createElement("button");
-                addbtn.textContent = "+";
-                addbtn.className = "addbtn";
-                plusdiv.appendChild(addbtn);
-                bindAddButton(addbtn, Level, Item, i);
-                div.appendChild(plusdiv);
-            }
-        } else {//Games
-
+        //if (Levels[Level].Skills[Item].Progressions) {
+        if (isSharedMode === false) {// && Levels[Level].Skills[Item].Progressions.length > 0
+            var plusdiv = document.createElement("div");
+            var addbtn = document.createElement("button");
+            addbtn.textContent = "+";
+            addbtn.className = "addbtn";
+            plusdiv.appendChild(addbtn);
+            bindAddButton(addbtn, Level, Item, i);
+            div.appendChild(plusdiv);
         }
+        //}
         var commentsect = document.createElement("textarea");
         commentsect.textContent = Comment;
         if (isSharedMode === true) {
@@ -332,9 +328,9 @@ function RenderPlan(Week) {
             while (progressionMenu.firstChild) {
                 progressionMenu.removeChild(progressionMenu.firstChild);
             }
-            for (var x = 0; x < lvlinfo[Level][Item].Progressions.length; x++) {
+            for (var x = 0; x < Levels[Level].Skills[Item].Progressions.length; x++) {
                 var enclosingDiv = document.createElement("div");
-                var txt = lvlinfo[Level][Item].Progressions[x].replace(/<number\[([0-9]+)\]>/g, '<label>$1</label>').replace(/<list\(([0-9]+)\)+\[(.*?)\]>/g, "<label>Option List</label>");
+                var txt = Levels[Level].Skills[Item].Progressions[x].replace(/<number\[([0-9]+)\]>/g, '<label>$1</label>').replace(/<list\(([0-9]+)\)+\[(.*?)\]>/g, "<label>Option List</label>");
                 enclosingDiv.innerHTML = txt;
                 progressionMenu.appendChild(enclosingDiv, Level, Item, i, x);
                 bindOnClick(enclosingDiv, Level, Item, i, x);
@@ -345,7 +341,7 @@ function RenderPlan(Week) {
             div.onclick = function () {
                 setEditPending(true);
                 document.getElementById('menu').style.display = 'none';
-                SheetData[currentSheet].Data[currentWeek][SheetI].Progressions.push(lvlinfo[Level][Item].Progressions[ProgX]);
+                SheetData[currentSheet].Data[currentWeek][SheetI].Progressions.push(Levels[Level].Skills[Item].Progressions[ProgX]);
                 RenderPlan(currentWeek);
             };
         }
@@ -452,22 +448,19 @@ async function renderCorePlan(Level) {
     last_week_btn.disabled = true;
     next_week_btn.disabled = false;
     currentWeek = -1;
-    while (core_plan.firstChild) {
-        core_plan.removeChild(core_plan.firstChild);
-    }//Clear Level Selector
+    clearChildren(core_plan);//Clear Level Selector
     Array.from(lvl_switcher.children).forEach((child) => {
-        if (child !== document.getElementById("add-lvl-btn")) {
+        if (child !== add_lvl_btn) {
             child.remove();
         }
     });//Fill Level Selector
     for (var l = 0; l < iSource[currentSheet].Levels.length; l++) {
         var val = iSource[currentSheet].Levels[l];
-        var lvld = await getLevelSync(val);
         var lvlbtn = document.createElement("button");
         if (val === Level) {
             lvlbtn.className = "selected";
         }
-        lvlbtn.textContent = val;
+        lvlbtn.textContent = Levels[val].Name;
         btnSwitchLevel(lvlbtn, val);
         lvl_switcher.appendChild(lvlbtn);
     }
@@ -490,9 +483,9 @@ async function renderCorePlan(Level) {
         var blankBox = document.createElement("th");
         blankBox.textContent = "Name";
         headRow.appendChild(blankBox);
-        for (var i = 0; i < lvlinfo[Level].length; i++) {
+        for (var i = 0; i < Levels[Level].Skills.length; i++) {
             var header = document.createElement("th");
-            header.textContent = lvlinfo[Level][i].Name;
+            header.textContent = Levels[Level].Skills[i].Name;
             headRow.appendChild(header);
         }
         //Create table
@@ -504,7 +497,7 @@ async function renderCorePlan(Level) {
             txt_holder.style.fontWeight = "bold";
             row.appendChild(txt_holder);
             //Create skill boxes
-            for (var s = 0; s < lvlinfo[Level].length; s++) {
+            for (var s = 0; s < Levels[Level].Skills.length; s++) {
                 var skillBox = document.createElement("td");
                 var circleSpan = document.createElement("span");
                 if (iSource[currentSheet].Data[w].filter((skillItem) => {
@@ -564,15 +557,14 @@ async function renderCorePlan(Level) {
 const add_lvl_menu = document.getElementById("add-level-menu");
 add_lvl_btn.onclick = async function () {
     resetMenu(add_lvl_menu);
-    Array.from(add_lvl_menu.children).forEach((child) => {
-        child.remove();
-    });
-    var lvls = await getLevelList();
-    for (var i = 0; i < lvls.length; i++) {
+    clearChildren(add_lvl_menu);
+    let lvlKeys = Object.keys(Levels);
+    for (var i = 0; i < lvlKeys.length; i++) {
+        var currentLvl = Levels[lvlKeys[i]];
         var lvlbtn = document.createElement("button");
-        onBtnClick(lvlbtn, lvls[i].Name);
-        lvlbtn.textContent = lvls[i].Name;
-        if (SheetData[currentSheet].Levels.indexOf(lvls[i].Name) !== -1) {
+        onBtnClick(lvlbtn, lvlKeys[i]);
+        lvlbtn.textContent = currentLvl.Name;
+        if (SheetData[currentSheet].Levels.indexOf(lvlKeys[i]) !== -1) {
             lvlbtn.disabled = true;
         }
         add_lvl_menu.appendChild(lvlbtn);
@@ -804,7 +796,7 @@ function createMainOverviewCard(sheet, i) {
     box.appendChild(list);
     sheet.Levels.forEach((lvl) => {
         var listItem = document.createElement("p");
-        listItem.textContent = lvl;
+        listItem.textContent = Levels[lvl].Name;
         list.appendChild(listItem);
     });
     var noteTxt = document.createElement("label");
@@ -1068,7 +1060,7 @@ function getUser() {
         UserData = JSON.parse(e);
         if (UserData !== null) {
             if (!screenquery.matches) {
-                document.getElementById("logout-btn").innerHTML = "Log Out [" + UserData.PersonalName + "]";
+                document.getElementById("logout-btn").innerHTML = "Log Out [" + firebase.auth().currentUser.displayName + "]";
             }
             getPlans();
             //Run any code
@@ -1106,13 +1098,13 @@ async function showPrint(wk) {
                 infodiv.className = "infodiv";
                 maind.appendChild(infodiv);
                 var lbl = doc.createElement("p");
-                lbl.textContent = UserData.PersonalName.split(" ")[0] + " " + UserData.PersonalName.split(" ")[1].charAt(0) + " - " + dayMappings[sheetInfo.Day] + " @ " + sheetInfo.Time + " (Week " + (wk + 1) + ")";
+                lbl.textContent = getInstructorName(firebase.auth().currentUser.displayName) + " - " + dayMappings[sheetInfo.Day] + " @ " + sheetInfo.Time + " (Week " + (wk + 1) + ")";
                 infodiv.appendChild(lbl);
                 var lbl2 = doc.createElement("p");
                 lbl2.className = "right";
                 var lv = [];
                 sheetInfo.Levels.forEach((v) => {
-                    lv.push(v);
+                    lv.push(Levels[v].Name);
                 });
                 lbl2.textContent = lv.join(", ");
                 infodiv.appendChild(lbl2);
@@ -1128,7 +1120,7 @@ async function showPrint(wk) {
                     lvltxt.textContent = data.Level;
                     firstline.appendChild(lvltxt);
                     var itmtxt = doc.createElement("p");
-                    itmtxt.textContent = " " + lvlinfo[data.Level][data.Position].Name.replace(/^[0-9]+. /, "");
+                    itmtxt.textContent = " " + Levels[data.Level][data.Position].Name.replace(/^[0-9]+. /, "");
                     itmtxt.className = "padleft";
                     firstline.appendChild(itmtxt);
                     //Each progression
@@ -1178,15 +1170,17 @@ document.getElementById("print-btn").onclick = function () {
 //---------------------------------------------------
 const screenquery = window.matchMedia("(max-width: 700px)");
 
-firebase.auth().onAuthStateChanged(function (user) {
+firebase.auth().onAuthStateChanged(async function (user) {
     if (user) {
-        getUser();
+        initClientDatabase().then(async() => {
+            getUser();
+            initSelectorScreen(level_filter);
+        });
     } else {
         location.reload(true);
     }
 });
 window.onload = function () {
-    initSelectorScreen(level_filter);
     window.onbeforeunload = function () {
         return EditPending === true ? "" : null;
     };
@@ -1204,19 +1198,4 @@ function handleError(msg) {
 function setEditPending(val) {
     EditPending = val;
     document.getElementById("save-btn").className = val === true ? "unsaved" : "";
-}
-
-async function getLvlInfo(Level) {
-    return new Promise((resolve, reject) => {
-        if (lvlinfo[Level] === undefined) {
-            firebase.database().ref("Plan-Data/" + Level).once('value').then((snap) => {
-                lvlinfo[Level] = snap.val();
-                resolve(snap.val());
-            }).catch((err) => {
-                reject(err);
-            });
-        } else {
-            resolve(lvlinfo[Level]);
-        }
-    });
 }

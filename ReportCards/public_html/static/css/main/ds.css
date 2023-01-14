@@ -231,8 +231,14 @@ button.disablebtn-disabled{
     font-size: 20px;
 }
 
+#user-menu h2{
+    font-size: 15px;
+    font-weight: lighter;
+    margin: 0;
+    text-align: center;
+}
+
 #user-menu p{
-    border-bottom: 2px solid var(--color-primary);
     padding-bottom: 3px;
     font-size: 16px;
 }
@@ -242,25 +248,26 @@ button.disablebtn-disabled{
     padding:5px;
     line-height: 25px;
     box-sizing: content-box;
-}
-
-#user-menu div{
     border-bottom: 2px solid var(--color-primary);
 }
 
-#user-menu div:nth-child(odd){
-    background:rgba(155,155,155,0.2);
+#user-menu div:nth-of-type(1){
+    border-top: 2px solid var(--color-primary);
 }
 
-#user-menu div:nth-child(odd) button.roundaction{
-    background:white;
+#user-menu div:nth-of-type(even){
+    background: var(--color-primary-light-background-transparent);
 }
 
 #user-menu div button.roundaction{
     float:right;
     outline:1px solid var(--color-primary-dark);
-    background: var(--color-primary-light);
+    background:white;
     transition: 0.3s;
+}
+
+#user-menu div button.roundaction:hover{
+    background: var(--color-primary-light-transparent);
 }
 
 #user-menu{

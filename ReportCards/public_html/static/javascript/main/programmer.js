@@ -645,8 +645,8 @@ window.onload = function () {
             for (var i = 0; i < options.length; i++) {
                 var holder = document.createElement("div");
                 var txt = document.createElement("label");
-                var Timeblock = getArchiveSheetTimeblockData(Timeblocks, "Timeblock", options[i].Timeblock);
-                var Facility = getArchiveSheetTimeblockData(Facilities, "Facility", options[i].Facility);
+                var Timeblock = getArchiveSheetTimeblockData(Timeblocks, "Timeblocks", options[i].Timeblock);
+                var Facility = getArchiveSheetTimeblockData(Facilities, "Facilities", options[i].Facility);
                 txt.textContent = Levels[options[i].Level].Name + " " + createModifierText(options[i]) + " - " + Timeblock.Name + " (" + Facility.Shortform + ")";
                 holder.appendChild(txt);
                 var btn = document.createElement("button");

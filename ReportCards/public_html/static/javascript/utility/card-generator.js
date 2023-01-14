@@ -13,13 +13,6 @@ function startCardGenerator(isDs, Faci, Time) {
     });
 }
 
-function getInstructorName(Name) {
-    if (!Name || Name === "") {
-        return "";
-    }
-    return Name.split(" ")[0] + " " + (Name.split(" ")[1] !== undefined ? Name.split(" ")[1].charAt(0) + "." : "");
-}
-
 async function run_card_generation(SheetData, PrintOptions, Instructor) {
 //Arrange for half pages at front
     var currentIndex = 0; //Each item is visited once, but seperate

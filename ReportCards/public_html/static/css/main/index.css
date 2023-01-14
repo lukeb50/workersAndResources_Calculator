@@ -713,6 +713,7 @@ div.menuitem h1, div.menuitem p{
     flex: 1 1 10px;
     overflow-y:auto;
     overflow-x: hidden;
+    padding-bottom: 10px;
 }
 
 #current-time-list,#addable-time-list,#access-time-list{
@@ -1216,19 +1217,19 @@ select{
     border:2px solid var(--color-primary);
 }
 
-#note-section{
+div.note-section{
     width:100%;
     flex:1;
     height: 10px;
     overflow-y: auto;
 }
 
-#note-section div{
+div.note-section div{
     margin-top: 10px;
     box-shadow: 0px 4px 4px 0px var(--color-primary-half-transparent);
 }
 
-#note-section div input{
+div.note-section div input{
     margin-left:5px;
     width: calc(100% - 10px);
     box-sizing: border-box;
@@ -1236,7 +1237,7 @@ select{
     border-radius: 5px;
 }
 
-#note-section div textarea{
+div.note-section div textarea{
     resize: vertical;
     margin:5px;
     margin-bottom: 0px;
@@ -1247,7 +1248,7 @@ select{
     min-height: 80px;
 }
 
-#note-section div span{
+div.note-section div span{
     width: calc(100% - 10px);
     margin-left: 5px;
     display: block;
@@ -1256,14 +1257,14 @@ select{
     padding-bottom: 2px;
 }
 
-#note-section div span button.delete{
+div.note-section div span button.delete{
     height: 100%;
     background:none;
     border:none;
     color:var(--color-red);
 }
 
-#note-section div span select{
+div.note-section div span select{
     height: 80%;
     border:none;
     border: 2px solid var(--color-primary);
@@ -1271,7 +1272,7 @@ select{
     background:white;
 }
 
-#note-section div span p{
+div.note-section div span p{
     display: inline;
     width:fit-content;
     margin: 0;
