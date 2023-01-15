@@ -454,7 +454,7 @@ function calculateTimeSpacing(sheets) {
             if (sI > 0) {//if not the first class for the instructor, calculate break with previous class
                 var prevSheet = sheets[uI][sI - 1];
                 var prevEnd = getClassProperty(prevSheet, "TimeStart") + getClassDuration(prevSheet);
-                var spacingDur = getClassProperty(sheets[uI][sI], "TimeStart") - prevEnd; //break duration
+                var spacingDur = prevEnd - getClassProperty(sheets[uI][sI], "TimeStart"); //break duration
                 if (spacingTimes.indexOf(spacingDur) === -1) {
                     spacingTimes.push(spacingDur); //add duration if it does not yet exist
                 }
@@ -702,19 +702,20 @@ function displayConfigPersonList(displayData) {
     for (var p = 0; p < displayData.People.length; p++) {
         var personDiv = document.createElement("div");
         configPersonList.appendChild(personDiv);
-        var personText = document.createElement("label");
+        var personText = document.createElement("p");
         personText.textContent = displayData.People[p].Name;
         personDiv.appendChild(personText);
         //show all barcodes
         str = "";
         for (b = 0; b < displayData.ScheduleData[p].length; b++) {
-            str += displayData.ScheduleData[p][b].Barcode + ", ";
+            str += (str===""?"":", ")+"#"+displayData.ScheduleData[p][b].Barcode;
         }
         var lbl = document.createElement("label");
         lbl.textContent = str;
         personDiv.appendChild(lbl);
         var personBarcodeBtn = document.createElement("button");
         personBarcodeBtn.textContent = "Add Barcodes";
+        personBarcodeBtn.className = "mainround";
         personDiv.appendChild(personBarcodeBtn);
         bindAddBarcodesBtn(personBarcodeBtn, p);
     }
@@ -739,6 +740,7 @@ function displayConfigPersonList(displayData) {
     //new person button
     var newPersonBtn = document.createElement("button");
     newPersonBtn.textContent = "New Person";
+    newPersonBtn.className = "mainround";
     configPersonList.appendChild(newPersonBtn);
     newPersonBtn.onclick = function () {
         var name = prompt("Enter Person Name");
