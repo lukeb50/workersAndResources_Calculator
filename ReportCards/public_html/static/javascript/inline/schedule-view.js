@@ -14,6 +14,7 @@ var Levels = {};
 var GroupingData = [];
 var SheetModifiers = [];
 var editMode = true;
+const scheduleContainer = document.getElementById("main-schedule-holder");
 const scheduleTable = document.getElementById("scheduleTable");
 var timeIntervalId = -1;
 function displaySchedule(Time) {
@@ -120,12 +121,12 @@ function displaySchedule(Time) {
     var currentTime = new Date();
     clearInterval(timeIntervalId);
     waitMinute();
-    //updateCurrentTime();
+    updateCurrentTime();
     function waitMinute() {
         var current = new Date();
         var timeToNextMinute = (60 - current.getSeconds()) * 1000 - current.getMilliseconds();
         timeIntervalId = setTimeout(function () {
-            //updateCurrentTime();
+            updateCurrentTime();
             waitMinute();
         }, timeToNextMinute);
     }
@@ -136,17 +137,18 @@ function displaySchedule(Time) {
         if (timeStamp >= tableInformation.firstStart && timeStamp < tableInformation.lastEnd) {
             //Time exists inside table range
             var timeEl = document.getElementById("time-" + roundDown5(timeStamp));
-            var topPos = timeEl.getBoundingClientRect().top + window.scrollY;
+            var topPos = timeEl.offsetTop;
             var minuteSize = timeEl.getBoundingClientRect().height / tableInformation.increment;
-            var minutePos = topPos + (minuteSize * (timeStamp - roundDown5(timeStamp)));
+            var minutePos = topPos + (minuteSize * (timeStamp - roundDown5(timeStamp))) - 1;
             if (!document.getElementById("timeLine")) {
                 var timeLine = document.createElement("div");
                 timeLine.id = "timeLine";
-                document.body.appendChild(timeLine);
+                scheduleContainer.appendChild(timeLine);
             }
             var timeLine = document.getElementById("timeLine");
             timeLine.style.top = minutePos + "px";
-            timeLine.style.left = (timeEl.getBoundingClientRect().left + timeEl.getBoundingClientRect().width + 1) + "px";
+            timeLine.style.width = "calc("+(scheduleTable.offsetWidth - 4) + "px - 8ch)";
+            timeLine.style.left = (timeEl.offsetLeft + timeEl.getBoundingClientRect().width + 1) + "px";
         }
 
         function roundDown5(x) {
@@ -446,18 +448,17 @@ function calculateTimeSpacing(sheets) {
         for (var sI = 0; sI < sheets[uI].length; sI++) {
 //how long the class lasts
             var dur = getClassDuration(sheets[uI][sI]);
-            firstStart = Math.min(firstStart, getClassProperty(sheets[uI][sI], "TimeStart"));
-            lastEnd = Math.max(lastEnd, parseInt(getClassProperty(sheets[uI][sI], "TimeStart")) + dur);
-            if (spacingTimes.indexOf(dur) === -1) {
-                spacingTimes.push(dur); //add duration if it does not yet exist
+            //Update bounds on schedule
+            var classStart = parseInt(getClassProperty(sheets[uI][sI], "TimeStart"));
+            var classEnd = classStart + dur;
+            firstStart = Math.min(firstStart, classStart);
+            lastEnd = Math.max(lastEnd, classEnd);
+            //GCD terms
+            if (spacingTimes.indexOf(classStart) === -1) {
+                spacingTimes.push(classStart); //add duration if it does not yet exist
             }
-            if (sI > 0) {//if not the first class for the instructor, calculate break with previous class
-                var prevSheet = sheets[uI][sI - 1];
-                var prevEnd = getClassProperty(prevSheet, "TimeStart") + getClassDuration(prevSheet);
-                var spacingDur = prevEnd - getClassProperty(sheets[uI][sI], "TimeStart"); //break duration
-                if (spacingTimes.indexOf(spacingDur) === -1) {
-                    spacingTimes.push(spacingDur); //add duration if it does not yet exist
-                }
+            if (spacingTimes.indexOf(classEnd) === -1){
+                spacingTimes.push(classEnd);
             }
         }
     }
@@ -708,7 +709,7 @@ function displayConfigPersonList(displayData) {
         //show all barcodes
         str = "";
         for (b = 0; b < displayData.ScheduleData[p].length; b++) {
-            str += (str===""?"":", ")+"#"+displayData.ScheduleData[p][b].Barcode;
+            str += (str === "" ? "" : ", ") + "#" + displayData.ScheduleData[p][b].Barcode;
         }
         var lbl = document.createElement("label");
         lbl.textContent = str;

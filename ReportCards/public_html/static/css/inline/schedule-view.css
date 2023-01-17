@@ -11,6 +11,7 @@
     width: 100%;
     height: 100%;
     overflow: auto;
+    position: fixed;
 }
 
 #scheduleTable tr th:not(:nth-child(1)),#scheduleTable tr:not(:nth-child(2)) td:not(:nth-child(1)), #scheduleTable tr:nth-child(2) td{
@@ -155,9 +156,10 @@ div.button-centering-div button{
 
 #timeLine{
     position: absolute;
-    width:calc(100% - 10ch);
     height: 0px;
-    border-bottom: 1px solid rgba(198, 77, 77,0.3);
+    border-bottom: 1px solid var(--color-red);
+    border-top: 1px solid var(--color-red);
+    background: var(--color-red);
 }
 
 div.note-section{
