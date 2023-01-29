@@ -591,7 +591,18 @@ function bindPersonListClick(div) {
         changeDisplayedInstructor(div.getAttribute("data-i"));
     };
 }
-function changeDisplayedInstructor(newCurrent, sheetId) {
+
+/**
+ * Changes the instructor being displayed, then calls renderTable
+ * if called on the current instructor, only renderTable will execute
+ * @param {type} newCurrent The new instructor to show
+ * @param {type} sheetFunction A function that must return the index of the sheet
+ * to display (i.e. the value to call renderTable(?) with). Can return a constant value
+ * or calculate. This function is GUARANTEED to be called AFTER the new user sheets are
+ * inserted into the documents array.
+ * @returns {Promise} async promise due to possible network calls
+ */
+function changeDisplayedInstructor(newCurrent, sheetFunction) {
     return new Promise((resolve, reject) => {
         let oldcurrent = currentPerson;
         currentPerson = newCurrent;
@@ -608,7 +619,7 @@ function changeDisplayedInstructor(newCurrent, sheetId) {
                     populatebar(0);
                     if (documents[currentPerson].length > 0) {
                         //sheet id if present, 0 otherwise
-                        renderTable(sheetId ? sheetId : 0);
+                        renderTable(sheetFunction !== undefined ? sheetFunction() : 0);
                         resolve();
                     } else {
                         renderTable(-1);
@@ -625,7 +636,7 @@ function changeDisplayedInstructor(newCurrent, sheetId) {
             } else {//sheets for that person already loaded, display
                 populatebar(0);
                 if (documents[currentPerson].length > 0) {
-                    renderTable(sheetId ? sheetId : 0);
+                    renderTable(sheetFunction !== undefined ? sheetFunction() : 0);
                     resolve();
                 } else {
                     renderTable(-1);
@@ -633,9 +644,7 @@ function changeDisplayedInstructor(newCurrent, sheetId) {
                 }
             }
         } else {
-            if (sheetId !== null && sheetId !== undefined) {
-                renderTable(sheetId);
-            }
+            renderTable(sheetFunction !== undefined ? sheetFunction() : -1);
             resolve();
         }
     });
@@ -817,7 +826,7 @@ function handleAccessButton(accessbtn, personI) {
 function handleCorrectionInput(input, user) {
     input.onblur = function () {
         People[currentTime][user].UserInformation.Corrections = parseInt(input.value);
-        changeEditPending(true,true);//bypass incrementing corrections on change
+        changeEditPending(true, true);//bypass incrementing corrections on change
     };
 }
 
@@ -1200,6 +1209,9 @@ const MAX_SEARCH_RESULTS = 10;
 searchbar.addEventListener("focus", bindSearchBar);
 function bindSearchBar() {
     send_http_request("1/search/students", currentTime, []).then((students) => {
+        students = JSON.parse(students);
+        updateSearchWithEdits(students);
+        console.log(students);
         if (document.getElementById("searchBackground")) {
             document.getElementById("searchBackground").remove();
         }
@@ -1214,7 +1226,7 @@ function bindSearchBar() {
         searchbar.addEventListener("keyup", executeSearch);
         function executeSearch() {
             let searchVal = searchbar.value;
-            var res = JSON.parse(students).filter(function (student) {
+            var res = students.filter(function (student) {
                 return student.Name.toLowerCase().substring(0, searchVal.length) === searchVal.toLowerCase();
             });
             if (res.length > 0 && searchVal !== "") {
@@ -1223,11 +1235,6 @@ function bindSearchBar() {
                 searchbtn.setAttribute("data-search", "{}");
             }
             clearChildren(searchDiv);
-            if (EditPending === true) {
-                editAlert = document.createElement("p");
-                editAlert.textContent = "Save to search edits";
-                searchDiv.appendChild(editAlert);
-            }
             for (var s = 0; s < res.length && s < MAX_SEARCH_RESULTS; s++) {
                 var studentBtn = document.createElement("div");
                 searchDiv.appendChild(studentBtn);
@@ -1244,11 +1251,15 @@ function bindSearchBar() {
                         let pos = People[currentTime].findIndex(function (obj) {
                             return obj.Uid === stuData.Instructor;
                         });
-                        await changeDisplayedInstructor(pos);
-                        let sheetindex = documents[currentPerson].findIndex(function (sheet) {
-                            return parseInt(sheet.UniqueID) === parseInt(stuData.UniqueID);
+                        await changeDisplayedInstructor(pos, () => {
+                            if (stuData.UniqueID !== undefined) {
+                                return documents[currentPerson].findIndex(function (sheet) {
+                                    return parseInt(sheet.UniqueID) === parseInt(stuData.UniqueID);
+                                });
+                            } else {
+                                return stuData.SheetIndex;
+                            }
                         });
-                        renderTable(sheetindex);
                         searchbar.value = "";
                         searchbtn.setAttribute("data-search", "{}");
                     };
@@ -1256,6 +1267,23 @@ function bindSearchBar() {
             }
         }
     });
+
+    function updateSearchWithEdits(students) {
+        for (var i = 0; i < documents.length; i++) {
+            for (var x = 0; x < documents[i].length; x++) {
+                var currentDocStudents = documents[i][x].Names;
+                for (var s = 0; s < currentDocStudents.length; s++) {
+                    //For each student in EVERY class, check if in index array from server
+                    var existPos = students.findIndex(function (student) {
+                        return student.Name === currentDocStudents[s];
+                    });
+                    if (existPos === -1) {//Not in index array, add
+                        students.push({SheetIndex: x.UniqueID, Instructor: People[currentTime][i].Uid, Name: documents[i][x].Names[s]});
+                    }
+                }
+            }
+        }
+    }
 }
 
 window.onload = function () {
@@ -1341,5 +1369,7 @@ window.onload = function () {
 async function handleScheduleViewSheet(instructor, sheet) {
     resetloader(false, null, null, false);
     var sheetPos = documents[instructor].indexOf(sheet);
-    await changeDisplayedInstructor(instructor, sheetPos);
+    await changeDisplayedInstructor(instructor, (() => {
+        return sheetPos;
+    }));
 }

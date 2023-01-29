@@ -446,7 +446,7 @@ function calculateTimeSpacing(sheets) {
             }
         }
         for (var sI = 0; sI < sheets[uI].length; sI++) {
-//how long the class lasts
+            //how long the class lasts
             var dur = getClassDuration(sheets[uI][sI]);
             //Update bounds on schedule
             var classStart = parseInt(getClassProperty(sheets[uI][sI], "TimeStart"));

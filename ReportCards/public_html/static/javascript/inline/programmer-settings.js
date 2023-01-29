@@ -94,7 +94,6 @@ function refactorProgressionData(data) {
 function getRegexLocations(regexp, text) {
     let locations = [];
     let lengths = [];
-    console.log(text);
     while ((match = regexp.exec(text)) !== null) {
         locations.push(regexp.lastIndex);
         lengths.push(match[0].length);
@@ -107,9 +106,24 @@ function displayUpdatedProgressionText(progression) {
     //Replace control characters
     inputText = inputText.replace(new RegExp("&", "g"), "&amp").replace(new RegExp("<", "g"), "&lt");
     for (var type of Object.keys(progRegexes)) {
-        inputText = inputText.replace(progRegexes[type].InternalMatch, "<span>$&<p>" + progRegexes[type].Name + "</p></span>");
+        inputText = inputText.replace(progRegexes[type].InternalMatch, ((matchStr)=>{
+            var itemId = parseInt(matchStr.match(/\(([0-9]+)\)/)[1]);
+            return "<span data-type="+type+" data-id="+itemId+">"+matchStr+"<p>" + progRegexes[type].Name + "</p></span>";
+        }));
     }
     prog_edit_display.innerHTML = inputText;
+    var spanChildren = prog_edit_display.getElementsByTagName("span");
+    for(var c = 0; c < spanChildren.length; c++){
+        var currentSpan = spanChildren[c];
+        bindSpanClick(currentSpan);
+    }
+    
+    function bindSpanClick(span){
+        span.onclick = function(){
+            console.log(span.getAttribute("data-type"));
+            console.log(span.getAttribute("data-id"));
+        };
+    }
 }
 
 function convertInputIntoJSON(progData, inputBox) {
