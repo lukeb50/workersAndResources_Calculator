@@ -11,6 +11,7 @@ Levels = {};
 const regexmenu = document.getElementById("regex-menu");
 const progressionmenu = document.getElementById("progression-edit-menu");
 const colormenu = document.getElementById("group-color-menu");
+const evalmenu = document.getElementById("eval-select-menu");
 
 const loadblocker = document.getElementById("loadblocker");
 
@@ -36,7 +37,7 @@ close_mainmenu.onclick = function () {
 
 const prog_edit_area = document.getElementById("prog-input");
 const prog_edit_display = document.getElementById("prog-highlight-code");
-    const progRegexes = {ListData: {Name: "List", InternalName: "lidata", TextMatch: /List/gi, InternalMatch: /~~lidata\([0-9]+\)~~/g},
+const progRegexes = {ListData: {Name: "List", InternalName: "lidata", TextMatch: /List/gi, InternalMatch: /~~lidata\([0-9]+\)~~/g},
     NumberData: {Name: "NumberBox", InternalName: "nmdata", TextMatch: /Numberbox/gi, InternalMatch: /~~nmdata\([0-9]+\)~~/g},
     TextData: {Name: "TextBox", InternalName: "txdata", TextMatch: /Textbox/gi, InternalMatch: /~~txdata\([0-9]+\)~~/g}};
 
@@ -61,7 +62,7 @@ function loadProgressionDisplay(lvl, skill, progid) {
         if (e.inputType === "deleteContentBackward") {
             //delete action
             for (var type of Object.keys(progRegexes)) {
-                let regexInfo = getRegexLocations(new RegExp("~~"+progRegexes[type].InternalName+"\\([0-9]+\\)~", "g"), progData.Text);
+                let regexInfo = getRegexLocations(new RegExp("~~" + progRegexes[type].InternalName + "\\([0-9]+\\)~", "g"), progData.Text);
                 let regexLocationIndex = regexInfo.Indexes.indexOf(prog_edit_area.selectionStart);
                 if (regexLocationIndex >= 0) {
                     //delete the tag from Text & reflect
@@ -106,20 +107,20 @@ function displayUpdatedProgressionText(progression) {
     //Replace control characters
     inputText = inputText.replace(new RegExp("&", "g"), "&amp").replace(new RegExp("<", "g"), "&lt");
     for (var type of Object.keys(progRegexes)) {
-        inputText = inputText.replace(progRegexes[type].InternalMatch, ((matchStr)=>{
+        inputText = inputText.replace(progRegexes[type].InternalMatch, ((matchStr) => {
             var itemId = parseInt(matchStr.match(/\(([0-9]+)\)/)[1]);
-            return "<span data-type="+type+" data-id="+itemId+">"+matchStr+"<p>" + progRegexes[type].Name + "</p></span>";
+            return "<span data-type=" + type + " data-id=" + itemId + ">" + matchStr + "<p>" + progRegexes[type].Name + "</p></span>";
         }));
     }
     prog_edit_display.innerHTML = inputText;
     var spanChildren = prog_edit_display.getElementsByTagName("span");
-    for(var c = 0; c < spanChildren.length; c++){
+    for (var c = 0; c < spanChildren.length; c++) {
         var currentSpan = spanChildren[c];
         bindSpanClick(currentSpan);
     }
-    
-    function bindSpanClick(span){
-        span.onclick = function(){
+
+    function bindSpanClick(span) {
+        span.onclick = function () {
             console.log(span.getAttribute("data-type"));
             console.log(span.getAttribute("data-id"));
         };
@@ -135,12 +136,14 @@ function convertInputIntoJSON(progData, inputBox) {
     return str;
 }
 //[{ID:2343432, ...}]
-function createUniqueID(existingData){
+function createUniqueID(existingData) {
     let possibleID = Math.floor(Math.random() * (10000 - 1000) + 1000);
-    isUsed = existingData.filter(entry=>{entry.ID===possibleID;}).length>0;
-    if(isUsed ===false){
+    isUsed = existingData.filter(entry => {
+        entry.ID === possibleID;
+    }).length > 0;
+    if (isUsed === false) {
         return possibleID;
-    }else{
+    } else {
         return createUniqueID(existingData);
     }
 }
@@ -1293,6 +1296,221 @@ email_plaintext_preview.onclick = function () {
     showEmailPreview(parseEmailContent(email_subject, false), parseEmailContent(email_plain_body, false), false);
 };
 
+const eval_list = document.getElementById("eval-list");
+const eval_panel = document.getElementById("eval-panel");
+const element_library = {label: {builderName: "Text Label", isText: true, textValue: "", value: null, inputType: null, elementType: "label", name: "", className: ""},
+    highlight: {builderName: "Highlightable Text", isText: true, textValue: "", value: false, inputType: null, elementType: "label", name: "", className: "highlightInput"},
+    checkbox: {builderName: "Checkbox", isText: false, textValue: "", value: false, inputType: "checkbox", elementType: "input", name: "", className: ""},
+    numberbox: {builderName: "Number Input", isText: false, textValue: "", value: 0, inputType: "number", elementType: "input", name: "", className: ""},
+    textinput: {builderName: "Single Line Textbox", isText: false, textValue: "", value: "", inputType: "text", elementType: "input", name: "", className: ""},
+    textarea: {builderName: "Multiline Textbox", isText: false, textValue: "", value: "", inputType: "text", elementType: "textarea", name: "", className: ""}
+};
+
+function generateEvaluationMenu() {
+    var evalData = null;
+    clientDb.ref("Settings/Evaluations").once('value').then((evalSnap) => {
+        evalData = evalSnap.val();
+        evalData = evalData ? evalData : [];
+        generateEvaluationList();
+    });
+    function generateEvaluationList() {
+        clearChildren(eval_list);
+        for (var e = 0; e < evalData.length; e++) {
+            //update missing data from db read
+            if (!evalData[e].RowData) {
+                evalData[e].RowData = [];
+            }
+            var template_holder = document.createElement("div");
+            //name label
+            var template_name = document.createElement("label");
+            template_name.textContent = evalData[e].Name;
+            template_holder.appendChild(template_name);
+            //button holder
+            var template_button_holder = document.createElement("div");
+            template_holder.appendChild(template_button_holder);
+            //rename button
+            var template_rename_button = document.createElement("button");
+            template_rename_button.textContent = "Rename";
+            template_button_holder.appendChild(template_rename_button);
+            function bindRenameButton(button, index) {
+                button.onclick = function (e) {
+                    e.stopPropagation();
+                    var newName = prompt("Enter new name");
+                    if (newName) {
+                        evalData[index].Name = newName;
+                        generateEvaluationList();
+                    }
+                };
+            }
+            bindRenameButton(template_rename_button, e);
+            //delete button
+            var template_delete_button = document.createElement("button");
+            template_delete_button.textContent = "Delete";
+            template_button_holder.appendChild(template_delete_button);
+            function bindDeleteButton(button, index) {
+                button.onclick = function (e) {
+                    e.stopPropagation();
+                    if (confirm("Delete this template?")) {
+                        evalData.splice(index, 1);
+                        clearChildren(eval_panel);
+                        generateEvaluationList();
+                    }
+                };
+            }
+            bindDeleteButton(template_delete_button, e);
+            //append all
+            eval_list.appendChild(template_holder);
+            bindShowTemplatePanel(template_holder, e);
+        }
+        //add template button
+        var create_holder = document.createElement("div");
+        create_holder.style.display = "flex";
+        create_holder.id = "new_eval_btn_holder";
+        var create_btn = document.createElement("button");
+        create_btn.textContent = "New Evaluation Template";
+        create_btn.id = "new_eval_template_btn";
+        create_btn.className = "mainround";
+        create_holder.appendChild(create_btn);
+        eval_list.appendChild(create_holder);
+        //handle button
+        create_btn.onclick = function () {
+            var templateName = prompt("Enter Template Name");
+            if (templateName) {
+                evalData.push({Name: templateName, RowData: []});
+                generateEvaluationList();
+            }
+        };
+    }
+
+    function bindShowTemplatePanel(button, index) {
+        button.onclick = function () {
+            showTemplatePanel(index);
+        };
+        function showTemplatePanel(index) {
+            clearChildren(eval_panel);
+            if (index < 0 || index > evalData.length - 1) {//invalid index, stop
+                return;
+            }
+            var tData = evalData[index];
+            for (var i = 0; i < tData.RowData.length; i++) {
+                var row = document.createElement("tr");
+                eval_panel.appendChild(row);
+                //individual elements
+                for (var x = 0; x < tData.RowData[i].length; x++) {
+                    var newEl = document.createElement(tData.RowData[i][x].elementType);
+                    newEl.type = tData.RowData[i][x].inputType;
+                    newEl.name = tData.RowData[i][x].name;
+                    if (tData.RowData[i][x].isText === true) {
+                        bindEditTextValue(newEl, i, x);
+                        if (tData.RowData[i][x].textValue === "") {
+                            newEl.textContent = "Click to edit";
+                        } else {
+                            newEl.textContent = tData.RowData[i][x].textValue;
+                        }
+                    }
+                    newEl.className = tData.RowData[i][x].className;
+                    //Edit the text of labels, etc
+                    function bindEditTextValue(textObject, i, x) {
+                        textObject.onclick = function () {
+                            var newVal = prompt("New Text Value", tData.RowData[i][x].textValue);
+                            if (newVal) {
+                                tData.RowData[i][x].textValue = newVal ? newVal : "";
+                                textObject.textContent = newVal ? newVal : "Click to edit";
+                            }
+                        };
+                    }
+
+                    function bindRightClick(object, i, x) {
+                        object.oncontextmenu = function (e) {
+                            e.preventDefault();
+                            if (confirm("Remove this element?")) {
+                                tData.RowData[i].splice(x, 1);
+                                object.remove();
+                            }
+                            return false;
+                        };
+                    }
+                    bindRightClick(newEl, i, x);
+                    row.appendChild(newEl);
+                }
+                //new element button on each row
+                if (tData.RowData[i].length < 15 &&
+                        (tData.RowData[i].length === 0 ||
+                                (tData.RowData[i].length > 0 &&
+                                        tData.RowData[i][tData.RowData[i].length - 1].elementType !== "textarea"))) {//10 elements per row max
+                    var newElBtn = document.createElement("button");
+                    newElBtn.textContent = "Add Element";
+                    newElBtn.className = "mainround";
+                    function bindAddElement(btn, row) {
+                        btn.onclick = async function () {
+                            var excludedElements = [];
+                            if (tData.RowData[row].length > 0) {
+                                excludedElements.push("textarea");
+                            }
+                            var elType = await promptElementType(excludedElements);
+                            if (element_library[elType] !== undefined) {
+                                tData.RowData[row].push(JSON.parse(JSON.stringify(element_library[elType])));
+                                showTemplatePanel(index);
+                            }
+                        };
+                    }
+                    bindAddElement(newElBtn, i);
+                    row.appendChild(newElBtn);
+                }
+            }
+            //new row button
+            var newRowBtn = document.createElement("button");
+            newRowBtn.textContent = "New Row";
+            newRowBtn.className = "mainround";
+            newRowBtn.onclick = function () {
+                tData.RowData.push([]);
+                showTemplatePanel(index);
+            };
+            eval_panel.appendChild(newRowBtn);
+        }
+
+        const eval_menu_list = document.getElementById("eval-menu-list");
+        async function promptElementType(blockedElements) {
+            return new Promise((resolve) => {
+                resetloader(false, evalmenu, "block", false);
+                clearChildren(eval_menu_list);
+                var elementKeys = Object.keys(element_library);
+                //show list
+                for (var i = 0; i < elementKeys.length; i++) {
+                    var btn = document.createElement("button");
+                    btn.textContent = element_library[elementKeys[i]].builderName;
+                    bindButton(btn, elementKeys[i]);
+                    eval_menu_list.appendChild(btn);
+                    if (blockedElements.indexOf(elementKeys[i]) !== -1) {
+                        btn.disabled = true;
+                    }
+                }
+                //Handle list button
+                function bindButton(button, el) {
+                    button.onclick = function () {
+                        resetloader(false, null, null, false);
+                        resolve(el);
+                    };
+                }
+            });
+        }
+    }
+
+    document.getElementById("save-eval-settings-btn").onclick = function () {
+        resetloader(true, null, null, false);
+        saveEvalData(evalData).then(function () {
+            resetloader(false, null, null, false);
+        }).catch((err) => {
+            alert("Error saving data");
+            resetloader(false, null, null, false);
+        });
+
+        async function saveEvalData(Data) {
+            return await send_http_request("2/save/customsetting", JSON.stringify(Data), [["location", "Evaluations"]]);
+        }
+    };
+}
+
 function setLevelEdit(newVal) {
     if (newVal === true) {
         document.getElementById("save-lvl-settings-btn").classList.add("unsaved");
@@ -1347,6 +1565,7 @@ window.onload = function () {
                 generateModifierList();
                 generateFacilityMenu();
                 generateEmailMenu();
+                generateEvaluationMenu();
                 resetloader(false, null, null, false);
             }).catch((f) => {
                 resetloader(false, null, null, false);

@@ -324,7 +324,7 @@ var Months = ["January", "Febuary", "March", "April", "May", "June", "July", "Au
 
 function timestampToText(time) {
     var date = new Date(time * 1000);
-    return Days[date.getDay()] + ", " + Months[date.getMonth()] + " " + date.getDate() + " " + date.getFullYear() + " at " + (date.getHours() > 12 ? getZeroString(date.getHours() - 12) : getZeroString(date.getHours())) + ":" + getZeroString(date.getMinutes()) + (date.getHours() > 12 ? "pm" : "am");
+    return Days[date.getDay()] + ", " + Months[date.getMonth()] + " " + date.getDate() + getDatePostfix(date.getDate()) + " " + date.getFullYear() + " at " + (date.getHours() > 12 ? getZeroString(date.getHours() - 12) : getZeroString(date.getHours())) + ":" + getZeroString(date.getMinutes()) + (date.getHours() > 12 ? "pm" : "am");
 }
 
 function getZeroString(time) {//prefixes single digit numbers with a 0
@@ -333,6 +333,18 @@ function getZeroString(time) {//prefixes single digit numbers with a 0
         return "0" + time;
     } else {
         return time.toString();
+    }
+}
+
+function getDatePostfix(date){
+    if(date % 10 === 1){
+        return "st";
+    }else if(date % 10 === 2){
+        return "and";
+    }else if(date % 10 === 3){
+        return "rd";
+    }else{
+        return "th";
     }
 }
 
@@ -364,7 +376,8 @@ const General_Settings = [{Element: document.getElementById("general-session-inp
     {Element: document.getElementById("general-email-checkbox"), Name: "supervisorEmail", Type: "checkbox"},
     {Element: document.getElementById("general-attendance-checkbox"), Name: "useAttendance", Type: "checkbox"},
     {Element: document.getElementById("general-lookup-checkbox"), Name: "allowLookup", Type: "checkbox"},
-    {Element: document.getElementById("general-plan-checkbox"), Name: "useLessonPlans", Type: "checkbox"}
+    {Element: document.getElementById("general-plan-checkbox"), Name: "useLessonPlans", Type: "checkbox"},
+    {Element: document.getElementById("general-eval-checkbox"), Name: "useInstructorEvals", Type: "checkbox"}
 ];
 function showSettings() {
     for (var i = 0; i < General_Settings.length; i++) {

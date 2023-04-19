@@ -1,5 +1,5 @@
 /* global parseInt */
-/*global firebase, EditPending, Notification, Settings, initClientDatabase, clientDb, email_pattern, getLvlInfo, send_http_request, Levels*/
+/*global firebase, EditPending, Notification, Settings, initClientDatabase, clientDb, email_pattern, getLvlInfo, send_http_request, Levels, Days, Months*/
 var currentimgfile;
 var documents = [];
 var images = [];
@@ -77,8 +77,9 @@ const commentmenu = document.getElementById("comment-menu");
 const notemenu = document.getElementById("note-menu");
 const prevlookupmenu = document.getElementById("previouslookup-menu");
 const schedulemenu = document.getElementById("schedule-menu");
+const evalmenu = document.getElementById("evaluation-menu");
 
-const loaditms = [loadspinner, overflower, timemenu, printmenu, emailmenu, usermenu, notifmenu, commentmenu, notemenu, prevlookupmenu, schedulemenu]; //items that should be hidden when showing main blocker
+const loaditms = [loadspinner, overflower, timemenu, printmenu, emailmenu, usermenu, notifmenu, commentmenu, notemenu, prevlookupmenu, schedulemenu, evalmenu]; //items that should be hidden when showing main blocker
 
 const screenquery = window.matchMedia("(max-width: 700px)");
 
@@ -680,6 +681,13 @@ function generateInstList() {
         accessbtn.textContent = "Manage Access";
         handleAccessButton(accessbtn, i);
         div.appendChild(accessbtn);
+        //eval button
+        if (Settings.useInstructorEvals === true) {
+            let evalbtn = document.createElement("button");
+            evalbtn.textContent = "Evaluations";
+            div.appendChild(evalbtn);
+            handleEvalButton(evalbtn, i);
+        }
         bindPersonListClick(div);
         instlist.appendChild(div);
     }
@@ -764,8 +772,157 @@ async function getUserList() {
     return await send_http_request("1/list/users", "", []);
 }
 
+const evalList = document.getElementById("eval-list");
+const evalPanel = document.getElementById("eval-panel");
+const evalLabel = document.getElementById("eval-panel-name");
+const evalSigned = document.getElementById("eval-panel-signed");
+function handleEvalButton(button, personI) {
+    button.onclick = function (e) {
+        e.stopPropagation();
+        resetloader(true, null, null, false);
+        getUserEvals(currentTime, People[currentTime][personI].Uid).then((data) => {
+            data = JSON.parse(data);
+            resetloader(false, evalmenu, "block", true);
+            clearChildren(evalList);
+            clearChildren(evalPanel);
+            function renderEvalList() {
+                clearChildren(evalList);
+                evalLabel.textContent = People[currentTime][personI].Name;
+                evalSigned.textContent = " ";
+                for (var i = 0; i < data.length; i++) {
+                    //Render list
+                    var holder = document.createElement("div");
+                    var name = document.createElement("b");
+                    name.textContent = data[i].Name === "" ? "(No Name)" : data[i].Name;
+                    holder.appendChild(name);
+                    //templatetype
+                    var type = document.createElement("label");
+                    type.textContent = data[i].TemplateName;
+                    holder.appendChild(type);
+                    evalList.appendChild(holder);
+                    bindShowEvalBtn(holder, i);
+                }
+                var btnHolder = document.createElement("div");
+                var newItem = document.createElement("button");
+                newItem.textContent = "Create New Evaluation";
+                newItem.className = "mainround";
+                btnHolder.appendChild(newItem);
+                evalList.appendChild(btnHolder);
+                newItem.onclick = function () {
+                    clearChildren(evalPanel);
+                    evalLabel.textContent = People[currentTime][personI].Name + " - New Evaluation";
+                    evalSigned.textContent = " ";
+                    clientDb.ref("Settings/Evaluations").once('value').then((snap) => {
+                        var templates = snap.val() ? snap.val() : [];
+                        for (var i = 0; i < templates.length; i++) {
+                            var templateBtn = document.createElement("button");
+                            templateBtn.textContent = templates[i].Name;
+                            templateBtn.className = "evaltemplate";
+                            handleNewEvalBtn(templateBtn, i);
+                            evalPanel.appendChild(templateBtn);
+                            function handleNewEvalBtn(btn, templateIndex) {
+                                btn.onclick = function () {
+                                    clearChildren(evalPanel);
+                                    var newName = prompt("Enter evaluation name");
+                                    if (newName!==null) {
+                                        newData = JSON.parse(JSON.stringify(templates[templateIndex]));
+                                        newData.Timeblock = currentTime;
+                                        newData.TemplateName = newData.Name;
+                                        newData.Name = newName;
+                                        newData.SignatureDate = -1;
+                                        newData.isVisible = false;
+                                        newData.UniqueID = -1;
+                                        data.push(newData);
+                                        renderEvalList();
+                                    }
+                                };
+                            }
+                        }
+                    });
+                };
+
+                function bindShowEvalBtn(btn, evalI) {
+                    btn.onclick = function () {
+                        clearChildren(evalPanel);
+                        let tData = data[evalI];
+                        let isDisabled = parseInt(tData.SignatureDate) > -1;
+                        evalLabel.textContent = People[currentTime][personI].Name + " - " +
+                                (tData.Name !== "" ? tData.Name : "(No Name)");
+                        if (isDisabled) {
+                            evalSigned.textContent = "Signed on " + timestampToText(tData.SignatureDate);
+                        } else {
+                            evalSigned.textContent = "Not Signed by Instructor";
+                        }
+                        for (var i = 0; i < tData.RowData.length; i++) {
+                            var row = document.createElement("tr");
+                            evalPanel.appendChild(row);
+                            //individual elements
+                            for (var x = 0; x < tData.RowData[i].length; x++) {
+                                var newEl = document.createElement(tData.RowData[i][x].elementType);
+                                newEl.type = tData.RowData[i][x].inputType;
+                                newEl.name = tData.RowData[i][x].name;
+                                newEl.disabled = isDisabled;
+                                if (tData.RowData[i][x].isText === true) {
+                                    newEl.textContent = tData.RowData[i][x].textValue;
+                                }
+                                newEl.className = tData.RowData[i][x].className;
+                                if (tData.RowData[i][x].value !== undefined) {
+                                    if (tData.RowData[i][x].inputType === "checkbox") {
+                                        newEl.checked = tData.RowData[i][x].value;
+                                    } else {
+                                        newEl.value = tData.RowData[i][x].value;
+                                    }
+                                    if (!isDisabled) {
+                                        bindValueChange(newEl, i, x);
+                                    } else {
+                                        newEl.title = "Evaluation cannot be edited as it has been signed";
+                                    }
+                                }
+                                row.appendChild(newEl);
+                            }
+                        }
+                        function bindValueChange(obj, i, x) {
+                            obj.oninput = function () {
+                                if (data[evalI].RowData[i][x].inputType === "checkbox") {
+                                    data[evalI].RowData[i][x].value = obj.checked;
+                                } else {
+                                    data[evalI].RowData[i][x].value = obj.value;
+                                }
+                            };
+                        }
+
+                    };
+                }
+            }
+            renderEvalList();
+            document.getElementById("eval-save-btn").onclick = function () {
+                resetloader(true, null, null, false);
+                saveEvals(data, currentTime, People[currentTime][personI].Uid).then(() => {
+                    resetloader(false, null, null, false);
+                }).catch((err) => {
+                    console.log(err);
+                    alert("Error saving evaluation. Please try again.");
+                    resetloader(false, evalmenu, "block", true);
+                });
+
+                async function saveEvals(data, timeblock, userUid) {
+                    return await send_http_request("1/save/evaluations", JSON.stringify(data), [["timeblock", timeblock], ["uid", userUid]]);
+                }
+            };
+        }).catch((err) => {
+            resetloader(false, null, null, false);
+            console.log(err);
+            alert("Error: " + err);
+        });
+    };
+    async function getUserEvals(timeblock, userUid) {
+        return await send_http_request("1/get/evaluations", "", [["timeblock", timeblock], ["uid", userUid]]);
+    }
+}
+
 function handleAccessButton(accessbtn, personI) {
-    accessbtn.onclick = function () {
+    accessbtn.onclick = function (e) {
+        e.stopPropagation();
         resetloader(true, null, null, false);
         getCurrentAccess(People[currentTime][personI].Uid, currentTime).then((result) => {
             let currentAccess = JSON.parse(result);
@@ -800,7 +957,6 @@ function handleAccessButton(accessbtn, personI) {
             });
         });
     };
-
     function handleAccessBtnClick(btn, uid, isAdd, personI) {//PersonI is the person who owns the sheets
         //Uid is the person to grant access to
         btn.onclick = function () {
@@ -826,7 +982,7 @@ function handleAccessButton(accessbtn, personI) {
 function handleCorrectionInput(input, user) {
     input.onblur = function () {
         People[currentTime][user].UserInformation.Corrections = parseInt(input.value);
-        changeEditPending(true, true);//bypass incrementing corrections on change
+        changeEditPending(true, true); //bypass incrementing corrections on change
     };
 }
 
@@ -850,7 +1006,6 @@ instlistcollapse.onclick = function (ev) {
     instlistparent.setAttribute("data-collapse", "true");
     setChildrenDisplay(instlistparent, "none");
 };
-
 instlistparent.onclick = function () {
     if (instlistparent.getAttribute("data-collapse") === "true") {
         instlistparent.style.flex = "0 0 13rem";
@@ -858,7 +1013,6 @@ instlistparent.onclick = function () {
         setChildrenDisplay(instlistparent, "block");
     }
 };
-
 function setChildrenDisplay(parent, displayVal) {
     const children = parent.children;
     for (let i = 0; i < children.length; i++) {
@@ -917,7 +1071,6 @@ timeselect.onchange = function () {//handle changing time with dropdown
         timeselect.value = currentTime;
     }
 };
-
 printbtn.onclick = function () {
     resetloader(false, printmenu, "flex", false);
     printExclusions = [];
@@ -936,7 +1089,6 @@ blocker.onclick = function (target) {
 overflowbtn.onclick = function () {
     resetloader(false, overflower, "block", false);
 };
-
 emailbtn.onclick = function () {
     if (EditPending === false) {
         resetloader(false, emailmenu, "flex", false);
@@ -1007,7 +1159,7 @@ document.getElementById("email-menu-execute").onclick = function () {
                     RequestBody.push({Facility: currentTime.split("---")[0], Timeblock: currentTime.split("---")[1], Barcode: documents[currentPerson][i].Barcode, UniqueID: documents[currentPerson][i].UniqueID, Details: {Positions: Positions, Emails: Emails, Names: Names}});
                 }
             }
-            //Show confirmation screen
+//Show confirmation screen
             EmailParameters = RequestBody;
             document.getElementById("email-menu-execute").textContent = "Send Emails";
             while (email_maindiv.firstChild) {
@@ -1112,7 +1264,6 @@ prevlookupbtn.onclick = function () {
 
     function displayStudent(student) {
         displayStudentSheet(student, 0);
-
         function displayStudentSheet(student, sheet) {
             if (prevlookupResults[student] && prevlookupResults[student][sheet]) {
                 let data = prevlookupResults[student][sheet];
@@ -1120,7 +1271,7 @@ prevlookupbtn.onclick = function () {
                 prevlookup_next.disabled = sheet >= prevlookupResults[student].length - 1;
                 prevlookup_previous.disabled = sheet === 0;
                 prevlookup_sheetinfo.textContent = (sheet + 1) + " / " + prevlookupResults[student].length;
-                prevlookup_labels["Date"].textContent = data.Session;//timestampToText();
+                prevlookup_labels["Date"].textContent = data.Session; //timestampToText();
                 prevlookup_labels["Level"].textContent = data.LevelName;
                 prevlookup_labels["Instructor"].textContent = data.Instructor;
                 prevlookup_labels["Barcode"].textContent = "#" + data.Barcode;
@@ -1173,11 +1324,9 @@ prevlookupbtn.onclick = function () {
         prevlookup_selector.onchange = function () {
             displayStudent(parseInt(prevlookup_selector.value));
         };
-
         prevlookup_previous.onclick = function () {
             displayStudentSheet(student, prevlookupsheet - 1);
         };
-
         prevlookup_next.onclick = function () {
             displayStudentSheet(student, prevlookupsheet + 1);
         };
@@ -1187,7 +1336,6 @@ prevlookupbtn.onclick = function () {
         return await send_http_request("1/search/lookup", sheet, [["instructor", People[currentTime][currentPerson].Uid]]);
     }
 };
-
 searchbtn.onclick = async function () {
     var searchData = JSON.parse(searchbtn.getAttribute("data-search"));
     if (searchbtn.getAttribute("data-search") !== "{}") {//Not empty, search term exists
@@ -1204,7 +1352,6 @@ searchbtn.onclick = async function () {
         searchbtn.setAttribute("data-search", "{}");
     }
 };
-
 const MAX_SEARCH_RESULTS = 10;
 searchbar.addEventListener("focus", bindSearchBar);
 function bindSearchBar() {
@@ -1267,7 +1414,6 @@ function bindSearchBar() {
             }
         }
     });
-
     function updateSearchWithEdits(students) {
         for (var i = 0; i < documents.length; i++) {
             for (var x = 0; x < documents[i].length; x++) {
@@ -1290,7 +1436,6 @@ window.onload = function () {
 
     handleresize();
     window.addEventListener("resize", handleresize);
-
     window.onbeforeunload = function () {
         return EditPending === true ? "" : null;
     };
@@ -1317,7 +1462,6 @@ window.onload = function () {
     }, function (error) {
         alert('Unexpected error logging in: please check your connection or try later' + error); //TODO:redirect
     });
-
     window.addEventListener("SettingUpdate", function () {
         if (Settings.supervisorEmail === false) {
             emailbtn.style.display = "none";
@@ -1325,7 +1469,6 @@ window.onload = function () {
             emailbtn.title = "Settings do not permit you to send emails";
         }
     });
-
     screenquery.addListener(function () {
         //screen size went above or below 700px
         if (sheetinfo.textContent !== "No Selection" && screenquery.matches) {
@@ -1336,7 +1479,6 @@ window.onload = function () {
         } else {//large screen
         }
     });
-
     searchbar.onblur = function () {
         let searchBackground = document.getElementById("searchBackground");
         searchbar.className = "";
@@ -1344,7 +1486,6 @@ window.onload = function () {
             searchBackground.remove();
         }
     };
-
     instmodebtn.onclick = function () {
         window.location.href = "/?ds=false";
     };
@@ -1364,7 +1505,6 @@ window.onload = function () {
         }
     };
 };
-
 //Handle schedule requesting view of sheet
 async function handleScheduleViewSheet(instructor, sheet) {
     resetloader(false, null, null, false);

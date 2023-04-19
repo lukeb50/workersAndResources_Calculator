@@ -38,6 +38,9 @@
                         </pre>
                     </div>
                 </div>
+                <div id="eval-select-menu" class="menuitem">
+                    <div id="eval-menu-list"></div>
+                </div>
                 <button class="mainround" id="main-menu-close-btn">Close</button>
             </div>
         </div>
@@ -48,15 +51,15 @@
                     <div id="level-settings-container">
                         <div id="lvl-list-settings-container">
                             <label>Levels:</label>
-                            <div id="lvl-list-settings-levels"></div>
+                            <div id="lvl-list-settings-levels" class="scrollbar"></div>
                             <label>Groupings:</label>
-                            <div id="lvl-list-settings-groups"></div>
+                            <div id="lvl-list-settings-groups" class="scrollbar"></div>
                         </div>
-                        <div id="lvl-settings-skills-container">
+                        <div id="lvl-settings-skills-container" class="scrollbar">
                             <div id="main-lvl-config-container"></div>
                         </div>
-                        <div id="plan-config-container"></div>
-                        <div id="main-lvl-config-side-container">
+                        <div id="plan-config-container" class="scrollbar"></div>
+                        <div id="main-lvl-config-side-container" class="scrollbar">
                             <div id="sidebar-lvl-settings">
                                 <label>Level Settings</label>
                                 <div><label>Comments:<input disabled id="isCommentsEnabled" type="checkbox"></label></div>
@@ -131,6 +134,18 @@
                 <button id="email-html-btn" class="mainround">View HTML email</button>
                 <button id="email-plaintext-btn" class="mainround">View plaintext email</button>
                 <div><button id="save-email-btn" class="mainround">Save Email</button></div>
+            </div>
+            <div id="general-eval-settings" class="nomargin"><!--true-->
+                <span><label>Evaluation Settings</label><button class="setting-arrow nomargin">▲</button></span>
+                <div id="eval-settigs-superholder">
+                    <div id="eval-settings-holder">
+                        <div id="eval-list" class="scrollbar"></div>
+                        <div id="eval-panel-flexer" class="scrollbar">
+                            <table id="eval-panel"></table>
+                        </div>
+                    </div>
+                    <button class="mainround" id="save-eval-settings-btn">Save</button>
+                </div>
             </div>
         </div>
         <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>

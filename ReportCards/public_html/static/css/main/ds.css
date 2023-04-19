@@ -387,3 +387,60 @@ button.disablebtn-disabled{
 #current-time-list div div{
     display: flex;
 }
+
+#eval-save-btn{
+    margin-top: 10px;
+    flex: 0 0 30px;
+    margin-left: 10%;
+    width: 80%;
+    height: 30px;
+}
+
+#eval-panel-signed{
+    border-bottom: 2px solid var(--color-primary-dark);
+    padding-left: 3px;
+    padding-bottom: 4px;
+    height: 1em;
+}
+
+#eval-panel-name{
+    border-bottom: none;
+    padding-bottom: 0px;
+}
+
+#eval-list button.mainround{
+    padding:10px;
+    margin: auto;
+    margin-top: 5px;
+}
+
+#eval-panel button.evaltemplate{
+    margin-top: 5px;
+    margin-left: 5px;
+    background:white;
+    border: 2px solid var(--color-primary);
+    padding:5px;
+    border-radius: 10px;
+}
+
+#eval-list div:nth-last-child(1){
+    display: flex;
+    border:none;
+    background:none;
+}
+
+#eval-list div b{
+    display: initial;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+#eval-panel input{
+    border-radius: 5px;
+    border:2px solid var(--color-primary);
+}
+
+#eval-panel textarea:disabled{
+    background:initial!important;
+    color: initial!important;
+}

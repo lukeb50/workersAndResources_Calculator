@@ -1,5 +1,5 @@
 /* global parseInt */
-/*global firebase, EditPending, initClientDatabase, Settings, getLvlInfo, Levels*/
+/*global firebase, EditPending, initClientDatabase, Settings, getLvlInfo, Levels, send_http_request*/
 var documents = [];
 var currentSheet = -1;
 var UserData;
@@ -46,8 +46,9 @@ const savebtn = document.getElementById("savebtn");
 const printbtn = document.getElementById("printbtn");
 const visualbtn = document.getElementById("visualmarkbtn");
 const prevlookupbtn = document.getElementById("prevlookupbtn");
+const evalbtn = document.getElementById("evalbtn");
 
-const topbtns = [timebtn, savebtn, prevlookupbtn, printbtn, visualbtn];//buttons in topbar that may need to overflow
+const topbtns = [timebtn, savebtn, prevlookupbtn, printbtn, visualbtn, evalbtn];//buttons in topbar that may need to overflow
 const topbtnlens = [];
 for (var i = 0; i < topbtns.length; i++) {//compute used space for each element
     topbtnlens[i] = parseInt(topbtns[i].getBoundingClientRect().width);//elwidth;
@@ -67,10 +68,11 @@ const commentmenu = document.getElementById("comment-menu");
 const visualmenu = document.getElementById("visualmarkingdiv");
 const notemenu = document.getElementById("note-menu");
 const prevlookupmenu = document.getElementById("previouslookup-menu");
+const evalmenu = document.getElementById("eval-menu");
 
 const msvholder = document.getElementById("visualmustseeholder");
 
-const loaditms = [loadspinner, overflower, timemenu, printmenu, visualmenu, commentmenu, notemenu, prevlookupmenu];//items that should be hidden when showing main blocker
+const loaditms = [loadspinner, overflower, timemenu, printmenu, visualmenu, commentmenu, notemenu, prevlookupmenu, evalmenu];//items that should be hidden when showing main blocker
 
 const screenquery = window.matchMedia("(max-width: 700px)");
 
@@ -87,7 +89,7 @@ window.onload = function () {
     });
 
     close_mainmenu.onclick = function () {
-        resetloader(false ,null ,null ,false);
+        resetloader(false, null, null, false);
     };
 
     var printExclusions = [];
@@ -211,7 +213,7 @@ window.onload = function () {
 
     timebtn.onclick = function () {
         timemselect.value = UserData.Home ? UserData.Home : Facilities[Object.keys(Facilities)[0]].UniqueID;
-        resetloader(false ,timemenu ,"flex" ,false);
+        resetloader(false, timemenu, "flex", false);
         showAvailableTimes();
         showCurrentTimes();
         showAccessTimes();
@@ -222,9 +224,9 @@ window.onload = function () {
             async function sendUpdate() {
                 return send_http_request("0/add/time", "", [["facility", btn.getAttribute("data-facility")], ["timeblock", btn.getAttribute("data-time")]]);
             }
-            resetloader(true ,null ,null ,false);
+            resetloader(true, null, null, false);
             sendUpdate().then(function () {
-                resetloader(false ,null ,null ,false);
+                resetloader(false, null, null, false);
                 var timeblockName = btn.getAttribute("data-facility") + "---" + btn.getAttribute("data-time");
                 UserData.Timeblocks.push(timeblockName);
                 documents[timeblockName] = [];
@@ -235,7 +237,7 @@ window.onload = function () {
                 new_sheet_manual.style.display = "block";
                 //selectfile.style.display = "block";
             }).catch((f) => {
-                resetloader(false ,null ,null ,false);
+                resetloader(false, null, null, false);
                 alert("An error occured. Please check your connection and try again");
             });
         };
@@ -282,9 +284,9 @@ window.onload = function () {
             async function sendUpdate() {
                 return send_http_request("0/delreset/sheets", "", [["facility", btn.getAttribute("data-facility")], ["timeblock", btn.getAttribute("data-time")], ["reset", false]]);
             }
-            resetloader(true ,null ,null ,false);
+            resetloader(true, null, null, false);
             sendUpdate().then(function () {
-                resetloader(false ,null ,null ,false);
+                resetloader(false, null, null, false);
                 var timeblockName = btn.getAttribute("data-facility") + "---" + btn.getAttribute("data-time");
                 documents[timeblockName] = null;
                 if (UserData.Timeblocks.length === 1) {
@@ -308,7 +310,7 @@ window.onload = function () {
                 renderTable(-1);
                 populatebar(0);
             }).catch((f) => {
-                resetloader(false ,null ,null ,false);
+                resetloader(false, null, null, false);
                 alert("An error occured. Please check your connection and try again");
             });
         };
@@ -319,16 +321,16 @@ window.onload = function () {
             async function sendUpdate() {
                 return send_http_request("0/delreset/sheets", "", [["facility", btn.getAttribute("data-facility")], ["timeblock", btn.getAttribute("data-time")], ["reset", true]]);
             }
-            resetloader(true ,null ,null ,false);
+            resetloader(true, null, null, false);
             sendUpdate().then(function () {
-                resetloader(false ,null ,null ,false);
+                resetloader(false, null, null, false);
                 //Handling any finishing UI
                 var timeblockName = btn.getAttribute("data-facility") + "---" + btn.getAttribute("data-time");
                 documents[timeblockName] = [];
                 renderTable(-1);
                 populatebar(0);
             }).catch((f) => {
-                resetloader(false ,null ,null ,false);
+                resetloader(false, null, null, false);
                 alert("An error occured. Please check your connection and try again");
             });
         };
@@ -428,7 +430,7 @@ window.onload = function () {
     }
 
     async function getUser() {
-        resetloader(true ,null ,null ,false);
+        resetloader(true, null, null, false);
         UserData = JSON.parse(await send_http_request("-1/get/user", ""));
         if (UserData !== null) {
             while (timeselect.firstChild) {
@@ -444,13 +446,13 @@ window.onload = function () {
                 currentTime = UserData.Timeblocks[0];
                 HandleLoad();
             } else {
-                resetloader(false ,null ,null ,false);
+                resetloader(false, null, null, false);
             }
         } else {
             new_sheet_manual.style.display = "none";
             //selectfile.style.display = "none";
             alert("Unexpected error fetching your data - please try again later");
-            resetloader(false ,null ,null ,false);
+            resetloader(false, null, null, false);
         }
     }
 
@@ -516,7 +518,7 @@ window.onload = function () {
     }
 
     function SaveSheets() {//Should be set to save all timeblocks
-        resetloader(true ,null ,null ,false);
+        resetloader(true, null, null, false);
         saveCurrentSheets().then((IdArray) => {
             if (IdArray) {
                 for (var t = 0; t < IdArray.length; t++) {
@@ -529,10 +531,10 @@ window.onload = function () {
                 }
             }
             changeEditPending(false);
-            resetloader(false ,null ,null ,false);
+            resetloader(false, null, null, false);
         }).catch((f) => {
             alert("An error occured. Please check your connection and try again");
-            resetloader(false ,null ,null ,false);
+            resetloader(false, null, null, false);
         });
     }
 
@@ -548,7 +550,7 @@ window.onload = function () {
     }
 
     function HandleLoad() {
-        resetloader(true ,null ,null ,false);
+        resetloader(true, null, null, false);
         getCurrentSheets().then((f) => {
             if (JSON.parse(f).length > 0) {
                 documents[currentTime] = JSON.parse(f);
@@ -558,11 +560,11 @@ window.onload = function () {
                 renderTable(-1);
             }
             populatebar(0);
-            resetloader(false ,null ,null ,false);
+            resetloader(false, null, null, false);
         }).catch((f) => {
             console.log(f);
             alert("An error occured. Please check your connection and try again");
-            resetloader(false ,null ,null ,false);
+            resetloader(false, null, null, false);
         });
     }
 
@@ -581,7 +583,7 @@ window.onload = function () {
     };
 
     printbtn.onclick = function () {
-        resetloader(false ,printmenu ,"flex" ,false);
+        resetloader(false, printmenu, "flex", false);
         printExclusions = [];
         printShowTimeList();
         printsheet.classList.add("print-selected");
@@ -591,20 +593,20 @@ window.onload = function () {
     };
 
     /*visualbtn.onclick = function () {
-        for (var i = 0; i < documents[currentTime][currentSheet].Marks.length; i++) {
-            if (documents[currentTime][currentSheet].Marks[i].indexOf(false) !== -1) {//person fails
-                resetloader(false ,visualmenu ,"block" ,false);
-                GenerateVisualMarking(documents[currentTime][currentSheet].Level, i);
-                break;
-            }
-        }
-
-    };
-
-    document.getElementById("visualmarkingclose").onclick = function () {
-        resetloader(false ,null ,null ,false);
-        renderTable(currentSheet);
-    };*/
+     for (var i = 0; i < documents[currentTime][currentSheet].Marks.length; i++) {
+     if (documents[currentTime][currentSheet].Marks[i].indexOf(false) !== -1) {//person fails
+     resetloader(false ,visualmenu ,"block" ,false);
+     GenerateVisualMarking(documents[currentTime][currentSheet].Level, i);
+     break;
+     }
+     }
+     
+     };
+     
+     document.getElementById("visualmarkingclose").onclick = function () {
+     resetloader(false ,null ,null ,false);
+     renderTable(currentSheet);
+     };*/
 
     blocker.onclick = function (target) {
         if (target.target === blocker) {
@@ -614,87 +616,87 @@ window.onload = function () {
     };
 
     overflowbtn.onclick = function () {
-        resetloader(false ,overflower ,"block" ,false);
+        resetloader(false, overflower, "block", false);
     };
 
     /*function getWeakPositions() {
-        var weaks = [];
-        for (var i = 0; i < documents[currentTime][currentSheet].Marks.length; i++) {
-            if (documents[currentTime][currentSheet].Marks[i].indexOf(false) !== -1) {
-                weaks.push(i);
-            }
-        }
-        return weaks;
-    }
-
-    function GenerateVisualMarking(lvl, p) {
-        visualmarkingnext.setAttribute("data-p", p);
-        visualmarkingnext.setAttribute("data-lvl", lvl);
-        visualmarkingname.textContent = documents[currentTime][currentSheet].Names[p];
-        let weaks = getWeakPositions();
-        if (weaks.indexOf(p) === 0) {
-            visualmarkingprev.disabled = true;
-        } else {
-            visualmarkingprev.disabled = false;
-        }
-        if (weaks.indexOf(p) === weaks.length - 1) {
-            visualmarkingnext.disabled = true;
-        } else {
-            visualmarkingnext.disabled = false;
-        }
-        visualmarkingprogress.textContent = (weaks.indexOf(p) + 1) + "/" + (weaks.length);
-        while (msvholder.firstChild) {
-            msvholder.removeChild(msvholder.firstChild);
-        }
-        document.getElementById("cardimg").src = "../static/images/" + lvl.replace(" ", "") + "BACK.jpg";
-        var usedsegments = [];
-        for (var i = 0; i < Object.keys(mustseeinfo[lvl].MustSees).length; i++) {//skill
-            var ref = mustseeinfo[lvl][Object.keys(mustseeinfo[lvl])[i]];
-            if (documents[currentTime][currentSheet].Marks[p][Object.keys(mustseeinfo[lvl])[i]] === false) {
-                for (var x = 0; x < ref.length; x++) {//must see:ref[x]
-                    let seediv = document.createElement("div");
-                    if (documents[currentTime][currentSheet].MustSees[p][Object.keys(mustseeinfo[lvl])[i]].indexOf(x) !== -1) {
-                        seediv.className = "selectedmsholder";
-
-                    } else {
-                        seediv.className = "unselectedmsholder";
-                    }
-                    for (var z = 0; z < ref[x].Blocks.length; z++) {//each block
-                        if (usedsegments.indexOf(ref[x].Blocks[z][0][0] + ":" + ref[x].Blocks[z][0][1] + ":" + (ref[x].Blocks[z][1][1] - ref[x].Blocks[z][0][1]) + ":" + (Math.abs(ref[x].Blocks[z][1][0] - ref[x].Blocks[z][0][0]))) === -1) {
-                            let div = document.createElement("div");
-                            div.style.position = "absolute";
-                            div.style.left = ref[x].Blocks[z][0][0];
-                            div.style.top = ref[x].Blocks[z][0][1];
-                            div.style.height = ref[x].Blocks[z][1][1] - ref[x].Blocks[z][0][1];
-                            div.style.width = Math.abs(ref[x].Blocks[z][1][0] - ref[x].Blocks[z][0][0]);
-                            seediv.setAttribute("data-skill", Object.keys(mustseeinfo[lvl])[i]);
-                            seediv.setAttribute("data-mustsee", x);
-                            seediv.appendChild(div);
-                            usedsegments.push(ref[x].Blocks[z][0][0] + ":" + ref[x].Blocks[z][0][1] + ":" + (ref[x].Blocks[z][1][1] - ref[x].Blocks[z][0][1]) + ":" + (Math.abs(ref[x].Blocks[z][1][0] - ref[x].Blocks[z][0][0])));
-                        }
-                    }
-                    seediv.onclick = function () {//handle click and setting mustsee
-                        if (seediv.className === "unselectedmsholder") {
-                            documents[currentTime][currentSheet].MustSees[p][seediv.getAttribute("data-skill")].push(parseInt(seediv.getAttribute("data-mustsee")));
-                            seediv.className = "selectedmsholder";
-                        } else {
-                            documents[currentTime][currentSheet].MustSees[p][seediv.getAttribute("data-skill")].splice(documents[currentTime][currentSheet].MustSees[p][seediv.getAttribute("data-skill")].indexOf(parseInt(seediv.getAttribute("data-mustsee"))), 1);
-                            seediv.className = "unselectedmsholder";
-                        }
-                    };
-                    msvholder.appendChild(seediv);
-                }
-            }
-        }
-    }
-
-    visualmarkingprev.onclick = function () {
-        GenerateVisualMarking(visualmarkingnext.getAttribute("data-lvl"), parseInt(visualmarkingnext.getAttribute("data-p")) - 1);
-    };
-
-    visualmarkingnext.onclick = function () {
-        GenerateVisualMarking(visualmarkingnext.getAttribute("data-lvl"), parseInt(visualmarkingnext.getAttribute("data-p")) + 1);
-    };*/
+     var weaks = [];
+     for (var i = 0; i < documents[currentTime][currentSheet].Marks.length; i++) {
+     if (documents[currentTime][currentSheet].Marks[i].indexOf(false) !== -1) {
+     weaks.push(i);
+     }
+     }
+     return weaks;
+     }
+     
+     function GenerateVisualMarking(lvl, p) {
+     visualmarkingnext.setAttribute("data-p", p);
+     visualmarkingnext.setAttribute("data-lvl", lvl);
+     visualmarkingname.textContent = documents[currentTime][currentSheet].Names[p];
+     let weaks = getWeakPositions();
+     if (weaks.indexOf(p) === 0) {
+     visualmarkingprev.disabled = true;
+     } else {
+     visualmarkingprev.disabled = false;
+     }
+     if (weaks.indexOf(p) === weaks.length - 1) {
+     visualmarkingnext.disabled = true;
+     } else {
+     visualmarkingnext.disabled = false;
+     }
+     visualmarkingprogress.textContent = (weaks.indexOf(p) + 1) + "/" + (weaks.length);
+     while (msvholder.firstChild) {
+     msvholder.removeChild(msvholder.firstChild);
+     }
+     document.getElementById("cardimg").src = "../static/images/" + lvl.replace(" ", "") + "BACK.jpg";
+     var usedsegments = [];
+     for (var i = 0; i < Object.keys(mustseeinfo[lvl].MustSees).length; i++) {//skill
+     var ref = mustseeinfo[lvl][Object.keys(mustseeinfo[lvl])[i]];
+     if (documents[currentTime][currentSheet].Marks[p][Object.keys(mustseeinfo[lvl])[i]] === false) {
+     for (var x = 0; x < ref.length; x++) {//must see:ref[x]
+     let seediv = document.createElement("div");
+     if (documents[currentTime][currentSheet].MustSees[p][Object.keys(mustseeinfo[lvl])[i]].indexOf(x) !== -1) {
+     seediv.className = "selectedmsholder";
+     
+     } else {
+     seediv.className = "unselectedmsholder";
+     }
+     for (var z = 0; z < ref[x].Blocks.length; z++) {//each block
+     if (usedsegments.indexOf(ref[x].Blocks[z][0][0] + ":" + ref[x].Blocks[z][0][1] + ":" + (ref[x].Blocks[z][1][1] - ref[x].Blocks[z][0][1]) + ":" + (Math.abs(ref[x].Blocks[z][1][0] - ref[x].Blocks[z][0][0]))) === -1) {
+     let div = document.createElement("div");
+     div.style.position = "absolute";
+     div.style.left = ref[x].Blocks[z][0][0];
+     div.style.top = ref[x].Blocks[z][0][1];
+     div.style.height = ref[x].Blocks[z][1][1] - ref[x].Blocks[z][0][1];
+     div.style.width = Math.abs(ref[x].Blocks[z][1][0] - ref[x].Blocks[z][0][0]);
+     seediv.setAttribute("data-skill", Object.keys(mustseeinfo[lvl])[i]);
+     seediv.setAttribute("data-mustsee", x);
+     seediv.appendChild(div);
+     usedsegments.push(ref[x].Blocks[z][0][0] + ":" + ref[x].Blocks[z][0][1] + ":" + (ref[x].Blocks[z][1][1] - ref[x].Blocks[z][0][1]) + ":" + (Math.abs(ref[x].Blocks[z][1][0] - ref[x].Blocks[z][0][0])));
+     }
+     }
+     seediv.onclick = function () {//handle click and setting mustsee
+     if (seediv.className === "unselectedmsholder") {
+     documents[currentTime][currentSheet].MustSees[p][seediv.getAttribute("data-skill")].push(parseInt(seediv.getAttribute("data-mustsee")));
+     seediv.className = "selectedmsholder";
+     } else {
+     documents[currentTime][currentSheet].MustSees[p][seediv.getAttribute("data-skill")].splice(documents[currentTime][currentSheet].MustSees[p][seediv.getAttribute("data-skill")].indexOf(parseInt(seediv.getAttribute("data-mustsee"))), 1);
+     seediv.className = "unselectedmsholder";
+     }
+     };
+     msvholder.appendChild(seediv);
+     }
+     }
+     }
+     }
+     
+     visualmarkingprev.onclick = function () {
+     GenerateVisualMarking(visualmarkingnext.getAttribute("data-lvl"), parseInt(visualmarkingnext.getAttribute("data-p")) - 1);
+     };
+     
+     visualmarkingnext.onclick = function () {
+     GenerateVisualMarking(visualmarkingnext.getAttribute("data-lvl"), parseInt(visualmarkingnext.getAttribute("data-p")) + 1);
+     };*/
 
     const prevlookup_selector = document.getElementById("prevlookup-select");
     const prevlookup_sheetinfo = document.getElementById("prevlookup-info");
@@ -707,11 +709,11 @@ window.onload = function () {
     var prevlookupsheet = -1;
     prevlookupbtn.onclick = function () {
         if (currentSheet !== -1 && documents[currentTime][currentSheet].UniqueID) {
-            resetloader(true ,null ,null ,false);
+            resetloader(true, null, null, false);
             prevlookupResults = null;
             getLookup(documents[currentTime][currentSheet].UniqueID).then((res) => {
                 prevlookupResults = JSON.parse(res);
-                resetloader(false ,prevlookupmenu ,"block" ,false);
+                resetloader(false, prevlookupmenu, "block", false);
                 //Display results
                 clearChildren(prevlookup_selector);
                 for (var n = 0; n < documents[currentTime][currentSheet].Names.length; n++) {
@@ -802,12 +804,107 @@ window.onload = function () {
         }
     };
 
-    function PrepareScreen() {
-        if (Settings.allowLookup === true) {
-            prevlookupbtn.style.display = "inline-block";
-        } else {
-            prevlookupbtn.style.display = "none";
+    const evalList = document.getElementById("eval-list");
+    const evalPanel = document.getElementById("eval-panel");
+    const evalLabel = document.getElementById("eval-panel-name");
+    const evalSignBtn = document.getElementById("eval-sign-btn");
+    const evalSignText = document.getElementById("eval-sign-text");
+    evalbtn.onclick = function () {
+        resetloader(true, null, null, false);
+        getEvals().then((data) => {
+            data = JSON.parse(data);
+            clearChildren(evalList);
+            clearChildren(evalPanel);
+            resetloader(false, evalmenu, "block", true);
+            function renderEvalList() {
+                clearChildren(evalList);
+                evalLabel.textContent = "Evaluations";
+                evalSignBtn.disabled = true;
+                evalSignBtn.onclick = null;
+                evalSignText.textContent = "";
+                for (var i = 0; i < data.length; i++) {
+                    //Render list
+                    var holder = document.createElement("div");
+                    var name = document.createElement("b");
+                    name.textContent = data[i].Name === "" ? "(No Name)" : data[i].Name;
+                    holder.appendChild(name);
+                    evalList.appendChild(holder);
+                    bindShowEvalBtn(holder, i);
+                }
+
+                function bindShowEvalBtn(btn, evalI) {
+                    btn.onclick = function () {
+                        clearChildren(evalPanel);
+                        let tData = data[evalI];
+                        if(parseInt(tData.SignatureDate)===-1){
+                            evalSignBtn.disabled = false;
+                            evalSignText.textContent = "Not Signed";
+                            evalSignBtn.onclick = function(){
+                                resetloader(true,null,null,false);
+                                send_http_request("0/sign/evaluation", tData.UniqueID, []).then((t)=>{
+                                    data[evalI].SignatureDate = parseInt(t);
+                                    evalSignBtn.disabled = true;
+                                    evalSignText.textContent = "Signed on " + TimestampToText(tData.SignatureDate);
+                                    resetloader(false, evalmenu, "block", true);
+                                }).catch((err)=>{
+                                    alert("Error signing evaluation");
+                                    console.log(err);
+                                    resetloader(false, evalmenu, "block", true);
+                                });
+                            };
+                        }else{
+                            evalSignText.textContent = "Signed on " + timestampToText(tData.SignatureDate);
+                            evalSignBtn.disabled = true;
+                        }
+                        evalLabel.textContent = (tData.Name !== "" ? tData.Name : "(No Name)");
+                        for (var i = 0; i < tData.RowData.length; i++) {
+                            var row = document.createElement("tr");
+                            evalPanel.appendChild(row);
+                            //individual elements
+                            for (var x = 0; x < tData.RowData[i].length; x++) {
+                                var newEl;
+                                if (tData.RowData[i][x].elementType !== "input" || (tData.RowData[i][x].elementType === "input" && tData.RowData[i][x].inputType === "checkbox")) {
+                                    newEl = document.createElement(tData.RowData[i][x].elementType);
+                                } else {
+                                    newEl = document.createElement("b");
+                                }
+                                newEl.type = tData.RowData[i][x].inputType;
+                                newEl.name = tData.RowData[i][x].name;
+                                if (tData.RowData[i][x].isText === true) {
+                                    newEl.textContent = tData.RowData[i][x].textValue;
+                                }
+                                newEl.className = tData.RowData[i][x].className;
+                                if (tData.RowData[i][x].value !== undefined) {
+                                    if (tData.RowData[i][x].inputType === "checkbox") {
+                                        newEl.checked = tData.RowData[i][x].value;
+                                        newEl.onclick = function(){
+                                            return false;
+                                        };
+                                    } else {
+                                        newEl.disabled = true;
+                                        newEl.textContent = tData.RowData[i][x].value;
+                                    }
+                                }
+                                row.appendChild(newEl);
+                            }
+                        }
+                    };
+                }
+            }
+            renderEvalList();
+        }).catch((err) => {
+            console.log(err);
+            alert("Error getting evaluations");
+            resetloader(false, null, null, false);
+        });
+        async function getEvals() {
+            return await send_http_request("0/get/evaluations", currentTime, []);
         }
+    };
+
+    function PrepareScreen() {
+        prevlookupbtn.style.display = Settings.allowLookup === true ? "inline-block" : "none";
+        evalbtn.style.display = Settings.useInstructorEvals === true ? "inline-block" : "none";
     }
 
     document.getElementById("logout-btn").onclick = function () {

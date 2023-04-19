@@ -722,7 +722,7 @@ function displayConfigPersonList(displayData) {
     }
     function bindAddBarcodesBtn(btn, p) {
         btn.onclick = function () {
-            var codes = prompt("Enter barcodes(s) seperated by a comma").replaceAll(" ", "").split(",");
+            var codes = prompt("Enter barcodes(s) seperated by a comma").replaceAll(" ", "").split(/([0-9]{4,})/);
             //codes is an array with one code per index, spaces removed
             for (var c = 0; c < codes.length; c++) {
                 var loc = displayData.rawData.findIndex((course) => {
@@ -756,7 +756,7 @@ function displayConfigPersonList(displayData) {
 function HandleSpeadsheetUpload(fileUpload) {
     return new Promise((resolve, reject) => {
         //Validate whether File is valid Excel file.
-        var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.xls|.xlsx)$/;
+        var regex = /^([a-zA-Z0-9\s_\\.\-\(\):])+(.xls|.xlsx)$/;
         if (regex.test(fileUpload.value.toLowerCase())) {
             var reader = new FileReader();
             reader.onload = function (e) {

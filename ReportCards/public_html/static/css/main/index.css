@@ -1391,3 +1391,103 @@ button.newnotebtn{
     font-weight: bold;
 }
 
+#eval-container{
+    display: flex;
+    height: 100%;    
+    border-bottom: 2px solid var(--color-primary-dark);
+
+}
+
+#eval-panel-holder{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#eval-panel-flexer{
+    flex: 1;
+    width:100%;
+    overflow: auto;
+}
+
+#eval-panel{
+    table-layout: fixed;
+    border-collapse: collapse;
+    height: fit-content;
+    width:100%;
+}
+
+#eval-panel-name{
+    padding-left:3px;
+    padding-top: 3px;
+    font-weight: bold;
+    font-size: 1.1em;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--color-primary-dark);
+}
+
+#eval-list{
+    max-width: 15em;
+    width:25%;
+    border-right: 2px solid var(--color-primary-dark);
+    overflow-y:auto;
+}
+
+#eval-list div{
+    padding-left:5px;
+    padding-top: 3px;
+    border-bottom: 2px solid var(--color-primary-dark)
+}
+
+#eval-list div:nth-child(even){
+    background:var(--color-primary-light-transparent);
+}
+
+#eval-list div label{
+    display: block;
+    font-size: 0.9em;
+}
+
+
+#eval-list div b{
+    display: block;
+    padding-top: 5px;
+    padding-bottom: 7px;
+}
+
+#eval-panel textarea{
+    resize:none;
+    line-height: 1em;
+    height: 6em;
+    width: calc(100% - 1em);
+    margin-left: calc(0.5em - 4px);
+    border-radius: 5px;
+    border: 2px solid var(--color-primary);
+}
+
+#eval-panel *{
+    margin-left: 5px;
+}
+
+#eval-panel tr{
+    min-height: 1.2em;
+    height: fit-content;
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+}
+
+#eval-panel textarea:disabled{
+    background:white;
+    color: black;
+}
+
+#eval-sign-holder{
+    border-top: 2px solid var(--color-primary-dark);
+}
+
+#eval-sign-btn{
+    margin: 5px;
+    height: 30px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
