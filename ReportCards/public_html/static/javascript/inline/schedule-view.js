@@ -719,7 +719,23 @@ function displayConfigPersonList(displayData) {
         personBarcodeBtn.className = "mainround";
         personDiv.appendChild(personBarcodeBtn);
         bindAddBarcodesBtn(personBarcodeBtn, p);
+        var personRenameBtn = document.createElement("button");
+        personRenameBtn.textContent = "Rename Person";
+        personRenameBtn.className = "mainround";
+        personDiv.appendChild(personRenameBtn);
+        bindRenamePersonBtn(personRenameBtn,p);
     }
+    
+    function bindRenamePersonBtn(btn,p){
+        btn.onclick = function(){
+            var newName = prompt("Enter new name");
+            if(newName){
+                displayData.People[p].Name = newName;
+                displayConfigPersonList(displayData);
+            }
+        };
+    }
+    
     function bindAddBarcodesBtn(btn, p) {
         btn.onclick = function () {
             var codes = prompt("Enter barcodes(s) seperated by a comma").replaceAll(" ", "").split(/([0-9]{4,})/);
