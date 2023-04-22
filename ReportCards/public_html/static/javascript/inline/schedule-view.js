@@ -802,9 +802,10 @@ function extractExcelClasses(data) {
     //get the name of First Sheet.
     var Sheet = workbook.SheetNames[0];
     //Read all rows from First Sheet into an JSON array.
-    var classRegex = new RegExp(/^([\s\S]+) - ([0-9]+)/);
+    var classRegex = new RegExp(/^([\s\S]+) - ([0-9]+)/); //Regex for class names
     var excelRows = XLSX.utils.sheet_to_json(workbook.Sheets[Sheet], {header: ["DataRow", "Meta1", "Meta2", "Meta3", "Meta4", "Meta5", "Meta6", "Meta7", "Meta8", "Meta9", "Meta10"]});
     var builtClass = null;
+    var nameBuilder = null;
     var Classes = [];
     for (var r = 0; r < excelRows.length; r++) {
         var row = excelRows[r];
@@ -817,12 +818,14 @@ function extractExcelClasses(data) {
         } else {//a class is being read
             if (row.Meta1 && row.Meta1 === "Time:") {//Handle TimeStart
                 builtClass.TimeStart = convertToTimeStartTwelveHour(row.Meta2); //Meta2 = The start time formatted as: x AM|PM
-                if (isNaN(parseInt(builtClass.Level))) {
+                if (!isNumber(builtClass.Level)) {
                     builtClass.Duration = convertToTimeStartTwelveHour(row.Meta4) - convertToTimeStartTwelveHour(row.Meta2);
                 }
-            } else if (row.DataRow && !isNaN(parseInt(row.DataRow))) {
-                builtClass.Names.push(flipName(row.Meta1)); //Last, First to First Last
-                if (!(r + 1 < excelRows.length) || !excelRows[r + 1].DataRow || isNaN(parseInt(excelRows[r + 1].DataRow))) {//if last row || Next line not data row || next line is data row but not a number (i.e is barcode)
+            } else if (row.DataRow && isNumber(row.DataRow)) { //Row with number, a name should be added
+                //nameBuilder handles very long names that split on two lines, last name on line 1, first name on line 2.
+                builtClass.Names.push(nameBuilder === null ? flipName(row.Meta1) : row.Meta1 + " " + nameBuilder); //Last, First to First Last
+                nameBuilder = null;
+                if ((!(r + 1 < excelRows.length) || !excelRows[r + 1].DataRow || isNaN(parseInt(excelRows[r + 1].DataRow))) && !rowIsLongName(r+1)) {//if last row || Next line not data row || next line is data row but not a number (i.e is barcode)
                     if (builtClass.TimeStart) {//edge case with spreadsheet & more than 27 students enrolled, else if handles case and merges with previous
                         Classes.push(builtClass);
                     } else if (Classes[Classes.length - 1].Barcode === builtClass.Barcode) {
@@ -830,10 +833,34 @@ function extractExcelClasses(data) {
                     }
                     builtClass = null;
                 }
+            }else if(rowIsLongName(r)){
+                //Handle long names with last name on seperate line
+                nameBuilder = row.Meta1.substring(0,row.Meta1.indexOf(","));//Remove comma from last name
             }
         }
     }
     return Classes;
+    
+    //Checks to see if given row contains a long name (over two rows)
+    function rowIsLongName(r){
+        if(!(r + 1 < excelRows.length) || r < 0){//invalid range
+            return false;
+        }
+        //Check for proper row pattern
+        if(excelRows[r].DataRow || !excelRows[r].Meta1 || !excelRows[r + 1].DataRow || !excelRows[r + 1].Meta1){
+            return false;
+        }
+        if(isNumber(excelRows[r + 1].DataRow)){
+            return true;
+        }
+        //Shouldn't be used, but included for safety catch
+        return false;
+    }
+    
+    //Helper function to decide if string is a number
+    function isNumber(value){
+        return !isNaN(parseInt(value));
+    }
 }
 
 function flipName(name) {
