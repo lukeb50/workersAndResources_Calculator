@@ -1,3 +1,21 @@
+#configMenuBtn{
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    background: white;
+    border:3px solid var(--color-primary);
+    color: var(--color-primary-dark-highlight);
+    font-size: 30px;
+    transition: 0.5s;
+}
+
+#configMenuBtn:hover{
+    background:var(--color-primary-light);
+}
+
 #scheduleTable{
     border-collapse: collapse;
     height: fit-content;
@@ -57,7 +75,8 @@
 }
 
 #scheduleTable td div{
-    display: block;
+    display: flex;
+    flex-direction: column;
     height: 100%;
 }
 
@@ -219,4 +238,111 @@ label.uploadprompt{
 
 #config-assignment-list label{
     padding-right: 5px;
+}
+
+.note-icon-spacer{
+    flex-grow:1;
+}
+
+.note-icon-holder{
+    display: block!important;
+    max-height: 22px;
+    overflow:hidden;
+    margin-bottom: 2px;
+    margin-left: 2px;
+}
+
+.note-icon-holder span{
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+    background:rgba(255,255,255,0.5);
+    border-radius: 25%;
+    margin-right: 3px;
+    border:1px dashed black;
+    cursor: default;
+}
+
+#view-change-menu{
+    flex-direction: column;
+}
+
+#print-change-button{
+    width: 2em;
+    height: 1.65em;
+    font-size: 1.5em;
+    line-height: 0;
+    text-align: center;
+    position: absolute;
+    right:0;
+    background:none;
+    border:none;
+    color: var(--color-primary);
+    transition: 0.5s;
+}
+
+#print-change-button:hover{
+    color: var(--color-primary-dark-highlight);
+}
+
+#view-change-table-holder{
+    flex: 1;
+    overflow-y: scroll;
+    border-top: 2px solid var(--color-primary-dark);
+    border-bottom: 2px solid var(--color-primary-dark);
+}
+
+@media print{
+    #view-change-table{
+        font-size: 12px;
+    }
+    #view-change-table tr{
+        border:1px solid black!important;
+    }
+
+    #view-change-table td, #view-change-table th, #view-change-table-holder{
+        border:1px solid black!important;
+    }
+}
+
+#view-change-table{
+    width:100%;
+    display: table;
+    table-layout: fixed;
+    border-collapse: collapse;
+    page-break-inside: auto;
+    word-wrap: break-word;
+}
+
+#view-change-table tr{
+    max-height: 20px;
+    page-break-inside:avoid;
+    page-break-after:auto;
+}
+
+#view-change-table tr{
+    border-bottom: 2px solid var(--color-primary-dark);
+}
+
+#view-change-table th,#view-change-table td{
+    width:20%;
+}
+
+#view-change-table td:not(.small){
+    padding-left: 3px;
+    padding-right: 2px;
+}
+
+#view-change-table th.small,#view-change-table td.small{
+    width:10%;
+    text-align: center;
+    font-weight: bold;
+}
+
+#view-change-table td.small{
+    display: table-cell;
+}
+
+#view-change-table tr *:not(:nth-child(1)){
+    border-left:2px solid var(--color-primary-dark);
 }

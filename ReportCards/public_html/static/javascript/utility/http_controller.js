@@ -1,4 +1,4 @@
-/* global firebase, loaditms, storage, loadblocker, loadspinner, billing_table, mainmenu, Levels, SheetModifiers, getLvlInfo */
+/* global firebase, loaditms, storage, loadblocker, loadspinner, billing_table, mainmenu, Levels, SheetModifiers, getLvlInfo, displaySchedule, changeEditPending */
 const email_pattern = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 const firebaseConfig = {
     apiKey: "AIzaSyCG2ONqpyLey1OP8B9135Yqk3dfrT9J9ts",
@@ -336,14 +336,14 @@ function getZeroString(time) {//prefixes single digit numbers with a 0
     }
 }
 
-function getDatePostfix(date){
-    if(date % 10 === 1){
+function getDatePostfix(date) {
+    if (date % 10 === 1) {
         return "st";
-    }else if(date % 10 === 2){
+    } else if (date % 10 === 2) {
         return "and";
-    }else if(date % 10 === 3){
+    } else if (date % 10 === 3) {
         return "rd";
-    }else{
+    } else {
         return "th";
     }
 }
@@ -533,8 +533,8 @@ async function getLvlInfo(Level) {
 }
 
 //functions to handle notes
-const noteIndicators = [{Id: 0, Name: "Info", Image: ""}, {Id: 1, Name: "Alert", Image: ""}];
-function showNoteSection(sheet, dsMode,div) {
+const noteIndicators = [{Id: -1, Name: "notes"}, {Id: 100, Name: "info"}, {Id: 200, Name: "warning"}];
+function showNoteSection(sheet, dsMode, div) {
     const note_section = div;
     clearChildren(note_section);
     let noteTitle = document.createElement("h1");
@@ -585,36 +585,36 @@ function showNoteSection(sheet, dsMode,div) {
         noteContainer.appendChild(controlHolder);
         //control elements
         //indicator
-        let indicatorLbl = document.createElement("label");
-        indicatorLbl.textContent = "Symbol: ";
         //commented out until indicator is implemented
         //controlHolder.appendChild(indicatorLbl);
         let indicatorSel = document.createElement("select");
-        indicatorLbl.appendChild(indicatorSel);
-        let noIndicator = document.createElement("option");
-        noIndicator.textContent = "None";
-        noIndicator.value = -1;
-        indicatorSel.appendChild(noIndicator);
+        indicatorSel.className = "material-symbols-outlined";
         noteIndicators.forEach((indicator) => {
             let opt = document.createElement("option");
+            opt.className = "material-symbols-outlined";
             opt.textContent = indicator.Name;
             opt.value = indicator.Id;
             indicatorSel.appendChild(opt);
         });
         indicatorSel.value = note.Indicator;
         indicatorSel.onchange = function () {
+            note.Indicator = parseInt(indicatorSel.value);
             attemptEditPending();
-            note.Indicator = indicatorSel.value;
         };
+        controlHolder.appendChild(indicatorSel);
         //delete button
         let deletebtn = document.createElement("button");
         deletebtn.textContent = "Delete";
         deletebtn.className = "delete";
         deletebtn.onclick = function () {
-            let noteLoc = sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes;
-            sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes = noteLoc.filter(lNote => lNote.UniqueID !== note.UniqueID);
-            noteContainer.remove();
-            attemptEditPending();
+            let notesLoc = sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes;
+            var noteLoc = notesLoc.findIndex(lNote => lNote.UniqueID === note.UniqueID);
+            //if((both fields blank) || ((one or both fields written in) && user confirms delete)) then delete note
+            if ((notesLoc[noteLoc].Title === "" && notesLoc[noteLoc].Content === "") || ((notesLoc[noteLoc].Title !== "" || notesLoc[noteLoc].Content !== "") && confirm("Delete this note?"))) {
+                sheet.SheetInformation[isDs ? "Lead" : "Instructor"].Notes = notesLoc.filter(lNote => lNote.UniqueID !== note.UniqueID);
+                noteContainer.remove();
+                attemptEditPending();
+            }
         };
         controlHolder.appendChild(deletebtn);
         //ds notice
@@ -647,8 +647,11 @@ function showNoteSection(sheet, dsMode,div) {
 
     function attemptEditPending() {
         var editPendingAvailable = !typeof (changeEditPending) === "undefined";
-        if(editPendingAvailable === true){
-            changeEditPending(true,true);
+        if (editPendingAvailable === true) {
+            changeEditPending(true, true);
+        }
+        if (typeof displaySchedule === "function") {
+            displaySchedule(true);
         }
         try {
             window.parent.changeEditPending(true, true);
@@ -668,4 +671,16 @@ function getInstructorName(Name) {
         return "";
     }
     return Name.split(" ")[0] + " " + (Name.split(" ")[1] !== undefined ? Name.split(" ")[1].charAt(0) + "." : "");
+}
+
+function createElement(type, appendTo, textContent, classNames) {
+    var el = document.createElement(type);
+    appendTo.appendChild(el);
+    if (textContent) {
+        el.textContent = textContent;
+    }
+    if (classNames) {
+        el.className = classNames;
+    }
+    return el;
 }

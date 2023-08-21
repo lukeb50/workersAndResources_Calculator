@@ -1,12 +1,13 @@
-/* global firebase, initClientDatabase, clientDb, XLSX, getSheetModifier */
+/* global firebase, initClientDatabase, clientDb, XLSX, getSheetModifier, noteIndicators */
 
 const loadspinner = document.getElementById("loadspinner");
 const sheetinfomenu = document.getElementById("sheetinfo-menu");
 const configmenu = document.getElementById("config-menu");
 const config_assignmenu = document.getElementById("config-assignment-menu");
+const view_changemenu = document.getElementById("view-change-menu");
 const mainmenu = document.getElementById("main-menu");
 const close_mainmenu = document.getElementById("main-menu-close-btn");
-const loaditms = [loadspinner, sheetinfomenu, configmenu, config_assignmenu];
+const loaditms = [loadspinner, sheetinfomenu, configmenu, config_assignmenu, view_changemenu];
 var scheduleData = [];
 var People = [];
 var sheetGroupingInfo = [];
@@ -147,7 +148,7 @@ function displaySchedule(Time) {
             }
             var timeLine = document.getElementById("timeLine");
             timeLine.style.top = minutePos + "px";
-            timeLine.style.width = "calc("+(scheduleTable.offsetWidth - 4) + "px - 8ch)";
+            timeLine.style.width = "calc(" + (scheduleTable.offsetWidth - 4) + "px - 8ch)";
             timeLine.style.left = (timeEl.offsetLeft + timeEl.getBoundingClientRect().width + 1) + "px";
         }
 
@@ -199,11 +200,62 @@ function displaySchedule(Time) {
         timeText.className = "light";
         timeText.textContent = convertTimeReadable(parseInt(getClassProperty(sheet, "TimeStart"))) + " - " + convertTimeReadable(parseInt(getClassProperty(sheet, "TimeStart")) + getClassDuration(sheet));
         holder.appendChild(timeText);
+        //note icon
+        var icos = extractNoteIndicators(sheet, isCombo);
+        if (icos.length > 0) {
+            //spacer so icons appear at bottom
+            var spacer = document.createElement("span");
+            spacer.className = "note-icon-spacer";
+            holder.appendChild(spacer);
+            //create and add icons
+            var icoHolder = document.createElement("div");
+            icoHolder.className = "note-icon-holder";
+            for (var n = 0; n < 3 && n < icos.length; n++) {//note icon
+                var icoEl = document.createElement("span");
+                var icoTxt = noteIndicators.findIndex((item) => {
+                    return item.Id === parseInt(icos[n]);
+                });
+                icoEl.className = "material-symbols-outlined";
+                icoEl.textContent = noteIndicators[icoTxt].Name;
+                icoEl.title = "This class has a note attached";
+                icoHolder.appendChild(icoEl);
+            }
+            ;
+            if (icos.length > 3) {//... icon
+                var icoEl = document.createElement("span");
+                icoEl.className = "material-symbols-outlined";
+                icoEl.textContent = "more_horiz";
+                icoEl.title = "There are more than 3 notes attached to this class";
+                icoHolder.appendChild(icoEl);
+            }
+            holder.appendChild(icoHolder);
+        }
         bindSheetClick(holder, sheet, instructor);
     }
 
-    function getLevelName(sheet) {
-        return Levels[sheet.Level] ? Levels[sheet.Level].Name : sheet.Level;
+    function extractNoteIndicators(mulSheet, isCombo) {
+        var indicators = [];
+        if (isCombo) {
+            mulSheet.forEach((st) => {
+                indicators.concat(extractFromSheet(st));
+            });
+        } else {
+            indicators = extractFromSheet(mulSheet);
+        }
+        return indicators;
+
+        function extractFromSheet(individualSheet) {
+            var indicators = [];
+            individualSheet.SheetInformation.Instructor.Notes = individualSheet.SheetInformation.Instructor.Notes ? individualSheet.SheetInformation.Instructor.Notes : [];
+            individualSheet.SheetInformation.Lead.Notes = individualSheet.SheetInformation.Lead.Notes ? individualSheet.SheetInformation.Lead.Notes : [];
+            individualSheet.SheetInformation.Lead.Notes.forEach(note => {
+                indicators.push(note.Indicator);
+            });
+            individualSheet.SheetInformation.Instructor.Notes.forEach(note => {
+                indicators.push(note.Indicator);
+            });
+            return indicators;
+        }
     }
 
     function bindSheetClick(div, sheet, instructor) {
@@ -401,6 +453,10 @@ function displaySchedule(Time) {
     }
 }
 
+function getLevelName(sheet) {
+    return Levels[sheet.Level] ? Levels[sheet.Level].Name : sheet.Level;
+}
+
 function getLevelColor(LevelId) {
     if (!Levels[LevelId]) {//TODO:Excel sheet code
         return "#ffffff";
@@ -457,12 +513,11 @@ function calculateTimeSpacing(sheets) {
             if (spacingTimes.indexOf(classStart) === -1) {
                 spacingTimes.push(classStart); //add duration if it does not yet exist
             }
-            if (spacingTimes.indexOf(classEnd) === -1){
+            if (spacingTimes.indexOf(classEnd) === -1) {
                 spacingTimes.push(classEnd);
             }
         }
     }
-    console.log(spacingTimes);
     return {firstStart: firstStart, lastEnd: lastEnd, increment: multiGCD(spacingTimes)};
 }
 
@@ -577,6 +632,7 @@ function closeMenuBind() {
 
 close_mainmenu.onclick = closeMenuBind;
 
+const view_change_table = document.getElementById("view-change-table");
 window.onload = function () {
     resetloader(true, null, null, false);
     firebase.auth().onAuthStateChanged(function (user) {
@@ -657,26 +713,117 @@ window.onload = function () {
         resetloader(true, null, null, false);
         HandleSpeadsheetUpload(document.getElementById("excelUpdateUpload")).then((cData) => {
             //Update all data
+            var changeData = [];
             for (var p = 0; p < People.length; p++) {
+                changeData.push([]);
                 for (var s = 0; s < scheduleData[p].length; s++) {
                     //for every sheet, look for an update
                     var index = cData.findIndex((sheet) => {
                         return parseInt(sheet.Barcode) === parseInt(scheduleData[p][s].Barcode);
                     });
-                    console.log(index);
                     if (index !== -1) {
+                        //Check changes
+                        var oldData = scheduleData[p][s].Names;
+                        var newData = cData[index].Names;
+                        var peopleAdded = newData.filter((name) => {
+                            return oldData.indexOf(name) === -1;
+                        });
+                        var peopleRemoved = oldData.filter((name) => {
+                            return newData.indexOf(name) === -1;
+                        });
+                        //Log any changes
+                        if (peopleAdded.length > 0 || peopleRemoved.length > 0) {
+                            changeData[p].push({Barcode: cData[index].Barcode, Level: cData[index].Level, TimeStart: cData[index].TimeStart, Added: peopleAdded, Removed: peopleRemoved});
+                        }
+                        //Assign updates to main data
+                        cData[index].SheetInformation = scheduleData[p][s].SheetInformation;
                         scheduleData[p][s] = cData[index];
                     }
                 }
             }
             displaySchedule(true);
-            resetloader(false, null, null, false);
+            resetloader(false, view_changemenu, "flex", true);
+            //render changes menu
+            clearChildren(view_change_table);
+            var header = createElement("tr", view_change_table, null, null);
+            createElement("th", header, "Instructor", null);
+            createElement("th", header, "Name", null);
+            createElement("th", header, "Class", null);
+            createElement("th", header, "Time", null);
+            createElement("th", header, "Add", "small");
+            createElement("th", header, "Delete", "small");
+            for (var p = 0; p < changeData.length; p++) {//each instructor
+                if (changeData[p].length > 0) {
+                    for (var s = 0; s < changeData[p].length; s++) {//each class
+                        for (var opt of ["Added", "Removed"].values()) {//Adds and Removes
+                            var dataSet = changeData[p][s];
+                            for (var k = 0; k < dataSet[opt].length; k++) {//Each kid in add/remove lists
+                                createRow(view_change_table, People[p].Name, dataSet, dataSet[opt][k], opt);
+                            }
+                        }
+                    }
+                }
+            }
+
+            function createRow(parent, instructorName, changeDataEntry, personName, changeType) {
+                var row = createElement("tr", parent, null, null);
+                createElement("td", row, instructorName, null);
+                createElement("td", row, personName, null);
+                createElement("td", row, getLevelName(changeDataEntry) + " - #" + changeDataEntry.Barcode, null);
+                createElement("td", row, convertTimeReadable(changeDataEntry.TimeStart), null);
+                createElement("td", row, changeType === "Added" ? "check" : "", "material-symbols-outlined small");
+                createElement("td", row, changeType === "Removed" ? "check" : "", "material-symbols-outlined small");
+            }
         }).catch((e) => {
             alert("Error reading spreadsheet, please ensure document is valid");
             console.log(e);
             resetloader(false, null, null, false);
         });
         document.getElementById("excelUpdateUpload").value = null;
+    };
+};
+
+document.getElementById("print-change-button").onclick = function () {
+    var win = window.open("../inline-html/blank-print.html", "Print Enrollment Changes", "popup=true", true);
+    win.onload = function () {
+        var clone = view_change_table.cloneNode(true);
+        win.document.body.appendChild(clone);
+        var icoLink = createElement("link", win.document.head, null, null);
+        icoLink.rel = "stylesheet";
+        icoLink.href = "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,300,0,0";
+        monitorStyle(icoLink);
+        var fontLink = createElement("link", win.document.head, null, null);
+        fontLink.rel = "stylesheet";
+        fontLink.href = "https://fonts.googleapis.com/css?family=Roboto&display=swap";
+        monitorStyle(fontLink);
+        var indexLink = createElement("link", win.document.head, null, null);
+        indexLink.rel = "stylesheet";
+        indexLink.href = "../css/main/index.css";
+        indexLink.type = "text/css";
+        monitorStyle(indexLink);
+        var scheduleLink = createElement("link", win.document.head, null, null);
+        scheduleLink.rel = "stylesheet";
+        scheduleLink.href = href = "../css/inline/schedule-view.css";
+        scheduleLink.type = "text/css";
+        monitorStyle(scheduleLink);
+
+        var count = 0;
+        const sheets = 4;
+        //wait until 4 onload events are triggered, then trigger print
+        function monitorStyle(stylesheet) {
+            stylesheet.onload = function () {
+                count++;
+                if (count === sheets) {
+                    setTimeout(function () {
+                        win.print();
+                    }, 1000);//1 sec delay for checkmark render
+                }
+            };
+        }
+
+        win.onafterprint = function () {
+            win.close();//auto close window after printing
+        };
     };
 };
 
@@ -723,19 +870,19 @@ function displayConfigPersonList(displayData) {
         personRenameBtn.textContent = "Rename Person";
         personRenameBtn.className = "mainround";
         personDiv.appendChild(personRenameBtn);
-        bindRenamePersonBtn(personRenameBtn,p);
+        bindRenamePersonBtn(personRenameBtn, p);
     }
-    
-    function bindRenamePersonBtn(btn,p){
-        btn.onclick = function(){
+
+    function bindRenamePersonBtn(btn, p) {
+        btn.onclick = function () {
             var newName = prompt("Enter new name");
-            if(newName){
+            if (newName) {
                 displayData.People[p].Name = newName;
                 displayConfigPersonList(displayData);
             }
         };
     }
-    
+
     function bindAddBarcodesBtn(btn, p) {
         btn.onclick = function () {
             var codes = prompt("Enter barcodes(s) seperated by a comma").replaceAll(" ", "").split(/([0-9]{4,})/);
@@ -821,11 +968,13 @@ function extractExcelClasses(data) {
                 if (!isNumber(builtClass.Level)) {
                     builtClass.Duration = convertToTimeStartTwelveHour(row.Meta4) - convertToTimeStartTwelveHour(row.Meta2);
                 }
+                ;
+            } else if (row.Meta1 && row.Meta1 === "Weekdays:") {
             } else if (row.DataRow && isNumber(row.DataRow)) { //Row with number, a name should be added
                 //nameBuilder handles very long names that split on two lines, last name on line 1, first name on line 2.
                 builtClass.Names.push(nameBuilder === null ? flipName(row.Meta1) : row.Meta1 + " " + nameBuilder); //Last, First to First Last
                 nameBuilder = null;
-                if ((!(r + 1 < excelRows.length) || !excelRows[r + 1].DataRow || isNaN(parseInt(excelRows[r + 1].DataRow))) && !rowIsLongName(r+1)) {//if last row || Next line not data row || next line is data row but not a number (i.e is barcode)
+                if ((!(r + 1 < excelRows.length) || !excelRows[r + 1].DataRow || isNaN(parseInt(excelRows[r + 1].DataRow))) && !rowIsLongName(r + 1)) {//if last row || Next line not data row || next line is data row but not a number (i.e is barcode)
                     if (builtClass.TimeStart) {//edge case with spreadsheet & more than 27 students enrolled, else if handles case and merges with previous
                         Classes.push(builtClass);
                     } else if (Classes[Classes.length - 1].Barcode === builtClass.Barcode) {
@@ -833,32 +982,32 @@ function extractExcelClasses(data) {
                     }
                     builtClass = null;
                 }
-            }else if(rowIsLongName(r)){
+            } else if (rowIsLongName(r)) {
                 //Handle long names with last name on seperate line
-                nameBuilder = row.Meta1.substring(0,row.Meta1.indexOf(","));//Remove comma from last name
+                nameBuilder = row.Meta1.substring(0, row.Meta1.indexOf(","));//Remove comma from last name
             }
         }
     }
     return Classes;
-    
+
     //Checks to see if given row contains a long name (over two rows)
-    function rowIsLongName(r){
-        if(!(r + 1 < excelRows.length) || r < 0){//invalid range
+    function rowIsLongName(r) {
+        if (!(r + 1 < excelRows.length) || r < 0) {//invalid range
             return false;
         }
         //Check for proper row pattern
-        if(excelRows[r].DataRow || !excelRows[r].Meta1 || !excelRows[r + 1].DataRow || !excelRows[r + 1].Meta1){
+        if (excelRows[r].DataRow || !excelRows[r].Meta1 || !excelRows[r + 1].DataRow || !excelRows[r + 1].Meta1) {
             return false;
         }
-        if(isNumber(excelRows[r + 1].DataRow)){
+        if (isNumber(excelRows[r + 1].DataRow)) {
             return true;
         }
         //Shouldn't be used, but included for safety catch
         return false;
     }
-    
+
     //Helper function to decide if string is a number
-    function isNumber(value){
+    function isNumber(value) {
         return !isNaN(parseInt(value));
     }
 }

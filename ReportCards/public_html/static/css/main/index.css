@@ -1265,11 +1265,13 @@ div.note-section div span button.delete{
 }
 
 div.note-section div span select{
-    height: 80%;
+    height: 100%;
     border:none;
     border: 2px solid var(--color-primary);
     box-sizing:border-box;
     background:white;
+    font-size: 20px;
+    vertical-align: middle;
 }
 
 div.note-section div span p{
