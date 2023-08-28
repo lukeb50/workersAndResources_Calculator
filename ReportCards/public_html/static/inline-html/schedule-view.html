@@ -22,7 +22,7 @@
             <div id="main-menu">
                 <div class="menuitem" id="sheetinfo-menu"></div>
                 <div class="menuitem" id="config-menu">
-                    <h2>Create</h2>
+                    <h2>Load</h2>
                     <div class="button-centering-div">
                         <button id="newMasterConfig" class="mainround">New Schedule</button>
                     </div>
@@ -34,9 +34,15 @@
                         <input type="file" id="excelNewUpload" style="display: none"/>
                     </div>
                     <label class="uploadprompt">Upload an Activity Attendance Sheet report in Excel format</label>
-                    <h2>Export</h2>
+                    <div class="button-centering-div">
+                        <button id="inputDatabaseMasterConfig" class="mainround">From Database</button>
+                    </div>
+                    <h2>Save</h2>
                     <div class="button-centering-div">
                         <button id="getMasterConfig" class="mainround">Export Schedule</button>
+                    </div>
+                    <div class="button-centering-div">
+                        <button id="saveDatabaseMasterConfig" class="mainround">Save to Database</button>
                     </div>
                     <h2>Update</h2>
                     <div class="button-centering-div">
@@ -61,13 +67,28 @@
                         <table id="view-change-table"></table>
                     </div>
                 </div>
+                <div class="menuitem" id="database-menu">
+                    <h2>Database</h2>
+                    <div id="database-list" class="scrollbar"></div>
+                </div>
                 <button class="mainround" id="main-menu-close-btn">Close</button>
             </div>
         </div>
         <div class="scrollbar" id="main-schedule-holder">
             <table id="scheduleTable"></table>
-            <div id="uploadSection">        
-                <button id="configMenuBtn">+</button>
+            <div id="controlHolder">
+                <div id="controlSection">
+                    <div id="controlSearchResultHolder">
+                        <div id="controlSearchResults" class="scrollbar"></div>
+                    </div>
+                    <div id="mainControlSection">
+                        <input id="searchBar">
+                        <div id="mainControlBtns">
+                            <button class="material-symbols-outlined" id="searchBtn">person_search</button>
+                            <button id="configMenuBtn" class="material-symbols-outlined">settings</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
@@ -79,6 +100,7 @@
         <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
         <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-database.js"></script>
         <script src="../javascript/utility/http_controller.js"></script>
+        <script src="../javascript/utility/name-search.js"></script>
         <script src="../javascript/inline/schedule-view.js"></script>
     </body>
 </html>

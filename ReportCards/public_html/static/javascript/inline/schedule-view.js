@@ -5,9 +5,10 @@ const sheetinfomenu = document.getElementById("sheetinfo-menu");
 const configmenu = document.getElementById("config-menu");
 const config_assignmenu = document.getElementById("config-assignment-menu");
 const view_changemenu = document.getElementById("view-change-menu");
+const databasemenu = document.getElementById("database-menu");
 const mainmenu = document.getElementById("main-menu");
 const close_mainmenu = document.getElementById("main-menu-close-btn");
-const loaditms = [loadspinner, sheetinfomenu, configmenu, config_assignmenu, view_changemenu];
+const loaditms = [loadspinner, sheetinfomenu, configmenu, config_assignmenu, view_changemenu, databasemenu];
 var scheduleData = [];
 var People = [];
 var sheetGroupingInfo = [];
@@ -659,14 +660,73 @@ window.onload = function () {
         });
     };
 
+    const searchBar = document.getElementById("searchBar");
+    const controlSection = document.getElementById("controlSection");
+    const searchHolder = document.getElementById("controlSearchResultHolder");
+    var searchHandler = new SearchSystem([]);
+    document.getElementById("searchBtn").onclick = function () {
+        var names = [];
+        for (var x = 0; x < scheduleData.length; x++) {
+            for (var c = 0; c < scheduleData[x].length; c++) {
+                for (var n = 0; n < scheduleData[x][c].Names.length; n++) {
+                    names.push({Name: scheduleData[x][c].Names[n], Person: x, Class: c});
+                }
+            }
+        }
+        searchHandler.updateDatabase(names);
+        if (searchBar.className === "show") {
+            searchBar.className = "";
+            searchHolder.className = "";
+            searchBar.value = "";
+            searchBar.placeholder = "";
+            clearChildren(searchDiv);
+            controlSection.style.flexGrow = 0;
+        } else {
+            searchBar.className = "show";
+            searchHolder.className = "show";
+            searchBar.value = "";
+            searchBar.placeholder = "Search...";
+            clearChildren(searchDiv);
+            controlSection.style.flexGrow = 1;
+        }
+    };
+
+    const searchDiv = document.getElementById("controlSearchResults");
+    searchBar.oninput = function () {
+        var results = searchHandler.search(searchBar.value);
+        clearChildren(searchDiv);
+        results.forEach((res) => {//display search result list
+            var entryHolder = createElement("span", searchDiv, null, null);
+            createElement("b", entryHolder, res.Name, null);
+            var classData = scheduleData[res.Person][res.Class];
+            createElement("label", entryHolder, getLevelName(classData) + " " + createModifierText(classData) + " - " + classData.Barcode, null);
+            createElement("label", entryHolder, convertTimeReadable(classData.TimeStart) + " - " + convertTimeReadable(classData.TimeStart + getClassDuration(classData)), null);
+            createElement("label", entryHolder, People[res.Person].Name);
+            handleClick(entryHolder, res.Person, res.Class);
+        });
+        if(results.length === 0){
+            createElement("h1",searchDiv,"No Results",null);
+        }
+
+        function handleClick(span, p, c) {
+            span.onclick = function () {
+                alert("TODO: Open class menu");
+            };
+        }
+    };
+
     document.getElementById("configMenuBtn").onclick = function () {
         resetloader(false, configmenu, "flex", false);
     };
 
     document.getElementById("getMasterConfig").onclick = function () {
-        navigator.clipboard.writeText(JSON.stringify({People: People, ScheduleData: scheduleData}));
+        navigator.clipboard.writeText(createDataJSON());
         alert("Schedule data exported to clipboard");
     };
+
+    function createDataJSON() {
+        return JSON.stringify({People: People, ScheduleData: scheduleData});
+    }
     document.getElementById("inputMasterConfig").onclick = function () {
         var config = JSON.parse(prompt("Enter config"));
         People = config.People;
@@ -686,6 +746,109 @@ window.onload = function () {
             //Cancelled by user
         });
     };
+
+    const databaselist = document.getElementById("database-list");
+
+    document.getElementById("inputDatabaseMasterConfig").onclick = async function () {
+        var databaseValues = await getDatabaseSaves();
+        renderDatabaseMenu(databaseValues, loadDatabaseButtonFunction);
+    };
+
+    document.getElementById("saveDatabaseMasterConfig").onclick = async function () {
+        var databaseValues = await getDatabaseSaves();
+        renderDatabaseMenu(databaseValues, saveDatabaseButtonFunction);
+        var existingKeys = Object.keys(databaseValues);
+        if (existingKeys.length < 10) {
+            var newSaveBtn = createElement("button", databaselist, "New Save", "mainround newsave");
+            newSaveBtn.onclick = function () {
+                existingKeys = Object.keys(databaseValues);
+                var name = prompt("Enter save name");
+                if (name && name.length > 1 && existingKeys.indexOf(name) === -1) {
+                    performDatabaseSave(name);
+                } else {
+                    alert("Invalid name");
+                }
+            };
+        }
+    };
+
+    function renderDatabaseMenu(data, buttonFunction) {
+        resetloader(false, databasemenu, "flex", false);
+        clearChildren(databaselist);
+        Object.keys(data).forEach((k) => {
+            var holder = createElement("div", databaselist, null, null);
+            createElement("label", holder, k, null);
+            var buttonholder = createElement("span", holder, null, null);
+            buttonFunction(buttonholder, holder, data, k);
+        });
+    }
+
+    function saveDatabaseButtonFunction(span, holder, data, key) {
+        var overwriteBtn = createElement("button", span, "Overwrite", "mainround");
+        function handleOverwrite(btn) {
+            btn.onclick = function () {
+                if (confirm("Overwrite save " + key + "?")) {
+                    performDatabaseSave(key);
+                }
+            };
+        }
+        handleOverwrite(overwriteBtn);
+        var deleteBtn = createElement("button", span, "Delete", "mainround");
+        function handleDelete(btn) {
+            btn.onclick = function () {
+                if (confirm("Delete save " + key + "?")) {
+                    delete data[key];
+                    holder.remove();
+                    clientDb.ref("Schedule-Saves/" + firebase.auth().currentUser.uid + "/" + key).set(null);
+                }
+            };
+        }
+        handleDelete(deleteBtn);
+    }
+
+    function performDatabaseSave(key) {
+        resetloader(true, null, null, false);
+        clientDb.ref("Schedule-Saves/" + firebase.auth().currentUser.uid + "/" + key).set(createDataJSON()).then(() => {
+            resetloader(false, null, null, false);
+        }).catch((err) => {
+            alert("Could not save data. Please check your connection and try again.");
+            console.log(err);
+            resetloader(false, null, null, false);
+        });
+    }
+
+    function loadDatabaseButtonFunction(span, holder, data, key) {
+        var loadBtn = createElement("button", span, "Load", "mainround");
+        function handleLoad(btn) {
+            btn.onclick = function () {
+                var config = JSON.parse(data[key]);
+                People = config.People;
+                scheduleData = config.ScheduleData;
+                resetloader(false, null, null, false);
+                displaySchedule(true);
+            };
+        }
+        handleLoad(loadBtn);
+        var deleteBtn = createElement("button", span, "Delete", "mainround");
+        function handleDelete(btn) {
+            btn.onclick = function () {
+                if (confirm("Delete save " + key + "?")) {
+                    delete data[key];
+                    holder.remove();
+                    clientDb.ref("Schedule-Saves/" + firebase.auth().currentUser.uid + "/" + key).set(null);
+                }
+            };
+        }
+        handleDelete(deleteBtn);
+    }
+
+    async function getDatabaseSaves() {
+        resetloader(true, null, null, false);
+        return await clientDb.ref("Schedule-Saves/" + firebase.auth().currentUser.uid).once('value').then((snap) => {
+            var res = snap.val() ? snap.val() : {};
+            return res;
+        });
+    }
 
     document.getElementById("excelNewUpload").oninput = async function () {
         resetloader(true, null, null, false);
