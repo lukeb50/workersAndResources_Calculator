@@ -8,6 +8,7 @@
     width:100%;
     box-sizing: content-box;
     pointer-events: none;
+    z-index: 2;
 }
 
 #controlSection{
@@ -230,6 +231,20 @@
     font-size: 1.5em;
 }
 
+#sheetinfo-menu span.classmenuheader{
+    background:var(--color-primary-mostly-transparent);
+    display: block;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    box-shadow: 0px 5px 5px 0px var(--color-primary);
+}
+
+#sheetinfo-menu span.classmenuheader:nth-child(1){
+    border-radius: 5px 5px 0px 0px;
+    margin-top: 0px;
+}
+
 #sheetinfo-menu ul{
     margin-top: 0px;
     margin-bottom: 0px;
@@ -246,28 +261,24 @@
 }
 
 #sheetinfo-menu span.edit_title button{
-    border:2px solid var(--color-primary);
     border-radius: 5px;
     margin-left: 5px;
     margin-right: 5px;
-    font-size: 0.75em;
-    background: white;
+    background:white;
 }
 
+
 #sheetinfo-menu ul li button{
-    background:white;
-    border:2px solid var(--color-primary);
     margin-left: 5px;
+    margin-top: 3px;
     border-radius: 7px;
-    margin-top: 2px;
 }
 
 #sheetinfo-menu button.addstudent{
-    width:fit-content;
     background: white;
-    border:2px solid var(--color-primary);
     margin-left: 5px;
     border-radius: 5px;
+    margin-bottom: 5px;
 }
 
 #sheetinfo-menu button.viewsheetbtn{
@@ -300,13 +311,20 @@ div.button-centering-div button{
     height: 0px;
     border-bottom: 1px solid var(--color-red);
     border-top: 0px solid var(--color-red);
-    background: var(--color-red);
+    box-shadow: 0px 0px 3px 1px var(--color-red);
 }
 
 div.note-section{
     height: fit-content;
     padding-bottom: 5px;
-    border-top: 1px solid var(--color-primary-half-transparent);
+}
+
+div.note-section::before{
+    border-bottom: 2px dashed var(--color-primary);
+    width:92%;
+    margin-left: 3%;
+    display: block;
+    content: "";
 }
 
 div.button-centering-div{

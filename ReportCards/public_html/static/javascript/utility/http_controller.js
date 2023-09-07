@@ -537,9 +537,6 @@ const noteIndicators = [{Id: -1, Name: "notes"}, {Id: 100, Name: "info"}, {Id: 2
 function showNoteSection(sheet, dsMode, div) {
     const note_section = div;
     clearChildren(note_section);
-    let noteTitle = document.createElement("h1");
-    noteTitle.textContent = "Notes";
-    note_section.appendChild(noteTitle);
     //make sure notes exist, otherwise make blank arrays
     sheet.SheetInformation.Instructor.Notes = sheet.SheetInformation.Instructor.Notes ? sheet.SheetInformation.Instructor.Notes : [];
     if (dsMode) {//ds notes if applicable

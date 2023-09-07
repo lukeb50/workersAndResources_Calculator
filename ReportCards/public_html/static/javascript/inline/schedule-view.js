@@ -109,17 +109,6 @@ function displaySchedule(Time) {
         };
     }
 
-    function checkIfGrouped(sheet, instructorI) {
-        for (var i = 0; i < sheetGroupingInfo[instructorI].length; i++) {
-            let group = sheetGroupingInfo[instructorI][i];
-            let sheetPos = group.indexOf(sheet);
-            if (sheetPos !== -1) {
-                return {Position: sheetPos, Group: group};
-            }
-        }
-        return {Position: false, Group: null};
-    }
-
     var currentTime = new Date();
     clearInterval(timeIntervalId);
     waitMinute();
@@ -265,26 +254,60 @@ function displaySchedule(Time) {
         };
     }
 
-    function displaySheetMenu(sheet, instructor) {
-        clearChildren(sheetinfomenu);
-        if (Array.isArray(sheet)) {
-            sheet.forEach((c) => {//TODO: Rerender of individual sheet removes all other grouped sheets
-                createSheetMenu(sheetinfomenu, c, instructor, sheet);
-            });
-        } else {
-            createSheetMenu(sheetinfomenu, sheet, instructor, sheet);
-        }
-        resetloader(false, sheetinfomenu, "block", false);
+    function bindAddClassClick(instHeader, p) {
+        instHeader.onclick = function () {
+            var lvl = prompt("Enter level"); //null
+            var code = parseInt(prompt("Enter barcode")); //NaN
+            var start = convertToTimeStartTwelveHour(prompt("Enter start time HH:MM PM")); //null
+            //determineLevelId
+            if (lvl && !isNaN(code) && start !== null) {
+                if (determineLevelId(lvl) !== null) {
+                    scheduleData[p].push({Level: determineLevelId(lvl), Barcode: code, Names: [], TimeStart: start, SheetInformation: {Lead: {}, Instructor: {}}});
+                    displaySchedule(true);
+                } else {
+                    var dur = prompt("Enter class duration in minutes");
+                    if (!dur || isNaN(parseInt(dur))) {
+                        return;
+                    }
+                    scheduleData[p].push({Level: lvl, Barcode: code, Names: [], TimeStart: start, Duration: parseInt(dur), TimeModifier: -1, SheetInformation: {Lead: {}, Instructor: {}}});
+                    displaySchedule(true);
+                }
+            }
+        };
     }
+}
 
-    function createSheetMenu(div, sheet, instructor, allsheets) {
-        var title = document.createElement("h1");
-        title.textContent = getLevelName(sheet) + " " + createModifierText(sheet) + " - " + sheet.Barcode;
-        div.appendChild(title);
+function displaySheetMenu(sheet, instructor) {
+    clearChildren(sheetinfomenu);
+    if (Array.isArray(sheet)) {
+        sheet.forEach((c) => {//TODO: Rerender of individual sheet removes all other grouped sheets
+            createSheetMenu(sheetinfomenu, c, instructor, sheet);
+        });
+    } else {
+        createSheetMenu(sheetinfomenu, sheet, instructor, sheet);
+    }
+    resetloader(false, sheetinfomenu, "block", false);
+}
+
+function checkIfGrouped(sheet, instructorI) {
+    for (var i = 0; i < sheetGroupingInfo[instructorI].length; i++) {
+        let group = sheetGroupingInfo[instructorI][i];
+        let sheetPos = group.indexOf(sheet);
+        if (sheetPos !== -1) {
+            return {Position: sheetPos, Group: group};
+        }
+    }
+    return {Position: false, Group: null};
+}
+
+function createSheetMenu(div, sheet, instructor, allsheets) {
+    showSheetMenu(div, sheet, instructor, allsheets);
+    function showSheetMenu(div, sheet, instructor, allsheets) {
+        var headerSpan = createElement("span", div, null, "classmenuheader");
+        createElement("h1", headerSpan, getLevelName(sheet) + " " + createModifierText(sheet) + " - " + sheet.Barcode, null);
         if (editMode === true) {
-            var titleEdits = document.createElement("span");
-            var nameEdit = document.createElement("button");
-            nameEdit.textContent = "Edit Level";
+            var titleEdits = createElement("span", headerSpan, null, "edit_title");
+            var nameEdit = createElement("button", titleEdits, "Edit Level", "mainround");
             nameEdit.onclick = function () {
                 var newLevel = prompt("Enter level name");
                 if (newLevel) {
@@ -307,9 +330,7 @@ function displaySchedule(Time) {
                     }
                 }
             };
-            titleEdits.appendChild(nameEdit);
-            var barcodeEdit = document.createElement("button");
-            barcodeEdit.textContent = "Edit Code";
+            var barcodeEdit = createElement("button", titleEdits, "Edit Code", "mainround");
             barcodeEdit.onclick = function () {
                 var newCode = prompt("Enter new barcode");
                 if (newCode && !isNaN(parseInt(newCode))) {
@@ -318,9 +339,7 @@ function displaySchedule(Time) {
                     displaySchedule(true);
                 }
             };
-            titleEdits.appendChild(barcodeEdit);
-            var timeEdit = document.createElement("button");
-            timeEdit.textContent = "Edit Start";
+            var timeEdit = createElement("button", titleEdits, "Edit Start", "mainround");
             timeEdit.onclick = function () {
                 var newTime = prompt("Enter new start time in 12h format (MM:HH PM)");
                 if (newTime && convertToTimeStartTwelveHour(newTime)) {
@@ -329,11 +348,8 @@ function displaySchedule(Time) {
                     displaySchedule(true);
                 }
             };
-            titleEdits.appendChild(timeEdit);
-            titleEdits.className = "edit_title";
             if (sheet.Duration) {
-                var durEdit = document.createElement("button");
-                durEdit.textContent = "Edit Duration";
+                var durEdit = createElement("button", titleEdits, "Edit Duration", "mainround");
                 durEdit.onclick = function () {
                     var dur = parseInt(prompt("Enter lesson duration in minutes"));
                     if (!isNaN(dur) && dur > 0) {
@@ -342,10 +358,8 @@ function displaySchedule(Time) {
                         displaySchedule(true);
                     }
                 };
-                titleEdits.appendChild(durEdit);
             }
-            var deleteEdits = document.createElement("button");
-            deleteEdits.textContent = "Delete";
+            var deleteEdits = createElement("button", titleEdits, "Delete", "mainround");
             deleteEdits.onclick = function () {
                 if (confirm("Delete this sheet?")) {
                     scheduleData[instructor].splice(scheduleData[instructor].indexOf(sheet), 1);
@@ -353,37 +367,22 @@ function displaySchedule(Time) {
                     resetloader(false, null, null, false);
                 }
             };
-            titleEdits.appendChild(deleteEdits);
-            div.appendChild(titleEdits);
         }
-        var time = document.createElement("label");
-        time.textContent = convertTimeReadable(sheet.TimeStart) + " - " + (convertTimeReadable(parseInt(sheet.TimeStart) + getClassDuration(sheet)));
-        div.appendChild(time);
-        var inst = document.createElement("label");
-        inst.textContent = People[instructor].Name;
-        div.appendChild(inst);
-        var nameList = document.createElement("ul");
-        div.appendChild(nameList);
+        createElement("label", headerSpan, convertTimeReadable(sheet.TimeStart) + " - " + (convertTimeReadable(parseInt(sheet.TimeStart) + getClassDuration(sheet))), null);
+        createElement("label", headerSpan, People[instructor].Name, null);
+        var nameList = createElement("ul",div,null,null);
         sheet.Names.forEach((name, i) => {
-            var item = document.createElement("li");
-            item.textContent = name;
-            nameList.appendChild(item);
+            var item = createElement("li",nameList,name,null);
             if (editMode === true) {
-                var editbtn = document.createElement("button");
-                editbtn.textContent = "Change";
+                var editbtn = createElement("button",item,"Change","mainround");
                 bindStudentNameChange(editbtn, sheet, instructor, i, allsheets);
-                item.appendChild(editbtn);
-                var delbtn = document.createElement("button");
-                delbtn.textContent = "-";
+                var delbtn = createElement("button",item,"-","mainround");
                 bindStudentDelete(delbtn, sheet, instructor, i, allsheets);
-                item.appendChild(delbtn);
             }
         });
         //add student btn in edit mode
         if (editMode === true) {
-            var addbtn = document.createElement("button");
-            addbtn.textContent = "Add Student";
-            addbtn.className = "addstudent";
+            var addbtn = createElement("button",div,"Add Student","addstudent mainround");
             addbtn.onclick = function () {
                 var newName = prompt("Enter new student name");
                 if (newName) {
@@ -392,7 +391,6 @@ function displaySchedule(Time) {
                     displaySchedule(true);
                 }
             };
-            div.appendChild(addbtn);
         }
         //Notes section
         let noteSection = document.createElement("div");
@@ -427,28 +425,6 @@ function displaySchedule(Time) {
                 sheet.Names.splice(studentI, 1);
                 displaySheetMenu(allsheets, instructor);
                 displaySchedule(true);
-            }
-        };
-    }
-
-    function bindAddClassClick(instHeader, p) {
-        instHeader.onclick = function () {
-            var lvl = prompt("Enter level"); //null
-            var code = parseInt(prompt("Enter barcode")); //NaN
-            var start = convertToTimeStartTwelveHour(prompt("Enter start time HH:MM PM")); //null
-            //determineLevelId
-            if (lvl && !isNaN(code) && start !== null) {
-                if (determineLevelId(lvl) !== null) {
-                    scheduleData[p].push({Level: determineLevelId(lvl), Barcode: code, Names: [], TimeStart: start, SheetInformation: {Lead: {}, Instructor: {}}});
-                    displaySchedule(true);
-                } else {
-                    var dur = prompt("Enter class duration in minutes");
-                    if (!dur || isNaN(parseInt(dur))) {
-                        return;
-                    }
-                    scheduleData[p].push({Level: lvl, Barcode: code, Names: [], TimeStart: start, Duration: parseInt(dur), TimeModifier: -1, SheetInformation: {Lead: {}, Instructor: {}}});
-                    displaySchedule(true);
-                }
             }
         };
     }
@@ -702,17 +678,23 @@ window.onload = function () {
             createElement("label", entryHolder, getLevelName(classData) + " " + createModifierText(classData) + " - " + classData.Barcode, null);
             createElement("label", entryHolder, convertTimeReadable(classData.TimeStart) + " - " + convertTimeReadable(classData.TimeStart + getClassDuration(classData)), null);
             createElement("label", entryHolder, People[res.Person].Name);
-            handleClick(entryHolder, res.Person, res.Class);
+            handleClick(entryHolder, res.Person, scheduleData[res.Person][res.Class]);
         });
-        if(results.length === 0){
-            createElement("h1",searchDiv,"No Results",null);
+        if (results.length === 0) {
+            createElement("h1", searchDiv, "No Results", null);
         }
 
-        function handleClick(span, p, c) {
+        function handleClick(span, instructorId, classObj) {
             span.onclick = function () {
-                alert("TODO: Open class menu");
+                var groupingData = checkIfGrouped(classObj, instructorId);
+                if (groupingData.Group) {
+                    displaySheetMenu(groupingData.Group, instructorId)
+                } else {
+                    displaySheetMenu(classObj, instructorId);
+                }
             };
         }
+
     };
 
     document.getElementById("configMenuBtn").onclick = function () {
