@@ -524,3 +524,7 @@ label.uploadprompt{
 #database-list button.newsave{
     margin-top: 5px;
 }
+
+table td{
+    min-height: 100px;
+}

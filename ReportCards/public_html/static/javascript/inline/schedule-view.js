@@ -111,8 +111,8 @@ function displaySchedule(Time) {
 
     var currentTime = new Date();
     clearInterval(timeIntervalId);
-    waitMinute();
-    updateCurrentTime();
+    //waitMinute(); TODO: Fix
+    //updateCurrentTime();
     function waitMinute() {
         var current = new Date();
         var timeToNextMinute = (60 - current.getSeconds()) * 1000 - current.getMilliseconds();
