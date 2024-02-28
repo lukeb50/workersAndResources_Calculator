@@ -20,6 +20,7 @@ const scheduleContainer = document.getElementById("main-schedule-holder");
 const scheduleTable = document.getElementById("scheduleTable");
 var timeIntervalId = -1;
 function displaySchedule(Time) {
+    var maxRowHeight = 0; //Used to maintain heights with blank entries
     clearChildren(scheduleTable);
     if (Time === null || Time === "" || !Time) {
         return;
@@ -61,10 +62,12 @@ function displaySchedule(Time) {
     //create intervals
     for (var t = tableInformation.firstStart; t < tableInformation.lastEnd; t = t + tableInformation.increment) {
         var timerow = document.createElement("tr");
+        scheduleTable.appendChild(timerow);
         var timeLbl = document.createElement("td");
         //TimeStart value converted to hour:minute with provision for xx:0y times (first 9 minutes leading 0)
         timeLbl.textContent = convertTimeReadable(t);
         timeLbl.id = "time-" + t;
+        timeLbl.className = "lessonTime";
         timerow.appendChild(timeLbl);
         //Handle any times to display
         for (var i = 0; i < scheduleData.length; i++) {
@@ -77,14 +80,17 @@ function displaySchedule(Time) {
                         isLesson = true;
                         var lessonHolder = document.createElement("td");
                         lessonHolder.className = "lesson";
-                        lessonHolder.rowSpan = getClassDuration(currentSheet) / tableInformation.increment;
+                        var rowSpan = getClassDuration(currentSheet) / tableInformation.increment;
+                        lessonHolder.rowSpan = rowSpan;
                         lessonHolder.style.backgroundColor = getLevelColor(getClassProperty(currentSheet, "Level"));
+                        timerow.appendChild(lessonHolder);
                         if (groupPos.Position === false) {//not grouped
                             createSheetListing(lessonHolder, currentSheet, i);
                         } else if (groupPos.Position === 0) {//first in group, show
                             createSheetListing(lessonHolder, groupPos.Group, i);
                         }
-                        timerow.appendChild(lessonHolder);
+                        //maxHeight is independant of the number of rows spanned
+                        maxRowHeight = Math.max(lessonHolder.getElementsByTagName("div")[0].offsetHeight / rowSpan,maxRowHeight);
                     } else if (t >= parseInt(getClassProperty(currentSheet, "TimeStart")) && t < parseInt(getClassProperty(currentSheet, "TimeStart")) + getClassDuration(currentSheet)) {
                         isLesson = true;
                     }
@@ -92,10 +98,17 @@ function displaySchedule(Time) {
             }
             if (isLesson === false) {
                 var blockBreak = document.createElement("td");
+                blockBreak.className = "lessonSpacer"
                 timerow.appendChild(blockBreak);
             }
         }
-        scheduleTable.appendChild(timerow);
+    }
+    //Handle heights
+    var lessonElements = scheduleTable.querySelectorAll(".lesson, .lessonSpacer, .lessonTime");
+    for(var e = 0; e < lessonElements.length; e++){
+        var currentElement = lessonElements[e];
+        console.log(currentElement);
+        currentElement.style.height = maxRowHeight + "px";
     }
 
     function bindScheduleNoteChange(input, person) {
@@ -370,19 +383,19 @@ function createSheetMenu(div, sheet, instructor, allsheets) {
         }
         createElement("label", headerSpan, convertTimeReadable(sheet.TimeStart) + " - " + (convertTimeReadable(parseInt(sheet.TimeStart) + getClassDuration(sheet))), null);
         createElement("label", headerSpan, People[instructor].Name, null);
-        var nameList = createElement("ul",div,null,null);
+        var nameList = createElement("ul", div, null, null);
         sheet.Names.forEach((name, i) => {
-            var item = createElement("li",nameList,name,null);
+            var item = createElement("li", nameList, name, null);
             if (editMode === true) {
-                var editbtn = createElement("button",item,"Change","mainround");
+                var editbtn = createElement("button", item, "Change", "mainround");
                 bindStudentNameChange(editbtn, sheet, instructor, i, allsheets);
-                var delbtn = createElement("button",item,"-","mainround");
+                var delbtn = createElement("button", item, "-", "mainround");
                 bindStudentDelete(delbtn, sheet, instructor, i, allsheets);
             }
         });
         //add student btn in edit mode
         if (editMode === true) {
-            var addbtn = createElement("button",div,"Add Student","addstudent mainround");
+            var addbtn = createElement("button", div, "Add Student", "addstudent mainround");
             addbtn.onclick = function () {
                 var newName = prompt("Enter new student name");
                 if (newName) {
