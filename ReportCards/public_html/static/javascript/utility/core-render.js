@@ -1,5 +1,4 @@
 /* global firebase, add_row_btn, documents, currentTime, printbtn, maintable, blocker, blocker_change, blocker_lvl, blocker_mark, blocker_mustsee, screenquery, sheetinfo, overflowbtn, topbar_controls, overflowmenu, barlist, loadblocker, btnback, btnnext, savebtn, currentPerson, People, UserData, commentmenu, manual_sel, manual_div, notemenu, clientDb, upload_button_div, new_sheet_manual, getSheetModifier, getLvlInfo, Settings */
-var staticPath = "../../static";
 const marking_change_btns = [document.getElementById("blocker_btn1"), document.getElementById("blocker_btn2")];
 var markingOptions = new Map();
 markingOptions.set(true, "Complete");

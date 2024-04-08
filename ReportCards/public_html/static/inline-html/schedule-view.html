@@ -53,6 +53,10 @@
                     <div class="button-centering-div">
                         <button id="configUpdatePeopleBtn" class="mainround">Modify People</button>
                     </div>
+                    <h2>Actions</h2>
+                    <div class="button-centering-div">
+                        <button id="worksheetBtn" class="mainround">Worksheets</button>
+                    </div>
                 </div>
                 <div class="menuitem" id="config-assignment-menu">
                     <div id="config-assignment-list" class="scrollbar"></div>
@@ -71,6 +75,30 @@
                     <h2>Database</h2>
                     <div id="database-list" class="scrollbar"></div>
                 </div>
+                <div class="menuitem" id="worksheet-menu">
+                    <div id="worksheet-menu-container">
+                        <h2>Worksheets</h2>
+                        <div id="worksheet-options-holder">
+                            <label>Facility:<select id="worksheet-facility-select"></select></label>
+                            <label >Timeblock:<select id="worksheet-timeblock-select"></select></label>
+                        </div>
+                        <label class="label-centre">Order By</label>
+                        <div id="print-top-buttons">
+                            <button id="worksheet-instructor-btn" class="print-selected mainround">Instructors</button>
+                            <button id="worksheet-level-btn" class="mainround">Levels</button>
+                        </div>
+                        <label class="label-centre">Print</label>
+                        <div>
+                            <label><input id="worksheet-all-radio" type="radio" name="worksheet-selector" value ="all" checked>All</label>
+                        </div>
+                        <div>
+                            <label id="worksheet-selector-label"><input id="worksheet-select-radio" type="radio" name="worksheet-selector" value = "select">Select:<select id="worksheet-select"></select></label>
+                        </div>
+                    </div>
+                    <div class="button-centering-div">
+                        <button id="print-worksheet-button" class="mainround">Print</button>
+                    </div>
+                </div>
                 <button class="mainround" id="main-menu-close-btn">Close</button>
             </div>
         </div>
@@ -84,8 +112,9 @@
                     <div id="mainControlSection">
                         <input id="searchBar">
                         <div id="mainControlBtns">
-                            <button class="material-symbols-outlined" id="searchBtn">person_search</button>
-                            <button id="configMenuBtn" class="material-symbols-outlined">settings</button>
+                            <button class="material-symbols-outlined barBtn" id="searchBtn">person_search</button>
+                            <button id="worksheetBtn" class="material-symbols-outlined barBtn" disabled>construction</button>
+                            <button id="configMenuBtn" class="material-symbols-outlined barBtn">settings</button>
                         </div>
                     </div>
                 </div>
@@ -99,8 +128,10 @@
         <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
         <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
         <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-database.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-storage.js"></script>
         <script src="../javascript/utility/http_controller.js"></script>
         <script src="../javascript/utility/name-search.js"></script>
+        <script src="../javascript/utility/card-generator.js"></script>
         <script src="../javascript/inline/schedule-view.js"></script>
     </body>
 </html>

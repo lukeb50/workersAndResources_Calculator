@@ -1,5 +1,6 @@
 /* global firebase, loaditms, storage, loadblocker, loadspinner, billing_table, mainmenu, Levels, SheetModifiers, getLvlInfo, displaySchedule, changeEditPending */
 const email_pattern = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+var staticPath = "../../static";
 const firebaseConfig = {
     apiKey: "AIzaSyCG2ONqpyLey1OP8B9135Yqk3dfrT9J9ts",
     authDomain: "report-cards-6290.firebaseapp.com",
@@ -215,19 +216,26 @@ Array.prototype.move = function (from, to) {
     this.splice(to, 0, this.splice(from, 1)[0]);
 };
 
-async function getURL(imgName) {
+async function getURL(imgName, mode) {
+    return getUrlInternal(imgName,mode,Organization);
+}
+
+async function getUrlInternal(imgName, mode, org) {
     return new Promise((resolve, reject) => {
         if (imgName === "") {
             resolve("");
             return;
         }
-        ;
-        storage.ref(Organization + "/" + imgName).getDownloadURL().then((returnurl) => {
+        storage.ref(org + "/" + mode + "/" + imgName).getDownloadURL().then((returnurl) => {
             resolve(returnurl);
         }).catch((err) => {
             reject(err);
         });
     });
+}
+
+async function getCommonURL(imgName, mode) {
+    return getUrlInternal(imgName, mode, "common");
 }
 
 String.prototype.escapeJSON = function () {

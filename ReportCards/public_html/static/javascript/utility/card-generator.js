@@ -1,5 +1,7 @@
-/* global firebase, Levels, UserData, getArchiveSheetTimeblockData, clientDb, staticPath, getSheetModifier */
+/* global firebase, Levels,GroupingData, UserData, getArchiveSheetTimeblockData, clientDb, staticPath, getSheetModifier, Archive */
 var session = "";
+var imageQuality = 0.7;
+var includeGraphics = true;
 var isDsMode = false;
 var Facilities = {};
 var Timeblocks = [];
@@ -13,8 +15,16 @@ function startCardGenerator(isDs, Faci, Time) {
     });
 }
 
+function setImageQuality(quality) {
+    imageQuality = quality;
+}
+
+function setIncludeGrahpics(include) {
+    includeGraphics = include;
+}
+
 async function run_card_generation(SheetData, PrintOptions, Instructor) {
-//Arrange for half pages at front
+    //Arrange for half pages at front
     var currentIndex = 0; //Each item is visited once, but seperate
     //index must be kept to avoid infinite loop
     for (var x = 0; x < PrintOptions.length; x++) {
@@ -24,7 +34,7 @@ async function run_card_generation(SheetData, PrintOptions, Instructor) {
         }
         currentIndex++;
     }
-//Open Window and begin generation
+    //Open Window and begin generation
     var windowName = "Print Worksheets";
     var printWindow = window.open(staticPath + "/inline-html/card-print.html", windowName, 'left=0,top=0,width=1248,height=3280');
     printWindow.onload = async function () {
@@ -47,8 +57,8 @@ async function run_card_generation(SheetData, PrintOptions, Instructor) {
                     if (Tags.length === 0) {
                         generateTags(Tags, doc, isHalf);
                     }
-                    handleImageTag(printSettings.Image, prepTag(printSettings.isHalf, Tags, true), 0, PrintOptions[x], currentStudent, Instructor);
-                    handleImageTag(printSettings.BackImage, prepTag(printSettings.isHalf, Tags, false), 1, PrintOptions[x], currentStudent, Instructor);
+                    handleImageTag(printSettings.Image, prepTag(printSettings.isHalf, Tags, true), "report-card", 0, PrintOptions.Level, Levels[PrintOptions.Level], currentStudent, Instructor, SheetData);
+                    handleImageTag(printSettings.BackImage, prepTag(printSettings.isHalf, Tags, false), "report-card", 1, PrintOptions.Level, Levels[PrintOptions.Level], currentStudent, Instructor, SheetData);
                 }
                 if (isHalf === true && (PrintOptions.length - 1) === x) {
                     finishHalfTags(Tags);
@@ -60,86 +70,196 @@ async function run_card_generation(SheetData, PrintOptions, Instructor) {
             Tags[x].remove();
         }
     };
-    async function handleImageTag(ImgName, ImgTag, Side, PrintSetting, StudentData, Instructor) {
+}
+
+var default_worksheet_markup = JSON.parse('{"Autosort":true,"Color":"#a9c8ff","Name":"Swimmer","Regex":{},"Text":[{"BottomRight":{"x":939,"y":257},"Font":70,"Side":0,"TopLeft":{"x":100,"y":181},"Type":"level_and_modifier","isMultiline":false,"isVariable":false},{"BottomRight":{"x":1003,"y":-1884},"Font":40,"Side":0,"TopLeft":{"x":305,"y":-1927},"Type":"instructor","isMultiline":false,"isVariable":false},{"BottomRight":{"x":1002,"y":387},"Font":40,"Side":0,"TopLeft":{"x":270,"y":344},"Type":"session","isMultiline":false,"isVariable":false},{"BottomRight":{"x":1001,"y":315},"Font":40,"Side":0,"TopLeft":{"x":303,"y":272},"Type":"instructor","isMultiline":false,"isVariable":false},{"BottomRight":{"x":1004,"y":458},"Font":40,"Side":0,"TopLeft":{"x":212,"y":415},"Type":"day","isMultiline":false,"isVariable":false},{"BottomRight":{"x":1006,"y":530},"Font":40,"Side":0,"TopLeft":{"x":214,"y":487},"Type":"time_start_12","isMultiline":false,"isVariable":false},{"BottomRight":{"x":1611,"y":2036},"Font":30,"Lines":[587,617,647,677,707,737,767,797,827,857,887,917,947,977,1007,1037,1067,1097,1127,1157,1187],"Side":0,"TopLeft":{"x":98,"y":557},"Type":"student_list","isMultiline":true,"isVariable":false}],"Visible":true}');
+async function run_worksheet_generation(SheetData, InstructorData, PrintOptions, timeblockName) {
+    //Open Window and begin generation
+    var windowName = "Print Worksheets";
+    var printWindow = window.open(staticPath + "/inline-html/card-print.html", windowName, 'left=0,top=0,width=1248,height=3280');
+    printWindow.onload = async function () {
+        var doc = printWindow.document;
+        var Tags = [];
+        generateTags(Tags, doc, false);
+        for (var x = 0; x < PrintOptions.Sheets.length; x++) {
+            var currentOptionSheet = PrintOptions.Sheets[x];
+            var sheet = SheetData[currentOptionSheet.Instructor][currentOptionSheet.Sheet];
+            var sheetLevel = Levels[sheet.Level];
+            var sheetGroup = null;
+            //Get the group (if a numberic level is 
+            if (sheetLevel) {
+                sheetGroup = GroupingData.filter((group) => (group.Regex.test(Levels[sheet.Level].Name) === true));
+                if (sheetGroup.length === 1) {
+                    sheetGroup = sheetGroup[0];
+                } else {
+                    sheetGroup = null;
+                }
+            }
+            //Handle creation
+            if (Tags.length === 0) {
+                generateTags(Tags, doc, false);
+            }
+            var timeblockSplit = timeblockName.split("---");
+            sheet.Facility = timeblockSplit[0];
+            sheet.Timeblock = timeblockSplit[1];
+            if (sheetGroup && sheetLevel.WorksheetSettings && sheetLevel.WorksheetSettings.FrontImage && sheetLevel.WorksheetSettings.FrontImage !== "" && sheetLevel.WorksheetSettings.BackImage && sheetLevel.WorksheetSettings.BackImage !== "") {
+                await handleImageTag(sheetLevel.WorksheetSettings.FrontImage, prepTag(false, Tags, true), "worksheet", 0, sheet.Level, sheetGroup, currentOptionSheet, InstructorData[currentOptionSheet.Instructor].Name, SheetData);
+                await handleImageTag(sheetLevel.WorksheetSettings.BackImage, prepTag(false, Tags, false), "worksheet", 1, sheet.Level, sheetGroup, currentOptionSheet, InstructorData[currentOptionSheet.Instructor].Name, SheetData);
+            } else {
+                await handleImageTag("", prepTag(false, Tags, true), "worksheet", 0, sheet.Level, default_worksheet_markup, currentOptionSheet, InstructorData[currentOptionSheet.Instructor].Name, SheetData);
+                await handleImageTag("", prepTag(false, Tags, false), "worksheet", 1, sheet.Level, default_worksheet_markup, currentOptionSheet, InstructorData[currentOptionSheet.Instructor].Name, SheetData);
+                //Default
+            }
+            delete sheet.Facility;
+            delete sheet.Timeblock;
+        }
+        for (var x = 0; x < Tags.length; x++) {//Delete extra tags
+            Tags[x].remove();
+        }
+    };
+}
+
+async function handleImageTag(ImgName, ImgTag, imgMode, Side, Level, markupLocation, StudentData, Instructor, SheetData) {
+    return new Promise(async(resolve) => {
+        if (ImgName !== "") {
+            loadImage(ImgName, imgMode, false, ImgTag).then((ImgObjResult) => {
+                ImgTag.src = generateGraphic(Side, ImgObjResult.width, ImgObjResult.height, Level, markupLocation, StudentData, SheetData, Instructor, ImgObjResult, imgMode);
+                resolve();
+            }).catch((err) => {
+                throw new Error(err);
+            });
+        } else {
+            switch (imgMode) {
+                case "report-card":
+                    ImgTag.src = generateBlankGraphic();
+                    resolve();
+                case "worksheet":
+                    if (Side === 0) {
+                        loadImage("classlist.jpg", "worksheet", true, ImgTag).then((ImgObjResult) => {
+                            ImgTag.src = generateGraphic(Side, ImgObjResult.width, ImgObjResult.height, Level, markupLocation, StudentData, SheetData, Instructor, ImgObjResult, imgMode);
+                            resolve();
+                        }).catch((err) => {
+                            throw new Error(err);
+                        });
+                    } else {
+                        ImgTag.src = generateBlankGraphic();
+                        resolve();
+                    }
+            }
+        }
+    });
+}
+
+function loadImage(ImgName, imgMode, isCommon, imgTag) {
+    return new Promise(async(resolve, reject) => {
         var ImageObject = new Image();
         ImageObject.crossOrigin = "Anonymous";
-        ImageObject.src = ImgName !== "" ? await getURL(ImgName) : "";
+        if (isCommon === false) {
+            ImageObject.src = ImgName !== "" ? await getURL(ImgName, imgMode) : "";
+        } else {
+            ImageObject.src = await getCommonURL(ImgName, imgMode);
+        }
         if (ImgName !== "") {
             ImageObject.onload = function () {
                 //TODO: revisit how worksheet data is passed into function
-                ImgTag.src = generateGraphic(Side, ImageObject.width, ImageObject.height, PrintSetting.Level, StudentData, SheetData, Instructor, ImageObject);
+                determineRotation(ImageObject, imgTag);//Adds the 'portrait' tag if upright full page
+                if (includeGraphics === true) {
+                    resolve(ImageObject);
+                } else {
+                    //Generate a white background
+                    var blankImage = new Image(ImageObject.width, ImageObject.height);
+                    blankImage.src = generateSizedBlankGraphic(ImageObject.width, ImageObject.height);
+                    resolve(blankImage);
+                }
+            };
+            ImageObject.onerror = function () {
+                reject();
             };
         } else {
-            ImgTag.src = generateBlankGraphic();
+            reject();
+        }
+    });
+}
+
+function determineRotation(ImageObj, imgElement) {
+    if (ImageObj.height > ImageObj.width) {
+        imgElement.classList.add("portrait");
+    }
+}
+
+function finishHalfTags(Tags) {
+    if (Tags.length !== 4) {
+        for (var t = 0; t < Tags.length; t++) {
+            Tags[t].parentElement.className = "halfSpacer";
+            Tags[t].className = "halfSpacer";
+            Tags[t].src = generateBlankGraphic();
+        }
+        while (Tags.length > 0) {
+            Tags.pop();
+        }
+    } else {
+        for (var t = 0; t < Tags.length; t++) {
+            Tags[t].remove();
         }
     }
+}
 
-    function finishHalfTags(Tags) {
-        if (Tags.length !== 4) {
-            for (var t = 0; t < Tags.length; t++) {
-                Tags[t].parentElement.className = "halfSpacer";
-                Tags[t].className = "halfSpacer";
-                Tags[t].src = generateBlankGraphic();
-            }
-            while (Tags.length > 0) {
-                Tags.pop();
-            }
+function prepTag(isHalf, Arr, isFront) {
+    var tag = Arr[0];
+    tag.classList.add(isHalf ? "half" : "full");
+    tag.parentElement.classList.add(isHalf ? "half" : "full");
+    if (!isHalf && !isFront) {
+        tag.classList.add("fullback");
+        tag.parentElement.classList.add("fullback");
+    }
+    Arr.splice(0, 1);
+    return tag;
+}
+
+function generateTags(arr, doc, isHalf) {
+    var tmp = [];
+    for (var i = 0; i < 4; i++) {
+        var holder = doc.createElement("div");
+        holder.className = "cardImg";
+        var img = doc.createElement("img");
+        img.className = "cardImg";
+        holder.appendChild(img);
+        doc.body.appendChild(holder);
+        if (isHalf === false) {
+            arr[i] = img;
         } else {
-            for (var t = 0; t < Tags.length; t++) {
-                Tags[t].remove();
-            }
+            tmp.push(img);
         }
     }
-
-    function prepTag(isHalf, Arr, isFront) {
-        var tag = Arr[0];
-        tag.classList.add(isHalf ? "half" : "full");
-        tag.parentElement.classList.add(isHalf ? "half" : "full");
-        if (!isHalf && !isFront) {
-            tag.classList.add("fullback");
-            tag.parentElement.classList.add("fullback");
-        }
-        Arr.splice(0, 1);
-        return tag;
+    if (isHalf === true) {
+        arr[0] = tmp[0];
+        arr[1] = tmp[3];
+        arr[2] = tmp[1];
+        arr[3] = tmp[2];
     }
-
-    function generateTags(arr, doc, isHalf) {
-        var tmp = [];
-        for (var i = 0; i < 4; i++) {
-            var holder = doc.createElement("div");
-            holder.className = "cardImg";
-            var img = doc.createElement("img");
-            img.className = "cardImg";
-            holder.appendChild(img);
-            doc.body.appendChild(holder);
-            if (isHalf === false) {
-                arr[i] = img;
-            } else {
-                tmp.push(img);
-            }
-        }
-        if (isHalf === true) {
-            arr[0] = tmp[0];
-            arr[1] = tmp[3];
-            arr[2] = tmp[1];
-            arr[3] = tmp[2];
-        }
-    }
+}
+function generateSizedBlankGraphic(width, height) {
+    var cvc = document.createElement("canvas");
+    var ctx = cvc.getContext("2d");
+    cvc.width = width;
+    cvc.height = height;
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, width, height);
+    return cvc.toDataURL("image/jpeg", imageQuality);
 }
 
 function generateBlankGraphic() {
-    var cvc = document.createElement("canvas");
-    var ctx = cvc.getContext("2d");
-    cvc.width = 100;
-    cvc.height = 100;
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, 100, 100);
-    return cvc.toDataURL("image/png");
+    return generateSizedBlankGraphic(100, 100);
 }
 
-function generateGraphic(side, width, height, level, studentData, SheetData, Instructor, ImageObject) {
-    var LevelMarkup = Levels[level];
-    var currentSheet = SheetData[studentData.Sheet];
+function generateGraphic(side, width, height, level, markupLocation, studentData, SheetData, Instructor, ImageObject, imgMode) {
+    var LevelMarkup = markupLocation;//Refactor rename when can be bothered to
+    var currentSheet;
+    if (imgMode === "report-card") {
+        currentSheet = SheetData[studentData.Sheet];
+    } else if (imgMode === "worksheet") {
+        currentSheet = SheetData[studentData.Instructor][studentData.Sheet];
+    }
     var cvc = document.createElement("canvas");
     cvc.width = width;
     cvc.height = height;
@@ -150,8 +270,10 @@ function generateGraphic(side, width, height, level, studentData, SheetData, Ins
     if (LevelMarkup.Text) {
         generateTextGraphics(ctx, LevelMarkup, currentSheet, studentData.Student, side, Instructor);
     }
-    generateSkillsGraphics(ctx, LevelMarkup, currentSheet, studentData.Student, side, level);
-    return cvc.toDataURL("image/png");
+    if (LevelMarkup.Skills) {
+        generateSkillsGraphics(ctx, LevelMarkup, currentSheet, studentData.Student, side, level);
+    }
+    return cvc.toDataURL("image/jpeg", imageQuality);
 }
 
 function generateSkillsGraphics(ctx, LevelMarkup, sheet, student, side, level) {
@@ -166,7 +288,6 @@ function generateSkillsGraphics(ctx, LevelMarkup, sheet, student, side, level) {
                     for (var h = 0; h < MustSee.Highlighting.length; h++) {
                         let Data = MustSee.Highlighting[h];
                         if (Data.Side === side && sheet.Marks[student][t] === false && sheet.MustSees[student][t].indexOf(m) !== -1) {
-                            console.log(Data);
                             ctx.globalAlpha = 0.5;
                             ctx.fillStyle = "yellow";
                             ctx.beginPath();
@@ -337,23 +458,40 @@ function generateTextGraphics(ctx, LevelMarkup, sheet, student, side, inst) {
                 ctx.font = currentTxt.Font + "px Roboto";
             }//TOCHANGE
             if (currentTxt.isMultiline === true && currentTxt.Lines) {
-                renderMultiline(ctx, getText(currentTxt, sheet, student, inst), currentTxt, variableData === null ? 0 : variableData.Vertical);
+                //Can be changed to array lookup if expanded
+                var isGeneratedMultiline = currentTxt.Type === "student_list";
+                renderMultiline(ctx, getText(currentTxt, sheet, student, inst), currentTxt, variableData === null ? 0 : variableData.Vertical, isGeneratedMultiline);
             } else {//Single Line
                 ctx.fillText(getText(currentTxt, sheet, student, inst), currentTxt.TopLeft.x, currentTxt.TopLeft.y + (variableData === null ? 0 : variableData.Vertical));
             }
         }
     }
-    function renderMultiline(ctx, Text, TextData, verticalOffset) {
+    function renderMultiline(ctx, Text, TextData, verticalOffset, isGenerated) {
         var linePos = generateLinePos(TextData);
         var width = TextData.BottomRight.x - TextData.TopLeft.x;
-        var wordArray = Text.split(" ");
+        //Generated works by changing the split to be per generated line (',' is the delimiter)
+        //and forcing a break after each element draw in the array
+        var wordArray = Text.split(isGenerated ? "," : " ");
         var currentTxt = "";
         var tempTxt = "";
+        //Each run, add a word to tempTxt. See if it fits.
+        //If it does not, ignore that word (currentTxt is the last run) and write.
+        ////Otherwise assign tmp to current in order to finalize that word fitting.
         while (wordArray.length > 0 && linePos.length > 0) {
             tempTxt = currentTxt.concat(" ", wordArray[0]);
-            if (ctx.measureText(tempTxt).width >= width) {//overflow
-//discard tempTxt, write currentTxt
-                ctx.fillText(currentTxt, TextData.TopLeft.x, linePos[0] + verticalOffset);
+            if ((!(isGenerated === true && TextData.isVariable) && ctx.measureText(tempTxt).width >= width) || (isGenerated === true && currentTxt.length > 0)) {//overflow || 1 generated-word (a generated line) has been written last cycle and should now be drawn
+                //discard tempTxt, write currentTxt
+                //If statement handles predetermined variable text lines, where each line must scale independantly
+                if (isGenerated === true && TextData.isVariable === true) {
+                    //Calculate the font size
+                    var variableTextData = {isMultiline: false, Font: TextData.Font, MaxFont: TextData.MaxFont, TopLeft: TextData.TopLeft, BottomRight: TextData.BottomRight};
+                    var variableData = calculateVariableFont(ctx, currentTxt, variableTextData);
+                    ctx.font = variableData.Width + "px Roboto";
+                    ctx.fillText(currentTxt, TextData.TopLeft.x, linePos[0]);
+                } else {
+                    //Use the predetermined font size
+                    ctx.fillText(currentTxt, TextData.TopLeft.x, linePos[0] + verticalOffset);
+                }
                 linePos.splice(0, 1); //remove line;
                 currentTxt = ""; //clear used text
             } else {//Still space, move on
@@ -361,16 +499,36 @@ function generateTextGraphics(ctx, LevelMarkup, sheet, student, side, inst) {
                 currentTxt = tempTxt; //assign to carry on
             }
         }
-//Draw leftover text
+        //Draw leftover text
         if (linePos.length > 0 && currentTxt !== "") {
-            ctx.fillText(currentTxt, TextData.TopLeft.x, linePos[0] + verticalOffset);
+            //If statement handles predetermined variable text lines, where each line must scale independantly
+            if (isGenerated === true && TextData.isVariable === true) {
+                //Calculate the font size
+                var variableTextData = {isMultiline: false, Font: TextData.Font, MaxFont: TextData.MaxFont, TopLeft: TextData.TopLeft, BottomRight: TextData.BottomRight};
+                var variableData = calculateVariableFont(ctx, currentTxt, variableTextData);
+                ctx.font = variableData.Width + "px Roboto";
+                ctx.fillText(currentTxt, TextData.TopLeft.x, linePos[0]);
+            } else {
+                //Use the predetermined font size
+                ctx.fillText(currentTxt, TextData.TopLeft.x, linePos[0] + verticalOffset);
+            }
         }
     }
 
     function getText(currentTxt, sheet, student, inst) {
         switch (currentTxt.Type) {
             case "level":
-                return Levels[sheet.Level].Name;
+                if (Levels[sheet.Level]) {
+                    return Levels[sheet.Level].Name;
+                } else {
+                    return sheet.Level;
+                }
+            case "level_and_modifier":
+                if (Levels[sheet.Level]) {
+                    return Levels[sheet.Level].Name + " " + createModifierText(sheet);
+                } else {
+                    return sheet.Level + " " + createModifierText(sheet);
+                }
             case "nextlevel":
                 //Check if all marking is done or not, return blank if skill is unmarked
                 if (sheet.Marks[student].reduce((acc, current) => {
@@ -388,12 +546,15 @@ function generateTextGraphics(ctx, LevelMarkup, sheet, student, side, inst) {
                 }
             case "instructor":
                 if (sheet.Instructor) {
+                    //getInstructorName is a truncation function
                     return getInstructorName(sheet.Instructor);
                 } else {
                     return getInstructorName(inst);
                 }
             case "student":
                 return sheet.Names[student];
+            case "student_list":
+                return sheet.Names.join(",");
             case "barcode":
                 return sheet.Barcode;
             case "custom":
@@ -403,9 +564,17 @@ function generateTextGraphics(ctx, LevelMarkup, sheet, student, side, inst) {
                     return sheet.Comments[student];
                 }
             case "facility_short":
-                return getArchiveSheetTimeblockData(Facilities, "Facilities", sheet.Facility).Shortform;
+                if (Archive) {
+                    return getArchiveSheetTimeblockData(Facilities, "Facilities", sheet.Facility).Shortform;
+                } else {
+                    return Facilities[sheet.Facility].Shortform;
+                }
             case "facility":
-                return getArchiveSheetTimeblockData(Facilities, "Facilities", sheet.Facility).Name;
+                if (Archive) {
+                    return getArchiveSheetTimeblockData(Facilities, "Facilities", sheet.Facility).Name;
+                } else {
+                    return Facilities[sheet.Facility].Name;
+                }
             case "time_modifier":
                 let mod = getSheetModifier(sheet);
                 if (mod !== null) {//If modifier exists
@@ -415,12 +584,19 @@ function generateTextGraphics(ctx, LevelMarkup, sheet, student, side, inst) {
                 }
             case "time_start_12":
                 return convertTimeReadable(sheet.TimeStart, true);
+            case "day":
+                if (Archive) {
+                    return getArchiveSheetTimeblockData(Timeblocks, "Timeblocks", sheet.Timeblock).Name;
+                } else {
+                    return Timeblocks[sheet.Timeblock].Name;
+                }
+            case "day_and_time":
+                return getText({Type: "day"}, sheet, student, inst) + " " + getText({Type: "time_start_12"}, sheet, student, inst);
             default:
                 return "Error, Please contact system maintainers";
         }
     }
 }
-
 function calculateVariableFont(ctx, Text, TextData) {
     if (TextData.isMultiline === true && TextData.Lines) {
         var max = TextData.Font;

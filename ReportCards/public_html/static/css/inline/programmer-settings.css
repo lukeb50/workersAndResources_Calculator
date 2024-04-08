@@ -68,6 +68,10 @@ input[type="text"]:disabled,input[type="number"]:disabled,textarea:disabled, sel
     height: fit-content;
 }
 
+#level-settings-container button.mainround{
+    border-radius: 5px;
+}
+
 #level-settings-container div{
     height: 40em;
     flex:1;
@@ -191,10 +195,12 @@ input[type="text"]:disabled,input[type="number"]:disabled,textarea:disabled, sel
     padding:5px;
 }
 
-#color-menu input,#regex-menu input, #progression-edit-menu input{
-    width:96%;
-    margin: 5px 0px 5px 0px;
-    border-radius: 5px;
+#group-color-menu input[type='color'],#regex-menu input, #progression-edit-menu input{
+    width:90%;
+    margin: 5px 0px 5px 5%;
+    border-radius: 10px;
+    box-sizing: border-box;
+    background: rgba(150,150,150,0.1);
     padding:5px;
 }
 
@@ -204,10 +210,18 @@ input[type="text"]:disabled,input[type="number"]:disabled,textarea:disabled, sel
 
 #color-input{
     height: 4em;
-    padding:2px!important;
-    border-radius: 0px!important;
-    border:2px solid grey!important;
+    border-radius: 10px!important;
+    border: 2px solid grey!important;
+    box-sizing: border-box;
 
+}
+
+#applyColor,#applyRegex,#applyNoColor{
+    width:90%;
+    margin-left: 5%;
+    box-sizing: border-box;
+    margin-top: 10px;
+    height: 30px;
 }
 
 #main-lvl-config-side-container{
@@ -245,12 +259,19 @@ input[type="text"]:disabled,input[type="number"]:disabled,textarea:disabled, sel
     font-weight: normal;
 }
 
-#sidebar-lvl-next p{
-    width:calc(100% - 5px);
-    padding-left: 5px;
-    margin: 5px 0px 5px 0px;
-    text-decoration: none;
-    font-weight: bold;
+#worksheet-image-upload-div{
+    margin-top: 5px;
+}
+
+#worksheet-image-upload-div label{
+    display:flex;
+    width:calc(100% - 10px);
+    margin-right: 5px;
+    padding-bottom: 5px;
+}
+
+#worksheet-image-upload-div label select{
+    flex-grow: 1;
 }
 
 #constant-next-text{
@@ -572,7 +593,7 @@ i{
     margin-top: 5px;
 }
 
-#open-editor-btn{
+#open-editor-btn,#worksheet-image-upload-btn{
     margin-left: 5px;
 }
 

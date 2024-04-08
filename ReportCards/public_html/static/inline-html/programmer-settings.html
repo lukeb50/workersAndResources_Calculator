@@ -27,6 +27,7 @@
                 <div id="group-color-menu" class="menuitem">
                     <p>Select a color to represent this group. A familiar color such as the worksheet color is recommended.</p>
                     <input id="color-input" type="color">
+                    <button id="applyNoColor" class="mainround">No Color</button>
                     <button id="applyColor" class="mainround">Apply</button>
                 </div>
                 <div id="progression-edit-menu" class="menuitem">
@@ -83,12 +84,19 @@
                         </div>
                         <div>
                             <button disabled id="open-editor-btn" class="mainround px5margin">Card Editor</button>
+                            <div id = "worksheet-image-upload-div">
+                                <label><b>Worksheet Images</b></label>
+                                <label>Front:<select id="worksheet-front-img-select" disabled></select></label>
+                                <label>Back:<select id="worksheet-back-img-select" disabled></select></label>
+                                <button id="worksheet-image-upload-btn" class="mainround" onclick="document.getElementById('worksheet-image-upload').click();" disabled>Upload New</button>
+                                <input id="worksheet-image-upload" accept=".png,.jpg,.jpeg" type="file" style="display:none">
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div id="lvl-settings-save-holder">
-                    <button class="mainround" id="save-lvl-settings-btn">Save</button>
-                </div>
+            </div>
+            <div id="lvl-settings-save-holder">
+                <button class="mainround" id="save-lvl-settings-btn">Save</button>
             </div>
             <div id="general-modifier-settings"><!--true-->
                 <span><label>Modifier Settings</label><button class="setting-arrow">▲</button></span>
@@ -148,10 +156,12 @@
                 </div>
             </div>
         </div>
-        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-database.js"></script>
-        <script src="../javascript/utility/http_controller.js"></script>
-        <script src="../javascript/inline/programmer-settings.js"></script>
-    </body>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-storage.js"></script>
+    <script src="../javascript/utility/http_controller.js"></script>
+    <script src="../javascript/inline/programmer-settings.js"></script>
+</body>
 </html>

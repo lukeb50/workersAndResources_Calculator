@@ -119,7 +119,7 @@
     }
 }
 
-#configMenuBtn,#searchBtn{
+.barBtn{
     width: 60px;
     height: 60px;
     border-radius: 50%;
@@ -131,12 +131,16 @@
     display: block;
 }
 
-#configMenuBtn{
+.barBtn:not(:nth-child(1)){
     margin-left: 5px;
 }
 
-#configMenuBtn:hover, #searchBtn:hover{
+.barBtn:hover:not(:disabled){
     background:var(--color-primary-light);
+}
+
+.barBtn:disabled{
+    background: rgba(0,0,0,0);
 }
 
 #scheduleTable{
@@ -527,4 +531,40 @@ label.uploadprompt{
 
 table td{
     min-height: 100px;
+}
+
+#worksheet-menu{
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
+#worksheet-menu-container{
+    flex:1;
+}
+
+#worksheet-menu label.label-centre{
+    display: block;
+    text-align: center;
+    width:100%;
+}
+
+#worksheet-selector-label, #worksheet-options-holder label{
+    width: 100%;
+    display: flex;
+    padding-bottom: 5px;
+}
+
+#worksheet-options-holder{
+    padding-left:5px;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    border-bottom: 2px dashed var(--color-primary);
+}
+
+#worksheet-selector-label select, #worksheet-options-holder label select{
+    flex-grow: 1;
+    margin-left: 5px;
+    margin-right: 5px;
+    border: 2px solid var(--color-primary-dark);
 }

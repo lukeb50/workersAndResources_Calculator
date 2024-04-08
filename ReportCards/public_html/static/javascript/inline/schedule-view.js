@@ -1,20 +1,26 @@
-/* global firebase, initClientDatabase, clientDb, XLSX, getSheetModifier, noteIndicators */
+/* global firebase, initClientDatabase, clientDb, XLSX, getSheetModifier, noteIndicators, createElement, currentTime */
 
+const storage = firebase.app().storage("gs://report-cards-6290-uploads");
 const loadspinner = document.getElementById("loadspinner");
 const sheetinfomenu = document.getElementById("sheetinfo-menu");
 const configmenu = document.getElementById("config-menu");
 const config_assignmenu = document.getElementById("config-assignment-menu");
 const view_changemenu = document.getElementById("view-change-menu");
 const databasemenu = document.getElementById("database-menu");
+const worksheetmenu = document.getElementById("worksheet-menu");
 const mainmenu = document.getElementById("main-menu");
 const close_mainmenu = document.getElementById("main-menu-close-btn");
-const loaditms = [loadspinner, sheetinfomenu, configmenu, config_assignmenu, view_changemenu, databasemenu];
+const loaditms = [loadspinner, sheetinfomenu, configmenu, config_assignmenu, view_changemenu, databasemenu, worksheetmenu];
 var scheduleData = [];
 var People = [];
 var sheetGroupingInfo = [];
 var Levels = {};
 var GroupingData = [];
 var SheetModifiers = [];
+var Facilities = {};
+var Timeblocks = {};
+var currentTime;
+
 var editMode = true;
 const scheduleContainer = document.getElementById("main-schedule-holder");
 const scheduleTable = document.getElementById("scheduleTable");
@@ -82,7 +88,7 @@ function displaySchedule(Time) {
                         lessonHolder.className = "lesson";
                         var rowSpan = getClassDuration(currentSheet) / tableInformation.increment;
                         lessonHolder.rowSpan = rowSpan;
-                        lessonHolder.style.backgroundColor = getLevelColor(getClassProperty(currentSheet, "Level"));
+                        lessonHolder.style.backgroundColor = getSheetColor(currentSheet);
                         timerow.appendChild(lessonHolder);
                         if (groupPos.Position === false) {//not grouped
                             createSheetListing(lessonHolder, currentSheet, i);
@@ -90,7 +96,7 @@ function displaySchedule(Time) {
                             createSheetListing(lessonHolder, groupPos.Group, i);
                         }
                         //maxHeight is independant of the number of rows spanned
-                        maxRowHeight = Math.max(lessonHolder.getElementsByTagName("div")[0].offsetHeight / rowSpan,maxRowHeight);
+                        maxRowHeight = Math.max(lessonHolder.getElementsByTagName("div")[0].offsetHeight / rowSpan, maxRowHeight);
                     } else if (t >= parseInt(getClassProperty(currentSheet, "TimeStart")) && t < parseInt(getClassProperty(currentSheet, "TimeStart")) + getClassDuration(currentSheet)) {
                         isLesson = true;
                     }
@@ -98,16 +104,15 @@ function displaySchedule(Time) {
             }
             if (isLesson === false) {
                 var blockBreak = document.createElement("td");
-                blockBreak.className = "lessonSpacer"
+                blockBreak.className = "lessonSpacer";
                 timerow.appendChild(blockBreak);
             }
         }
     }
     //Handle heights
     var lessonElements = scheduleTable.querySelectorAll(".lesson, .lessonSpacer, .lessonTime");
-    for(var e = 0; e < lessonElements.length; e++){
+    for (var e = 0; e < lessonElements.length; e++) {
         var currentElement = lessonElements[e];
-        console.log(currentElement);
         currentElement.style.height = maxRowHeight + "px";
     }
 
@@ -272,10 +277,10 @@ function displaySchedule(Time) {
             var lvl = prompt("Enter level"); //null
             var code = parseInt(prompt("Enter barcode")); //NaN
             var start = convertToTimeStartTwelveHour(prompt("Enter start time HH:MM PM")); //null
-            //determineLevelId
+            var determinedLevel = determineLevelId(lvl);
             if (lvl && !isNaN(code) && start !== null) {
-                if (determineLevelId(lvl) !== null) {
-                    scheduleData[p].push({Level: determineLevelId(lvl), Barcode: code, Names: [], TimeStart: start, SheetInformation: {Lead: {}, Instructor: {}}});
+                if (determinedLevel !== null) {
+                    scheduleData[p].push({Level: determinedLevel.Level, Barcode: code, Names: [], TimeStart: start, TimeModifier: determinedLevel.TimeModifier, SheetInformation: {Lead: {}, Instructor: {}}});
                     displaySchedule(true);
                 } else {
                     var dur = prompt("Enter class duration in minutes");
@@ -326,7 +331,8 @@ function createSheetMenu(div, sheet, instructor, allsheets) {
                 if (newLevel) {
                     var potentialLvlId = determineLevelId(newLevel);
                     if (potentialLvlId) {
-                        sheet.Level = potentialLvlId;
+                        sheet.Level = potentialLvlId.Level;
+                        sheet.TimeModifier = potentialLvlId.TimeModifier;
                         delete sheet.Duration;
                         displaySheetMenu(allsheets, instructor);
                         displaySchedule(true);
@@ -447,8 +453,14 @@ function getLevelName(sheet) {
     return Levels[sheet.Level] ? Levels[sheet.Level].Name : sheet.Level;
 }
 
-function getLevelColor(LevelId) {
-    if (!Levels[LevelId]) {//TODO:Excel sheet code
+function getSheetColor(sheet) {
+    var Modifier = getSheetModifier(sheet);
+    var LevelId = getClassProperty(sheet, "Level");
+    //Modifier is set with a color
+    if (Modifier !== null && Modifier.Color) {
+        return Modifier.Color;
+    }
+    if (!Levels[LevelId] && Modifier === null) {
         return "#ffffff";
     }
     var LevelName = Levels[LevelId].Name;
@@ -573,6 +585,7 @@ async function getModifierData() {
 
 async function loadAndDisplayScheduleData(Users, Data, Timeblock) {
     displaySchedule();
+    currentTime = Timeblock;
     if (Users === null || Data === null) {
         return;
     }
@@ -631,7 +644,10 @@ window.onload = function () {
                 await getCompleteLevels();
                 await getGroupingData();
                 await getModifierData();
+                await initCoreData();
                 resetloader(false, null, null, false);
+                startCardGenerator(false, Facilities, Timeblocks);
+                setImageQuality(0.2);
             });
         }
     });
@@ -647,6 +663,80 @@ window.onload = function () {
             resetloader(false, null, null, false);
             alert("Error creating schedule: " + err);
         });
+    };
+
+    document.getElementById("worksheetBtn").onclick = function () {
+        resetloader(false, worksheetmenu, null, false);
+        document.getElementById("worksheet-options-holder").style.display = editMode ? "block" : "none";
+        renderWorksheetSelect();
+        renderWorksheetOptions();
+    };
+
+    const worksheetInstructorBtn = document.getElementById("worksheet-instructor-btn");
+    const worksheetLevelBtn = document.getElementById("worksheet-level-btn");
+    const worksheetAllRadio = document.getElementById("worksheet-all-radio");
+    const worksheetSelectRadio = document.getElementById("worksheet-radio-radio");
+    const worksheetSelect = document.getElementById("worksheet-select");
+
+    const worksheetFacilitySelect = document.getElementById("worksheet-facility-select");
+    const worksheetTimeblockSelect = document.getElementById("worksheet-timeblock-select");
+    function renderWorksheetOptions() {
+        fillSelect(worksheetFacilitySelect, Facilities);
+        fillSelect(worksheetTimeblockSelect, Timeblocks);
+        function fillSelect(select, data) {
+            clearChildren(select);
+            var dataKeys = Object.keys(data);
+            dataKeys.forEach((key) => {
+                var dataEntry = data[key];
+                createElement("option", select, dataEntry.Name, null).value = key;
+            });
+        }
+    }
+
+    worksheetInstructorBtn.onclick = function () {//print only current sheet
+        worksheetInstructorBtn.classList.add("print-selected");
+        worksheetLevelBtn.classList.remove("print-selected");
+        worksheetAllRadio.checked = true;
+        renderWorksheetSelect();
+    };
+
+    worksheetLevelBtn.onclick = function () {//print current time
+        worksheetInstructorBtn.classList.remove("print-selected");
+        worksheetLevelBtn.classList.add("print-selected");
+        worksheetAllRadio.checked = true;
+        renderWorksheetSelect();
+    };
+
+    function renderWorksheetSelect() {
+        clearChildren(worksheetSelect);
+        var isInstructor = worksheetInstructorBtn.classList.contains("print-selected");
+        if (isInstructor) {
+            for (var p = 0; p < People.length; p++) {
+                var opt = createElement("option", worksheetSelect, People[p].Name, null);
+                opt.value = p;
+            }
+        } else {
+            initSelectorScreen(worksheetSelect);
+        }
+    }
+
+    document.getElementById("print-worksheet-button").onclick = function () {
+        var printData = {};
+        printData.isOrderByInstructor = worksheetInstructorBtn.classList.contains("print-selected");
+        printData.filterValue = worksheetAllRadio.checked === true ? -1 : parseInt(worksheetSelect.value);
+        printData.Sheets = [];
+        for (var i = 0; i < scheduleData.length; i++) {
+            for (var s = 0; s < scheduleData[i].length; s++) {
+                //Apply the filter
+                if ((printData.isOrderByInstructor === true && (printData.filterValue === -1 || i === printData.filterValue)) ||
+                        (printData.isOrderByInstructor === false && (printData.filterValue === -1 || scheduleData[i][s].Level === printData.filterValue))) {
+                    //Matches filter, add it
+                    printData.Sheets.push({Instructor: i, Sheet: s});
+                }
+            }
+        }
+        var timeblockName = worksheetFacilitySelect.value + "---" + worksheetTimeblockSelect.value;
+        run_worksheet_generation(scheduleData, People, printData, (editMode ? timeblockName : currentTime));
     };
 
     const searchBar = document.getElementById("searchBar");
@@ -701,7 +791,7 @@ window.onload = function () {
             span.onclick = function () {
                 var groupingData = checkIfGrouped(classObj, instructorId);
                 if (groupingData.Group) {
-                    displaySheetMenu(groupingData.Group, instructorId)
+                    displaySheetMenu(groupingData.Group, instructorId);
                 } else {
                     displaySheetMenu(classObj, instructorId);
                 }
@@ -1118,7 +1208,7 @@ function extractExcelClasses(data) {
             if (row.DataRow && classRegex.test(row.DataRow) === true) {
                 var matchArray = row.DataRow.match(/^([\s\S]+) - ([0-9]+)/);
                 var lvlDetermined = determineLevelId(matchArray[1]);
-                builtClass = {Barcode: parseInt(matchArray[2]), Level: lvlDetermined ? lvlDetermined : matchArray[1], Names: [], TimeModifier: -1, SheetInformation: {Lead: {}, Instructor: {}}};
+                builtClass = {Barcode: parseInt(matchArray[2]), Level: lvlDetermined ? lvlDetermined.Level : matchArray[1], Names: [], TimeModifier: lvlDetermined ? lvlDetermined.TimeModifier : -1, SheetInformation: {Lead: {}, Instructor: {}}};
             }
         } else {//a class is being read
             if (row.Meta1 && row.Meta1 === "Time:") {//Handle TimeStart
@@ -1193,8 +1283,15 @@ function convertToTimeStartTwelveHour(time) {//converts AM/PM values to TimeStar
 
 function determineLevelId(LevelName) {
     for (const [id, data] of Object.entries(Levels)) {
-        if (LevelName.match(new RegExp(data.Name + '$', 'gi'))) {//(?:\\s+|$)
-            return parseInt(id);
+        if (LevelName.match(new RegExp(data.Name + '($| )', 'gi'))) {
+            var result = {Level: parseInt(id), TimeModifier: -1};
+            LevelName = LevelName.replace(new RegExp(data.Name + '($| )| ', 'gi'), "");
+            for (const [modId, modData] of Object.entries(SheetModifiers)) {
+                if (LevelName.match(new RegExp("^" + modData.Name + "$", "gi"))) {
+                    result.TimeModifier = modData.UniqueID;
+                }
+            }
+            return result;
         }
     }
     return null;

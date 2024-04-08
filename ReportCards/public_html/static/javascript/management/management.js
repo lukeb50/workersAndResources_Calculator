@@ -76,11 +76,11 @@ document.getElementById("set-organization-btn").onclick = function () {
 document.getElementById("create-org-btn").onclick = function () {
     var name = prompt("Enter organization name");
     if (name && name !== "") {
-        showLoadingScreen();
+        resetloader(true ,null ,null ,false);
         createOrg(name).then((newId) => {
             changeOrganization(newId);
         }).catch(() => {
-            hideLoadingScreen();
+            resetloader(false ,null ,null ,false);
             alert("Error creating");
         });
     }
@@ -93,13 +93,13 @@ document.getElementById("create-org-btn").onclick = function () {
 document.getElementById("delete-org-btn").onclick = function () {
     if (confirm("Delete this organization? The operation cannot be undone.")) {
         if (confirm("Confirm")) {
-            showLoadingScreen();
+            resetloader(true ,null ,null ,false);
             deleteOrg("").then(() => {
                 delete Organizations[Organization];
                 var newOrgs = Object.keys(Organizations);
                 changeOrganization(newOrgs[0]);
             }).catch((e) => {
-                hideLoadingScreen();
+                resetloader(false ,null ,null ,false);
                 if (e === 402) {
                     alert("Outstanding financials. Delete cancelled");
                 } else {
@@ -116,7 +116,7 @@ document.getElementById("delete-org-btn").onclick = function () {
 function changeOrganization(Org) {
     setOrg(Org).then(() => {
         firebase.auth().currentUser.getIdTokenResult(true).then(() => {
-            hideLoadingScreen();
+            resetloader(false ,null ,null ,false);
             location.reload();
         });
     });
@@ -159,10 +159,10 @@ function showUserList() {
         createBtn.onclick = async function () {
             var email = prompt("Enter email address");
             if (email_pattern.test(email)) {
-                showLoadingScreen();
+                resetloader(true ,null ,null ,false);
                 await addUser(email);
                 showUserList();
-                hideLoadingScreen();
+                resetloader(false ,null ,null ,false);
             } else {
                 alert("Invalid Email");
             }
@@ -187,10 +187,10 @@ function showUserList() {
     function deleteUser(button, user) {
         button.onclick = async function () {
             if (confirm("Delete this user? Action cannot be undone")) {
-                showLoadingScreen();
+                resetloader(true ,null ,null ,false);
                 await DeleteUser(user.Uid);
                 showUserList();
-                hideLoadingScreen();
+                resetloader(false ,null ,null ,false);
             }
         };
     }
@@ -201,9 +201,9 @@ function showUserList() {
 
     function changePermission(select, user) {
         select.onchange = async function () {
-            showLoadingScreen();
+            resetloader(true ,null ,null ,false);
             await updatePermission(user.Uid, select.value);
-            hideLoadingScreen();
+            resetloader(false ,null ,null ,false);
         };
     }
 

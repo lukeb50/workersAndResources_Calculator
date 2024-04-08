@@ -15,12 +15,17 @@
         <meta name="theme-color" content="#ffffff">
     </head>
     <body>
-        <button id="print">Open Print Dialog</button>
+        <div id="printbar">
+            <div id="printbtnholder">
+                <button id="print">Open Print Dialog</button>
+            </div>
+            <div id="printspinner"></div>
+        </div>
         <script>
-            document.getElementById("print").onclick=function(){//print when button pressed
+            document.getElementById("print").onclick = function () {//print when button pressed
                 print();
             };
-            window.addEventListener("afterprint", function() {//close window when print dialog closes
+            window.addEventListener("afterprint", function () {//close window when print dialog closes
                 window.close();
             });
         </script>

@@ -1,7 +1,6 @@
 /* global firebase, clientDb, Organization */
 
 const storage = firebase.app().storage("gs://report-cards-6290-uploads");
-
 const BAR_HEIGHT = 30;
 const BAR_PADDING = 5;
 const BAR_VERTICAL = BAR_HEIGHT + (BAR_PADDING * 2);
@@ -9,6 +8,8 @@ var LvlInfo = window.allLvlInfo;
 window.allLvlInfo = null;
 var i = window.Id;
 window.I = null;
+var extraInfo = window.extraInfoPassthrough;
+window.extraInfoPassthrough = null;
 
 var currentElement = null;
 var currentHashCode = -1;
@@ -33,6 +34,9 @@ const MustSeeChannel = new BroadcastChannel("MustSee");
 
 var currentSkill = null;
 var currentMustSee = null;
+
+var mode = null;
+const skillModes = ["report-card"];
 
 const addcheckbtn = document.getElementById("insert-weak-check");
 const addskillbtn = document.getElementById("insert-skill-highlight");
@@ -130,53 +134,140 @@ function setMustSee(skill, mustsee) {
     addskillbtn.disabled = true;
     addmustseebtn.disabled = false;
 }
+var textTypes = [
+    {Value: "level", Name: "Current Level", Prompt: "Current Level", Modes: ["report-card", "worksheet"]},
+    {Value: "level_and_modifier", Name: "Current Level + Type", Prompt: "Current Level and Modifier", Modes: ["report-card", "worksheet"]},
+    {Value: "nextlevel", Name: "Next Level", Prompt: "Next Level to Register In", Modes: ["report-card"]},
+    {Value: "session", Name: "Session", Prompt: "Current Session Name", Modes: ["report-card", "worksheet"]},
+    {Value: "instructor", Name: "Instructor Name", Prompt: "Truncated Instructor Name", Modes: ["report-card", "worksheet"]},
+    {Value: "student", Name: "Student Name", Prompt: "Student Name", Modes: ["report-card"]},
+    {Value: "student_list", Name: "Student Name List", Prompt: "Student Name List", Modes: ["worksheet"]},
+    {Value: "barcode", Name: "Course Code", Prompt: "Course Code", Modes: ["report-card", "worksheet"]},
+    {Value: "comment", Name: "Comment", Prompt: "Comment Text Content", Modes: ["report-card"]},
+    {Value: "custom", Name: "Custom Text", Prompt: "Select to edit text", Modes: ["report-card", "worksheet"]},
+    {Value: "facility", Name: "Facility Name", Prompt: "Facility Name", Modes: ["report-card", "worksheet"]},
+    {Value: "facility_short", Name: "Facility Shortform", Prompt: "Facility Shortform", Modes: ["report-card", "worksheet"]},
+    {Value: "time_modifier", Name: "Class Type", Prompt: "Class Type", Modes: ["report-card", "worksheet"]},
+    {Value: "time_start_12", Name: "Start Time", Prompt: "Start Time", Modes: ["report-card", "worksheet"]},
+    {Value: "day", Name: "Day", Prompt: "Day", Modes: ["report-card", "worksheet"]},
+    {Value: "day_and_time", Name: "Day and Start Time", Prompt: "Day and Start Time", Modes: ["report-card", "worksheet"]}
+];
+
+function setMode(edditorMode) {
+    mode = edditorMode;
+    //Fill in type selector
+    clearChildren(new_txt_type);
+    for (var x = 0; x < textTypes.length; x++) {
+        var type = textTypes[x];
+        if (type.Modes.indexOf(edditorMode) !== -1) {
+            var opt = createElement("option", new_txt_type, type.Name);
+            if (type.Value === "comment") {//Special case as comments are conditional
+                opt.id = "commentoption";
+            }
+            opt.value = type.Value;
+        }
+    }
+    if (["worksheet"].indexOf(mode) !== -1) {
+        //modes that cannot insert highlighting/checkboxes
+        document.getElementById("image-highlighting-edit-holder").style.display = "none";
+    }
+    //Init user and show list of images
+    firebase.auth().onAuthStateChanged(async function (user) {
+        if (user) {
+            await initClientDatabase();
+            //Modes that support image upload & selection
+            if (["report-card"].indexOf(mode) !== -1) {
+                document.getElementById("image-select-holder").style.display = "block";
+                half_toggle.disabled = false;
+                updateNewCardSelector();
+            } else if (mode === "worksheet") {
+                //Find the first possible example & load images in
+                var imageFiles = extractImages();
+                if (imageFiles === null) {
+                    alert("At least one level in this group must have a front worksheet image set before you can edit the worksheet");
+                    return;
+                }
+                front_img.src = await getURL(imageFiles.Front, mode);
+                back_img.src = await getURL(imageFiles.Back, mode);
+                updateCardDrawScreen(i);
+            }
+        }
+    });
+
+    function extractImages() {
+        var partialCandidate = null;
+        var expr = new RegExp(LvlInfo[i].Regex);
+        for (const [id, lvlData] of Object.entries(extraInfo)) {
+            if (expr.test(lvlData.Name)) {//Candidate Image
+                lvlData.WorksheetSettings = lvlData.WorksheetSettings ? lvlData.WorksheetSettings : {FrontImage: "", BackImage: ""};
+                var front = lvlData.WorksheetSettings.FrontImage;
+                var back = lvlData.WorksheetSettings.BackImage;
+                //Both are images, use them
+                if (front !== "" && back !== "") {
+                    return {Front: front, Back: back};
+                } else if (front !== "" && partialCandidate === null) {
+                    //Only front is set, possible partial
+                    partialCandidate = {Front: front, Back: back};
+                }
+            }
+        }
+        return partialCandidate;
+    }
+}
 
 async function updateCardDrawScreen(i) {
     visualEditorI = i;
     if (i === -1) {
         return;
     }
-    half_toggle.checked = getPrintSetting("isHalf", LvlInfo[i], false);
-    new_card_img_select.value = getPrintSetting("Image", LvlInfo[i], "");
-    front_img.src = await getURL(LvlInfo[i].PrintSettings.Image);
+    if (skillModes.indexOf(mode) !== -1) {
+        half_toggle.checked = getPrintSetting("isHalf", LvlInfo[i], false);
+        new_card_img_select.value = getPrintSetting("Image", LvlInfo[i], "");
+        front_img.src = await getURL(LvlInfo[i].PrintSettings.Image, mode);
+    }
     front_img.onload = function () {
         var frontRectBox = front_img.getBoundingClientRect();
         frontRect = {top: front_img.offsetTop + 30, right: front_img.offsetLeft + frontRectBox.width, bottom: front_img.offsetTop + frontRectBox.height, left: front_img.offsetLeft};
     };
-    document.getElementById("commentoption").disabled = !LvlInfo[i].Settings.CommentEnabled;
-    new_card_back_img_select.value = getPrintSetting("BackImage", LvlInfo[i], "");
-    var backUrl = await getURL(LvlInfo[i].PrintSettings.BackImage);
-    back_img.src = backUrl;
-    if (backUrl !== "") {
+    if (textTypes.filter((type) => type.Value === "comment")[0].Modes.indexOf(mode) !== -1) {
+        document.getElementById("commentoption").disabled = !LvlInfo[i].Settings.CommentEnabled;
+    }
+    if (skillModes.indexOf(mode) !== -1) {
+        new_card_back_img_select.value = getPrintSetting("BackImage", LvlInfo[i], "");
+        var backUrl = await getURL(LvlInfo[i].PrintSettings.BackImage, mode);
+        back_img.src = backUrl;
+    }
+    if (back_img.src !== "") {
         back_img.onload = function () {
             var backRectBox = back_img.getBoundingClientRect();
             backRect = {top: back_img.offsetTop + 30, right: back_img.offsetLeft + backRectBox.width, bottom: back_img.offsetTop + backRectBox.height, left: back_img.offsetLeft};
             DrawExistingText();
-            DrawSkills();
-            DrawMustSees();
+            if (skillModes.indexOf(mode) !== -1) {
+                DrawSkills();
+                DrawMustSees();
+            }
         };
     } else {
         var backRectBox = back_img.getBoundingClientRect();
         backRect = {top: back_img.offsetTop + 30, right: back_img.offsetLeft + backRectBox.width, bottom: back_img.offsetTop + backRectBox.height, left: back_img.offsetLeft};
         DrawExistingText();
-        DrawSkills();
-        DrawMustSees();
+        if (skillModes.indexOf(mode) !== -1) {
+            DrawSkills();
+            DrawMustSees();
+        }
     }
-    var isWeakLetterHighlighted = LvlInfo[i].Settings.HighlightWeakLetter ? LvlInfo[i].Settings.HighlightWeakLetter : false;
-    if (isWeakLetterHighlighted === true) {
-        markup.classList.add("highlightweak");
-        groupingHolder.classList.add("highlightweak");
+    if (skillModes.indexOf(mode) !== -1) {
+        var isWeakLetterHighlighted = LvlInfo[i].Settings.HighlightWeakLetter ? LvlInfo[i].Settings.HighlightWeakLetter : false;
+        if (isWeakLetterHighlighted === true) {
+            markup.classList.add("highlightweak");
+            groupingHolder.classList.add("highlightweak");
+        }
     }
 }
 
-window.onload = async function () {
-    firebase.auth().onAuthStateChanged(async function (user) {
-        if (user) {
-            await initClientDatabase();
-            updateNewCardSelector();
-        }
-    });
-};
+window.addEventListener("load", async function () {
+
+});
 
 function DrawMustSees() {
     if (LvlInfo[i].MustSees) {
@@ -236,7 +327,7 @@ new_card_img_set.onclick = async function () {
     if (visualEditorI === -1) {
         return;
     }
-    front_img.src = await getURL(new_card_img_select.value);
+    front_img.src = await getURL(new_card_img_select.value, mode);
     LvlInfo[visualEditorI].PrintSettings.Image = new_card_img_select.value;
 };
 
@@ -244,7 +335,7 @@ new_card_back_img_set.onclick = async function () {
     if (visualEditorI === -1) {
         return;
     }
-    back_img.src = await getURL(new_card_back_img_select.value);
+    back_img.src = await getURL(new_card_back_img_select.value, mode);
     LvlInfo[visualEditorI].PrintSettings.BackImage = new_card_back_img_select.value;
 };
 
@@ -252,13 +343,13 @@ async function updateNewCardSelector() {
     clearChildren(new_card_img_select);
     clearChildren(new_card_back_img_select);
     var listedImages = null;
-    await storage.ref(Organization + "/").listAll().then((res) => {
+    await storage.ref(Organization + "/" + mode).listAll().then((res) => {
         listedImages = res;
         return;
     });
     for (var x = 0; x < listedImages.items.length; x++) {
         var opt = document.createElement("option");
-        var path = listedImages.items[x].fullPath.split("/")[1];
+        var path = listedImages.items[x].fullPath.split("/")[2];
         opt.value = path;
         opt.textContent = path;
         new_card_img_select.appendChild(opt);
@@ -300,7 +391,7 @@ new_card_img_upload.addEventListener('change', function () {
     fileReader.readAsDataURL(new_card_img_upload.files[0]);
 
     async function sendImage(imgData, filename, type) {
-        return send_http_request("2/add/image", imgData, [["name", filename], ["type", type]]);
+        return send_http_request("2/add/image", imgData, [["name", filename], ["type", type], ["mode", mode]]);
     }
 });
 
@@ -310,8 +401,8 @@ const new_txt_variable = document.getElementById("variablefont-input");
 const new_txt_type = document.getElementById("text-type-select");
 const new_text_insert = document.getElementById("create-text-btn");
 
-const text_prompts = {level: "Current Level", nextlevel: "Next Level to Register In", session: "Current Session Name", instructor: "Truncated Instructor Name", student: "Student Name", barcode: "Course Code", comment: "Comment Text Content", custom: "Select to edit text", facility: "Facility Name", facility_short: "Facility Shortform",time_modifier: "Class Type",time_start_12:"Start Time"};
 document.body.onclick = function (e) {
+    //TODO: Path is null, click in blank area to clear UI function
     if (document.getElementById("controlbar") && e.path.indexOf(document.getElementById("controlbar")) === -1 && e.path.indexOf(markup) === -1) {
         clearBar();
         if (isResizeActive() === false) {
@@ -392,6 +483,7 @@ function createControlInput(bindTo, Type, Starting, toolTip, EventHandler) {
 }
 
 new_text_insert.onclick = function (event) {
+    console.log(visualEditorI);
     if (!LvlInfo[visualEditorI].Text) {
         LvlInfo[visualEditorI].Text = [];
     }
@@ -709,6 +801,7 @@ function bindMoveRelease(e) {
     var oldTop = loc.TopLeft.y;
     var newAbsCoords = {x: parseInt(currentElement.style.left), y: parseInt(currentElement.style.top)};
     loc.Side = getSide({x: newAbsCoords.x, y: newAbsCoords.y});
+    console.log("Picked side " + loc.Side);
     loc.TopLeft.x = Math.round(newAbsCoords.x - getRect({x: newAbsCoords.x, y: newAbsCoords.y}).left);
     loc.TopLeft.y = Math.round(newAbsCoords.y - getRect({x: newAbsCoords.x, y: newAbsCoords.y}).top);
     var yOffset = loc.TopLeft.y - oldTop;
@@ -911,11 +1004,13 @@ function checkGroupingOverlap(group, allowedDistance) {
 }
 
 function getSide(TopLeft) {
-    return checkSide(frontRect) === true ? 0 : (checkSide(backRect) === true ? 1 : null);
-    function checkSide(rect) {
-        return TopLeft.x >= rect.left && TopLeft.x <= rect.right &&
-                TopLeft.y >= rect.top && TopLeft.y <= rect.bottom;
-    }
+    return TopLeft.y > backRect.top ? 1 : 0;
+    //Old code, more complicated and failed on anything strictly out of bounds
+    //return checkSide(frontRect) === true ? 0 : (checkSide(backRect) === true ? 1 : null);
+    /*function checkSide(rect) {
+     return TopLeft.x >= rect.left && TopLeft.x <= rect.right &&
+     TopLeft.y >= rect.top && TopLeft.y <= rect.bottom;
+     }*/
 }
 
 function getRect(TopLeft) {
@@ -1041,10 +1136,15 @@ function drawTextElement(Data) {
     markup.appendChild(txtholder);
 
     function getPrompt(Data) {
+        console.log(Data);
         if (Data.Type === "custom") {
-            return Data.Content ? Data.Content : text_prompts[Data.Type];
+            return Data.Content ? Data.Content : extractPrompt(Data.Type);
         } else {
-            return text_prompts[Data.Type];
+            return extractPrompt(Data.Type);
+        }
+
+        function extractPrompt(Type) {
+            return textTypes.filter((entry) => entry.Value === Type)[0].Prompt;
         }
     }
 }

@@ -1,4 +1,4 @@
-/* global LevelConfigs, clientDb, initClientDatabase, firebase, email_pattern, Settings, resetloader */
+/* global LevelConfigs, clientDb, initClientDatabase, firebase, email_pattern, Settings, resetloader, Organization, createElement */
 
 var GroupingData = null;
 var isLevelEdit = false;
@@ -231,9 +231,10 @@ async function generateLvlGroupingSettingsList() {
 
     function createBtns(i, length) {
         var box = document.createElement("div");
-        createLvlSettingListBtn("Name", box, bindChangeName, i, null);
+        createLvlSettingListBtn("Name", box, bindNameChange, i, null);
         createLvlSettingListBtn("Match", box, bindMatchChange, i, null);
         createLvlSettingListBtn("Color", box, bindColorChange, i, null);
+        createLvlSettingListBtn("Worksheet", box, bindWorksheetChange, i, null);
         var visibleTxt = "Visible: " + (GroupingData[i].Visible === true ? "Yes" : "No");
         createLvlSettingListBtn(visibleTxt, box, bindVisibleToggle, i, GroupingData[i].Visible === true ? "shown" : "hidden");
         var autosortTxt = "Autosort: " + (GroupingData[i].Autosort === true ? "On" : "Off");
@@ -294,6 +295,7 @@ async function generateLvlGroupingSettingsList() {
     function bindColorChange(btn, i) {
         btn.onclick = function () {
             resetloader(false, colormenu, "block", false);
+            document.getElementById("applyNoColor").style.display = "none";
             document.getElementById("color-input").value = GroupingData[i].Color;
             getUserInput().then((newVal) => {
                 resetloader(false, null, null, false);
@@ -308,6 +310,18 @@ async function generateLvlGroupingSettingsList() {
                 };
             });
         }
+    }
+    
+    function bindWorksheetChange(button, i) {
+        button.onclick = function () {
+            var editWindow = window.open("../inline-html/card-editor.html", "Card Editor", 'left=0,top=0,width=' + window.innerWidth + ',height=' + window.innerHeight);
+            editWindow.allLvlInfo = GroupingData;
+            editWindow.Id = i;
+            editWindow.extraInfoPassthrough = Levels;
+            editWindow.addEventListener("load", function () {
+                editWindow.setMode("worksheet");
+            });
+        };
     }
 
     function bindMatchChange(btn, i) {
@@ -331,7 +345,7 @@ async function generateLvlGroupingSettingsList() {
         }
     }
 
-    function bindChangeName(btn, i) {
+    function bindNameChange(btn, i) {
         btn.onclick = function () {
             var newName = prompt("Enter new name for group " + GroupingData[i].Name + ":");
             if (newName !== "" && newName !== null) {
@@ -392,20 +406,6 @@ async function generateLvlSettingsList() {
             }
         }
         var lbl = document.createElement("label");
-        /*if (isFull && (!NextLvlDetails[i]["PASS"])) {TODO
-         //potential alert icon
-         var alertholder = document.createElement("div");
-         var alertico = document.createElement("img");
-         alertico.src = "../images/cross.png";
-         alertholder.appendChild(alertico);
-         var infotext = document.createElement("label");
-         infotext.className = "alerttext";
-         infotext.textContent = "Missing Next Level Options";
-         infotext.title = "Ensure that 'Passing Options' has at least 1 level selected";
-         alertholder.appendChild(infotext);
-         container.appendChild(alertholder);
-         }*/
-        //
         lbl.textContent = lvl.Name;
         container.appendChild(lbl);
         var typelbl = document.createElement("label");
@@ -490,13 +490,61 @@ function bindOnLvlSettingChange(item) {//binding function
         setLevelEdit(true);
     };
 }
-function updateEditBtn(id) {
+
+const worksheet_upload_btn = document.getElementById("worksheet-image-upload-btn");
+const worksheet_upload_input = document.getElementById("worksheet-image-upload");
+const worksheet_upload_front = document.getElementById("worksheet-front-img-select");
+const worksheet_upload_back = document.getElementById("worksheet-back-img-select");
+
+const storage = firebase.app().storage("gs://report-cards-6290-uploads");
+
+async function initEditPanel(id, lvl) {
+    lvl.WorksheetSettings = lvl.WorksheetSettings ? lvl.WorksheetSettings : {FrontImage:"",BackImage:""};
+    //sent enabled/disabled
+    editorBtn.disabled = lvl === null;
+    worksheet_upload_btn.disabled = lvl === null;
+    worksheet_upload_front.disabled = lvl === null;
+    worksheet_upload_back.disabled = lvl === null;
+    //Handle edit button opening new window
     editorBtn.onclick = function () {
         var editWindow = window.open("../inline-html/card-editor.html", "Card Editor", 'left=0,top=0,width=' + window.innerWidth + ',height=' + window.innerHeight);
         editWindow.allLvlInfo = Levels;
         editWindow.Id = id;
+        editWindow.addEventListener("load", function () {
+            editWindow.setMode("report-card");
+        });
+    };
+    //Populate Selectors
+    clearChildren(worksheet_upload_front);
+    clearChildren(worksheet_upload_back);
+    var listedImages = null;
+    await storage.ref(Organization + "/worksheet").listAll().then((res) => {
+        listedImages = res;
+        return;
+    });
+    for (var x = 0; x < listedImages.items.length; x++) {
+        var path = listedImages.items[x].fullPath.split("/")[2];
+        var opt = createElement("option",worksheet_upload_front,path,null);
+        opt.value = path;
+        opt = createElement("option",worksheet_upload_back,path,null);
+        opt.value = path;
+    }
+    createElement("option",worksheet_upload_front,"No Image",null).value = "";
+    createElement("option",worksheet_upload_back,"No Image",null).value = "";
+    worksheet_upload_front.value = lvl.WorksheetSettings.FrontImage;
+    worksheet_upload_back.value = lvl.WorksheetSettings.BackImage;
+    //Handle Selector Changes
+    worksheet_upload_front.onchange = function(){
+        lvl.WorksheetSettings.FrontImage = worksheet_upload_front.value;
+        setLevelEdit(true);
+    };
+    
+    worksheet_upload_back.onchange = function(){
+        lvl.WorksheetSettings.BackImage = worksheet_upload_back.value;
+        setLevelEdit(true);
     };
 }
+
 function generateMainLevelConfig(id, lvl) {
     initSettings(id, lvl);
     initNextLevels(lvl);
@@ -505,8 +553,7 @@ function generateMainLevelConfig(id, lvl) {
     if (lvl === null) {//Don't render full view if partial level, only next info
         return;
     }
-    editorBtn.disabled = false;
-    updateEditBtn(id);
+    initEditPanel(id, lvl);
 
     function initMainConfig(id, lvl) {
         clearChildren(mainLevelConfig);
@@ -838,7 +885,7 @@ function generateModifierList() {
                 var newName = prompt("Enter new modifier name:").escapeJSON();
                 var timeLength = prompt("Enter modifier class length (minutes): ");
                 if (newName && newName !== "" && timeLength && !isNaN(parseInt(timeLength))) {
-                    modifiers.push({Name: newName, UniqueID: calculateUniqueID(newName, modifiers), Duration: parseInt(timeLength)});
+                    modifiers.push({Name: newName, UniqueID: calculateUniqueID(newName, modifiers), Duration: parseInt(timeLength), Color: null});
                     createListElement(modifiers.length - 1);
                 }
                 addbtn.remove();
@@ -857,6 +904,7 @@ function generateModifierList() {
         newDiv.appendChild(txtlbl);
         newDiv.appendChild(createButton("Rename", bindRename, pos));
         newDiv.appendChild(createButton("Duration", bindDuration, pos));
+        newDiv.appendChild(createButton("Color", bindColor, pos));
         newDiv.appendChild(createButton("Delete", bindDelete, pos));
         modifier_list.appendChild(newDiv);
         function createButton(txt, bindFunction, pos) {
@@ -888,6 +936,33 @@ function generateModifierList() {
                 lbl.textContent = modifiers[pos].Name + ": " + modifiers[pos].Duration + " Minutes";
             }
         };
+    }
+
+    function bindColor(button, div, pos) {
+        button.onclick = function () {
+            document.getElementById("applyNoColor").style.display = "block";
+            resetloader(false, colormenu, "block", false);
+            document.getElementById("color-input").value = modifiers[pos].Color;
+            getUserInput().then((val) => {
+                modifiers[pos].Color = val;
+                resetloader(false, null, null, false);
+            }).catch(() => {
+                modifiers[pos].Color = null;
+                resetloader(false, null, null, false);
+            });
+        };
+
+        function getUserInput() {
+            return new Promise((resolve, reject) => {
+                document.getElementById("applyColor").onclick = function () {
+                    resolve(document.getElementById("color-input").value);
+                };
+
+                document.getElementById("applyNoColor").onclick = function () {
+                    reject();
+                };
+            });
+        }
     }
 
     function bindDelete(button, div, pos) {
@@ -1580,4 +1655,28 @@ window.onload = function () {
         alert('Unexpected error logging in: please check your connection or try later' + error); //TODO:redirect
     });
 
+    //Handle worksheet upload button
+    worksheet_upload_input.addEventListener('change', function () {
+        var fileReader = new FileReader();
+        fileReader.onload = function () {
+            sendImage(fileReader.result.split(",")[1], worksheet_upload_input.files[0].name, worksheet_upload_input.files[0].type).then(function (r) {
+                var selectOption = document.createElement("option");
+                var imgName = worksheet_upload_input.files[0].name;
+                selectOption.textContent = imgName;
+                selectOption.value = imgName;
+                worksheet_upload_front.appendChild(selectOption);
+                var backSelectOption = document.createElement("option");
+                backSelectOption.value = imgName;
+                backSelectOption.textContent = imgName;
+                worksheet_upload_back.appendChild(backSelectOption);
+            }).catch(function (err) {
+                console.log(err);
+            });
+        };
+        fileReader.readAsDataURL(worksheet_upload_input.files[0]);
+
+        async function sendImage(imgData, filename, type) {
+            return send_http_request("2/add/image", imgData, [["name", filename], ["type", type], ["mode", "worksheet"]]);
+        }
+    });
 };
