@@ -85,56 +85,81 @@ function getUserToken() {
     });
 }
 
+var levelOrderData = [];
 async function initSelectorScreen(AppendTo) {//.Regex, .Name .Autosort
-    await getCompleteLevels().then((lvls) => {
-        clientDb.ref("Level-Grouping").once('value').then((snap) => {
-            var rawGrouping = snap.val() ? snap.val() : [];
-            var groupingData = [];
-            for (var i = 0; i < rawGrouping.length; i++) {
-                if (rawGrouping[i].Visible === true) {
-                    groupingData.push(rawGrouping[i]);
-                }
-            }
-            for (var g = 0; g < groupingData.length; g++) {
-                groupingData[g].Levels = [];
-                groupingData[g].Ids = [];
-                for (const [id, lvlinfo] of Object.entries(lvls)) {
-                    if (new RegExp(groupingData[g].Regex).test(lvlinfo.Name) === true) {
-                        groupingData[g].Levels.push(lvlinfo.Name);
-                        groupingData[g].Ids.push(id);
+    return new Promise(async(resolve, reject) => {
+        await getCompleteLevels().then((lvls) => {
+            clientDb.ref("Level-Grouping").once('value').then((snap) => {
+                var rawGrouping = snap.val() ? snap.val() : [];
+                var groupingData = [];
+                for (var i = 0; i < rawGrouping.length; i++) {
+                    if (rawGrouping[i].Visible === true) {
+                        groupingData.push(rawGrouping[i]);
                     }
                 }
-                if (groupingData[g].Autosort && groupingData[g].Autosort === true) {
-                    groupingData[g].Levels.sort();
+                for (var g = 0; g < groupingData.length; g++) {
+                    groupingData[g].Levels = [];
+                    groupingData[g].Ids = [];
+                    for (const [id, lvlinfo] of Object.entries(lvls)) {
+                        if (new RegExp(groupingData[g].Regex).test(lvlinfo.Name) === true) {
+                            groupingData[g].Levels.push(lvlinfo.Name);
+                            groupingData[g].Ids.push(id);
+                        }
+                    }
+                    if (groupingData[g].Autosort && groupingData[g].Autosort === true) {
+                        groupingData[g].Levels.sort();
+                    }
                 }
-            }
-            groupingData.forEach((Group) => {
-                var group = document.createElement("optgroup");
-                AppendTo.appendChild(group);
-                group.label = Group.Name;
-                Group.Levels.forEach((LevelName, index) => {
-                    var opt = document.createElement("option");
-                    opt.value = Group.Ids[index];
-                    opt.textContent = LevelName;
-                    group.appendChild(opt);
+                groupingData.forEach((Group) => {
+                    var group = document.createElement("optgroup");
+                    AppendTo.appendChild(group);
+                    group.label = Group.Name;
+                    Group.Levels.forEach((LevelName, index) => {
+                        var opt = document.createElement("option");
+                        opt.value = Group.Ids[index];
+                        opt.textContent = LevelName;
+                        group.appendChild(opt);
+                        levelOrderData.push(parseInt(Group.Ids[index]));
+                    });
                 });
+                resolve();
             });
         });
     });
 }
 
+//Uses a workaround on existing code, can be reformatted later
+async function sortLevelsForCompare() {
+    if (levelOrderData.length === 0) {
+        var tempSel = document.createElement("select");
+        await initSelectorScreen(tempSel);
+        tempSel.remove();
+    }
+    return;
+}
+
+function levelIdCompare(lv1, lv2) {
+    return levelOrderData.indexOf(lv1) - levelOrderData.indexOf(lv2);
+}
+
+var completeGotten = false;
 async function getCompleteLevels() {
     return new Promise((resolve, reject) => {
-        clientDb.ref("Levels").once('value').then((snap) => {
-            var allLvlRaw = snap.val();
-            for (const [id, lvlRaw] of Object.entries(allLvlRaw)) {
-                Levels[id] = processLoadedLevel(lvlRaw);
-            }
+        if (completeGotten === false) {
+            clientDb.ref("Levels").once('value').then((snap) => {
+                var allLvlRaw = snap.val();
+                for (const [id, lvlRaw] of Object.entries(allLvlRaw)) {
+                    Levels[id] = processLoadedLevel(lvlRaw);
+                }
+                completeGotten = true;
+                resolve(Levels);
+            }).catch((e) => {
+                console.log(e);
+                reject(null);
+            });
+        } else {
             resolve(Levels);
-        }).catch((e) => {
-            console.log(e);
-            reject(null);
-        });
+        }
     });
 }
 
@@ -217,7 +242,7 @@ Array.prototype.move = function (from, to) {
 };
 
 async function getURL(imgName, mode) {
-    return getUrlInternal(imgName,mode,Organization);
+    return getUrlInternal(imgName, mode, Organization);
 }
 
 async function getUrlInternal(imgName, mode, org) {

@@ -1,4 +1,4 @@
-/* global firebase, initClientDatabase, clientDb, XLSX, getSheetModifier, noteIndicators, createElement, currentTime */
+/* global firebase, initClientDatabase, clientDb, XLSX, getSheetModifier, noteIndicators, createElement, currentTime, levelIdCompare */
 
 const storage = firebase.app().storage("gs://report-cards-6290-uploads");
 const loadspinner = document.getElementById("loadspinner");
@@ -463,14 +463,26 @@ function getSheetColor(sheet) {
     if (!Levels[LevelId] && Modifier === null) {
         return "#ffffff";
     }
-    var LevelName = Levels[LevelId].Name;
-    for (var g = 0; g < GroupingData.length; g++) {
-        if (GroupingData[g].Regex.test(LevelName) === true) {
-            var color = GroupingData[g].Color;
-            return "rgba(" + HexToDecimal(color, 1) + "," + HexToDecimal(color, 2) + "," + HexToDecimal(color, 3) + ",0.22)";
-        }
+    var group = getSheetGroup(sheet);
+    if (group) {
+        var color = group.Color;
+        return "rgba(" + HexToDecimal(color, 1) + "," + HexToDecimal(color, 2) + "," + HexToDecimal(color, 3) + ",0.22)";
+    } else {
+        return "#ffffff";
     }
-    return "#ffffff";
+}
+
+function getSheetGroup(sheet, levelName) {
+    var levelId = levelName ? levelName : getClassProperty(sheet, "Level");
+    if (Levels[levelId]) {
+        for (var g = 0; g < GroupingData.length; g++) {
+            if (GroupingData[g].Regex.test(Levels[levelId].Name) === true) {
+                return GroupingData[g];
+            }
+        }
+    } else {
+        return null;
+    }
 }
 
 //Function to calculate data for main table
@@ -675,7 +687,7 @@ window.onload = function () {
     const worksheetInstructorBtn = document.getElementById("worksheet-instructor-btn");
     const worksheetLevelBtn = document.getElementById("worksheet-level-btn");
     const worksheetAllRadio = document.getElementById("worksheet-all-radio");
-    const worksheetSelectRadio = document.getElementById("worksheet-radio-radio");
+    const worksheetSelectRadio = document.getElementById("worksheet-select-radio");
     const worksheetSelect = document.getElementById("worksheet-select");
 
     const worksheetFacilitySelect = document.getElementById("worksheet-facility-select");
@@ -697,6 +709,7 @@ window.onload = function () {
         worksheetInstructorBtn.classList.add("print-selected");
         worksheetLevelBtn.classList.remove("print-selected");
         worksheetAllRadio.checked = true;
+        generateWorksheetPrintSummary();
         renderWorksheetSelect();
     };
 
@@ -704,8 +717,16 @@ window.onload = function () {
         worksheetInstructorBtn.classList.remove("print-selected");
         worksheetLevelBtn.classList.add("print-selected");
         worksheetAllRadio.checked = true;
+        generateWorksheetPrintSummary();
         renderWorksheetSelect();
     };
+
+    worksheetSelect.onchange = function () {
+        generateWorksheetPrintSummary();
+        worksheetSelectRadio.click();
+    };
+    worksheetAllRadio.onchange = generateWorksheetPrintSummary;
+    worksheetSelectRadio.onchange = generateWorksheetPrintSummary;
 
     function renderWorksheetSelect() {
         clearChildren(worksheetSelect);
@@ -718,6 +739,8 @@ window.onload = function () {
         } else {
             initSelectorScreen(worksheetSelect);
         }
+        //Show the list of levels to be printed
+        generateWorksheetPrintSummary();
     }
 
     document.getElementById("print-worksheet-button").onclick = function () {
@@ -736,8 +759,53 @@ window.onload = function () {
             }
         }
         var timeblockName = worksheetFacilitySelect.value + "---" + worksheetTimeblockSelect.value;
+        //order by level
+        if (printData.isOrderByInstructor === false) {
+            printData.Sheets.sort((entry1, entry2) => {
+                var entry1LevelId = scheduleData[entry1.Instructor][entry1.Sheet].Level;
+                var entry2LevelId = scheduleData[entry2.Instructor][entry2.Sheet].Level;
+                return levelIdCompare(entry1LevelId, entry2LevelId);
+            });
+        }
         run_worksheet_generation(scheduleData, People, printData, (editMode ? timeblockName : currentTime));
     };
+
+    const worksheetPrintSummary = document.getElementById("worksheet-print-list");
+    async function generateWorksheetPrintSummary() {
+        await sortLevelsForCompare();
+        var isOrderByInstructor = worksheetInstructorBtn.classList.contains("print-selected");
+        var filterValue = worksheetAllRadio.checked === true ? -1 : parseInt(worksheetSelect.value);
+        var results = new Map();
+        for (var i = 0; i < scheduleData.length; i++) {
+            for (var s = 0; s < scheduleData[i].length; s++) {
+                if ((isOrderByInstructor === true && (filterValue === -1 || i === filterValue)) ||
+                        (isOrderByInstructor === false && (filterValue === -1 || scheduleData[i][s].Level === filterValue))) {
+                    var lvlName = scheduleData[i][s].Level;
+                    if (results.has(lvlName)) {
+                        results.set(lvlName, results.get(lvlName) + 1);
+                    } else {
+                        results.set(lvlName, 1);
+                    }
+                }
+            }
+        }
+        var finalResult = new Map();
+        //Sort by level
+        [...results.keys()].sort(levelIdCompare).forEach((k) => {
+            finalResult.set(k, results.get(k));
+        });
+        clearChildren(worksheetPrintSummary);
+        const list = createElement("ul", worksheetPrintSummary);
+        finalResult.forEach((count, lvlId) => {
+            var lvlName = Levels[lvlId] ? Levels[lvlId].Name : lvlId;
+            //Not assigned to a group || (no group || group does not have text)
+            var isNotAssigned = (lvlId === lvlName) || (lvlId !== lvlName && (!getSheetGroup(null, lvlId) || !getSheetGroup(null, lvlId).Text));
+            //if level exists (no worksheet settings || (no front image && no back image)
+            //if level does not exist => true
+            var noImageGraphic = Levels[lvlId] ? !Levels[lvlId].WorksheetSettings || (Levels[lvlId].WorksheetSettings.FrontImage === "" && Levels[lvlId].WorksheetSettings.BackImage === "") : true;
+            createElement("li", list, "x" + count + " - " + lvlName, (isNotAssigned || noImageGraphic) ? "nographic" : "");
+        });
+    }
 
     const searchBar = document.getElementById("searchBar");
     const controlSection = document.getElementById("controlSection");

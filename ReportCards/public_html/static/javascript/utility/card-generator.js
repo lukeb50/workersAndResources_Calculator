@@ -5,6 +5,7 @@ var includeGraphics = true;
 var isDsMode = false;
 var Facilities = {};
 var Timeblocks = [];
+
 function startCardGenerator(isDs, Faci, Time) {
     isDsMode = isDs ? isDs !== undefined : false;
     Facilities = Faci;
@@ -69,6 +70,8 @@ async function run_card_generation(SheetData, PrintOptions, Instructor) {
         for (var x = 0; x < Tags.length; x++) {//Delete extra tags
             Tags[x].remove();
         }
+        doc.getElementById("printspinner").style.display = "none";
+        doc.getElementById("print").disabled = false;
     };
 }
 
@@ -116,6 +119,8 @@ async function run_worksheet_generation(SheetData, InstructorData, PrintOptions,
         for (var x = 0; x < Tags.length; x++) {//Delete extra tags
             Tags[x].remove();
         }
+        doc.getElementById("printspinner").style.display = "none";
+        doc.getElementById("print").disabled = false;
     };
 }
 
