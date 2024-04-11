@@ -1282,7 +1282,7 @@ function extractExcelClasses(data) {
             if (row.Meta1 && row.Meta1 === "Time:") {//Handle TimeStart
                 builtClass.TimeStart = convertToTimeStartTwelveHour(row.Meta2); //Meta2 = The start time formatted as: x AM|PM
                 if (!isNumber(builtClass.Level)) {
-                    builtClass.Duration = convertToTimeStartTwelveHour(row.Meta4) - convertToTimeStartTwelveHour(row.Meta2);
+                    builtClass.Duration = convertToTimeStartTwelveHour(row.Meta3.substring(3)) - convertToTimeStartTwelveHour(row.Meta2);
                 }
                 ;
             } else if (row.Meta1 && row.Meta1 === "Weekdays:") {
