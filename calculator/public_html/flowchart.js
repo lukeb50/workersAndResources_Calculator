@@ -426,7 +426,7 @@ function render(resourceToShow = "*", viewsToShow = ["production"]) {
         }, null, selectedBuildings, viewsToShow);
         //First step creates line for resources that can use a direct line, logs others for spines
         var spineResources = new Array(grid.length).fill([]);
-        resourceStages.keys().forEach((resource) => {
+        Array.from(resourceStages.keys()).forEach((resource) => {
             var inputCount = inputs[resource] ? Object.keys(inputs[resource]).length : 0;
             var outputCount = outputs[resource] ? Object.keys(outputs[resource]).length : 0;
             if (inputCount === 1 && outputCount === 1) {
@@ -529,7 +529,7 @@ function render(resourceToShow = "*", viewsToShow = ["production"]) {
         for (var col = 0; col < grid.length - 1; col++) {//-1 as spine columns are inside regular columns
             columnSpines[col] = [];
             columnSpineBuildings[col] = [];
-            resourceStages.keys().forEach((resource) => {
+            Array.from(resourceStages.keys()).forEach((resource) => {
                 if (spineResources.indexOf(resource) === -1) {
                     return;
                 }
