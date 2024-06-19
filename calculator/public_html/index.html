@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Calculator</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href = "flowchart.css">
+        <link rel="stylesheet" href = "customElements/imageSelect.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <div id="mainContainer">
+            <div id="topbar">
+                <span>
+                    <select-image id="resourceFilter"></select-image>
+                </span>
+                <hr>
+                <span id="calculatorSpan" style="display:none">
+                    <label>Required Production per Day: </label>
+                    <input id="calculatorPerDayInput" min="0" max="1000" value="" type="number">
+                    <label>Average Productivity: </label>
+                    <input id="calculatorAvgProductivityInput" min="0" max="100" value="100" type="number">
+                    <label>Mine Quality: </label>
+                    <input id="calculatorMineQualityInput" min="0" max="100" value="100" type="number">
+                </span>
+                <hr>
+                <span id="dlcOptionSpan">
+                    <select-checkbox id="dlcDropdown">
+                        <span value="">
+                            <label>DLC</label>
+                        </span>
+                        <span value="Ukraine">
+                            <input id="ukraineDlcCheck" type="checkbox">
+                            <img src="dlcIcons/Ukraine.png">
+                            <label for="ukraineDlcCheck">Ukraine</label>
+                        </span>
+                    </select-checkbox>
+                </span>
+                <hr>
+                <span>
+                    <select-checkbox id="mechanicsDropdown">
+                        <span value="">
+                            <label>Game Mechanics</label>
+                        </span>
+                        <span value="garbage">
+                            <input id="garbageMechanicCheck" type="checkbox" checked>
+                            <img src = "garbageIcons/mixedWaste.png">
+                            <label for="garbageMechanicCheck">Garbage</label>
+                        </span>
+                        <span value="sanitation">
+                            <input id="sanitationMechanicCheck" type="checkbox" checked>
+                            <img src= "resourceIcons/Water.png">
+                            <label for="sanitationMechanicCheck">Water & Sewage</label>
+                        </span>
+                    </select-checkbox>
+                </span>
+                <hr>
+                <span>
+                    <select-checkbox id="viewsDropdown">
+                        <span value=""><label>Views</label></span>
+                        <span value="production">
+                            <input id="viewProductionCheck" type="checkbox" checked>
+                            <img src="icons/production.png">
+                            <label for="viewProductionCheck">Production Buildings</label>
+                        </span>
+                        <span value="power">
+                            <input id="viewPowerCheck" type="checkbox">
+                            <img src="icons/electric.png">
+                            <label for="viewPowerCheck">Power Generation</label>
+                        </span>
+                        <span value="waste">
+                            <input id="viewGarbageCheck" type="checkbox">
+                            <img src="icons/waste.png">
+                            <label for="viewGarbageCheck">Waste Management</label>
+                        </span>
+                    </select-checkbox>
+                </span>
+            </div>
+            <div id="graph"></div>
+        </div>
+        <script src="flowchart.js"></script>
+        <script src="customElements/imageSelect.js"></script>
+        <script src="codeStrategies/renderStrategy.js"></script>
+    </body>
+</html>
