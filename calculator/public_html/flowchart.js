@@ -423,6 +423,7 @@ function render(resourceToShow = "*", viewsToShow = ["production"]) {
                     }
                 }
             }
+            
         }, null, selectedBuildings, viewsToShow);
         //First step creates line for resources that can use a direct line, logs others for spines
         var spineResources = new Array(grid.length).fill([]);
