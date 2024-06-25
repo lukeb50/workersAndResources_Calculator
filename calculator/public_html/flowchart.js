@@ -32,7 +32,7 @@ this.viewsDropdown.checkboxFunction = function () {
     if ((selected.length === 1 && selected.includes("production")) || selected.length === 0) {
         prodCheck.disabled = true;
         prodCheck.checked = true;
-    } else{
+    } else {
         prodCheck.disabled = false;
     }
 };
@@ -64,7 +64,8 @@ function render(resourceToShow = "*", viewsToShow = ["production"]) {
             //Push all buildings that produce resource
             if (inOutData.outputs[resource]) {
                 inOutData.outputs[resource].forEach((buildingId) => {
-                    if (selectedBuildings.indexOf(buildingId) === -1) {
+                    //isScannable ensures that selected options are respected
+                    if (selectedBuildings.indexOf(buildingId) === -1 && isScannable(buildingId, null, viewsToShow)) {
                         selectedBuildings.push(buildingId);
                         let building = getBuildingById(buildingId);
                         //Get inputs and call function on that resource
@@ -423,7 +424,7 @@ function render(resourceToShow = "*", viewsToShow = ["production"]) {
                     }
                 }
             }
-            
+
         }, null, selectedBuildings, viewsToShow);
         //First step creates line for resources that can use a direct line, logs others for spines
         var spineResources = new Array(grid.length).fill([]);
@@ -767,6 +768,9 @@ function render(resourceToShow = "*", viewsToShow = ["production"]) {
     renderFlowchartResources();
 }
 
+//finds a building ID by iterating types and categories
+//Calculates a running ID so as to not individually increment for each
+//building.
 function getBuildingInfoById(id) {
     var count = -1;
     var building = null;
@@ -892,7 +896,7 @@ function getBuildingComplexity(building) {
 //Calls the passed function on each building in the database
 //limit will only call certain categories
 //idArrayToScan can limit to specific building Ids
-//includeTypes can limit to specific building types (production,power,etc)
+//typeLimit can limit to specific building types (production,power,etc)
 function scanBuildings(func, limit = null, idArrayToScan = [], typeLimit = null) {
     var i = 0;
     var dlcToScan = dlcDropdown.getSelected();
@@ -921,6 +925,19 @@ function scanBuildings(func, limit = null, idArrayToScan = [], typeLimit = null)
         }
 }
 }
+
+function isScannable(buildingId, catLimit = null, typeLimit = null) {
+    let category = getBuildingById(buildingId).parentNode.parentNode;
+    let typeName = category.parentNode.nodeName.split("Buildings")[0];
+    let categoryName = category.nodeName;
+    if (!typeLimit || (typeLimit !== null && typeLimit.includes(typeName))) {//Type check
+        if (!catLimit || (catLimit !== null && catLimit.includes(categoryName))) {
+            return true;
+        }
+    }
+    return false;
+}
+
 async function multiFetch(...Urls) {
     //Prepare promises for Promise.all
     var promises = [];
@@ -954,6 +971,8 @@ function getRenderViewsList() {
 }
 
 const resourceFilter = document.getElementById("resourceFilter");
+const calculator = document.getElementById("calculator");
+const calculatorTopSpan = document.getElementById("calculatorSpan");
 const calcPerDayInput = document.getElementById("calculatorPerDayInput");
 function prepareMenuElements() {
     clearChildren(resourceFilter);
@@ -971,10 +990,22 @@ function prepareMenuElements() {
             }
         });
     }
+
     resourceFilter.onchange = function () {
         render(resourceFilter.value, getRenderViewsList());
-        document.getElementById("calculatorSpan").style.display = resourceFilter.value === "*" ? "none" : "block";
+        calculatorTopSpan.style.display = resourceFilter.value === "*" ? "none" : "block";
+        if (resourceFilter.value === "*") {
+            calculator.style.display = "none";
+        }
         calcPerDayInput.value = "";
+    };
+
+    document.getElementById("calculatorButton").onclick = function () {
+        if (calculator.style.display === "none") {
+            calculator.style.display = "block";
+        } else {
+            calculator.style.display = "none";
+        }
     };
 
     mechanicsDropdown.onblur = function () {

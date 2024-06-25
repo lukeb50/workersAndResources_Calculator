@@ -28,7 +28,9 @@ html,body{
     width:fit-content;
     height: 100%;
     align-content: center;
-    margin-left: 5px;
+    padding-left: 5px;
+    margin-right: 5px;
+    border-left: 1px solid rgba(255,0,0,0.4);
 }
 
 #topbar input{
@@ -44,29 +46,23 @@ html,body{
     align-items: center;
 }
 
-#topbar span input[type='number']{
-    width: 45px;
-    border:1px solid black;
-}
-
-#topbar select-image,#topbar select-checkbox{
+#topbar select-image,#topbar select-checkbox, #topbar button{
     height: 75%!important;
     border-radius: 5px;
-    background: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,1);
     vertical-align: middle;
     border: 1px solid lightgray;
+    font-size: 1em;
 }
 
-#topbar hr{
-    display: block;
-    margin:0;
-    margin-left: 5px;
-    border-color: rgba(255,0,0,0.4);
+#topbar select-image:hover,#topbar select-checkbox:hover, #topbar button:hover{
+    background: rgba(255,255,255,.7);
+    transition: 0.3s;
 }
 
 #graph{
     flex-grow: 1;
-    position: relative;
+    position: sticky;
     overflow: scroll;
     z-index: 20;
 }
@@ -289,4 +285,60 @@ html,body{
 #graph div.spineSubLine.stub{
     font-size: 7px;
     mask: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,1) 5px, rgba(255,255,255,1) calc(100% - 5px), rgba(255,255,255,0) 100%);
+}
+
+#mainGraphContainer{
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    overflow-x: hidden;
+}
+
+#calculator{
+    max-width: min(20em, 30vw);
+    background:rgba(255,0,0,0.05);
+    border-left: 2px solid rgba(255,0,0,0.4);
+    width:0px;
+    flex: 1;
+    transition: 0s;
+    padding:4px;
+    display: none;
+}
+
+#calculator h1, #calculator h3{
+    margin-top: 5px;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+#calculator h3{
+    font-weight: normal;
+}
+
+#calculator span{
+    display: block;
+    margin-bottom: 4px;
+    align-items: center;
+    display: flex;
+}
+
+#calculator span input[type="number"]{
+    border: 1px solid gray;
+    border-radius: 5px;
+    margin-right: 2px;
+    margin-left: 2px;
+}
+
+#calculator span button{
+    font-weight: bold;
+    border-radius: 10px;
+    border: 2px solid lightcoral;
+    background: white;
+    margin-left: 2px;
+
+}
+
+#calculator span img{
+    margin-right: 2px;
+    max-height: 1.5em;
 }

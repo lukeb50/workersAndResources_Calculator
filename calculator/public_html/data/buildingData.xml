@@ -839,11 +839,11 @@
                             <maxProduction>15.94</maxProduction>
                             <perWorker>0.6</perWorker>
                         </mixedWaste>
-                        <HazardousWaste>
+                        <hazardousWaste>
                             <capacity>24.5</capacity>
                             <maxProduction>0</maxProduction>
                             <perWorker>0</perWorker>
-                        </HazardousWaste>
+                        </hazardousWaste>
                     </garbage>
                     <sanitation>
                         <water>

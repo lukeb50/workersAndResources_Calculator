@@ -16,16 +16,9 @@
                 <span>
                     <select-image id="resourceFilter"></select-image>
                 </span>
-                <hr>
                 <span id="calculatorSpan" style="display:none">
-                    <label>Required Production per Day: </label>
-                    <input id="calculatorPerDayInput" min="0" max="1000" value="" type="number">
-                    <label>Average Productivity: </label>
-                    <input id="calculatorAvgProductivityInput" min="0" max="100" value="100" type="number">
-                    <label>Mine Quality: </label>
-                    <input id="calculatorMineQualityInput" min="0" max="100" value="100" type="number">
+                    <button id="calculatorButton">Production Calculator</button>
                 </span>
-                <hr>
                 <span id="dlcOptionSpan">
                     <select-checkbox id="dlcDropdown">
                         <span value="">
@@ -38,7 +31,6 @@
                         </span>
                     </select-checkbox>
                 </span>
-                <hr>
                 <span>
                     <select-checkbox id="mechanicsDropdown">
                         <span value="">
@@ -56,10 +48,9 @@
                         </span>
                     </select-checkbox>
                 </span>
-                <hr>
                 <span>
                     <select-checkbox id="viewsDropdown">
-                        <span value=""><label>Views</label></span>
+                        <span value=""><label>Building Categories</label></span>
                         <span value="production">
                             <input id="viewProductionCheck" type="checkbox" checked>
                             <img src="icons/production.png">
@@ -78,7 +69,34 @@
                     </select-checkbox>
                 </span>
             </div>
-            <div id="graph"></div>
+            <div id="mainGraphContainer">
+                <div id="graph"></div>
+                <div id="calculator">
+                    <h1>Production Calculator</h1>
+                    <h3>Configuration</h3>
+                    <span>
+                        <img src="icons/resources.png">
+                        <label>Required Production: </label>
+                        <input id="calculatorPerDayInput" min="0" max="1000" value="" type="number">
+                        <label>t/d</label>
+                        <button data-text="Enter how many tons you want to produce of the selected resource each day." onclick="alert(this.getAttribute('data-text'));">?</button>
+                    </span>
+                    <span>
+                        <img src="icons/overlay_productivity.png">
+                        <label>Average Productivity: </label>
+                        <input id="calculatorAvgProductivityInput" min="0" max="100" value="100" type="number">
+                        <label>%</label>
+                        <button data-text="Enter the average productivity of your citizens. This determine how productive all buildings will be." onclick="alert(this.getAttribute('data-text'));">?</button>
+                    </span>
+                    <span>
+                        <img src="buildingImages/tool_iron_mine.png">
+                        <label>Mine Quality: </label>
+                        <input id="calculatorMineQualityInput" min="0" max="100" value="100" type="number">
+                        <label>%</label>
+                        <button data-text="Enter the average quality of all mine buildings in order to estimate their output." onclick="alert(this.getAttribute('data-text'));">?</button>
+                    </span>
+                </div>
+            </div>
         </div>
         <script src="flowchart.js"></script>
         <script src="customElements/imageSelect.js"></script>
