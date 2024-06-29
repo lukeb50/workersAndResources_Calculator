@@ -37,16 +37,20 @@ this.viewsDropdown.checkboxFunction = function () {
     }
 };
 
-async function loadData() {
-    buildingData = null;
-    resourceData = null;
-    multiFetch("data/buildingData.xml", "data/resourceData.xml").then((xmlData) => {
-        //Get the data
-        buildingData = xmlData.get("data/buildingData.xml");
-        resourceData = xmlData.get("data/resourceData.xml");
-        graphHorizontalOffset = flowchartDiv.getBoundingClientRect().x;
-        graphVerticalOffset = flowchartDiv.getBoundingClientRect().y;
-        render("*", getRenderViewsList());
+//Resource is a passthrough for the first render
+async function loadData(resource) {
+    return new Promise((resolve, reject) => {
+        buildingData = null;
+        resourceData = null;
+        multiFetch("data/buildingData.xml", "data/resourceData.xml").then((xmlData) => {
+            //Get the data
+            buildingData = xmlData.get("data/buildingData.xml");
+            resourceData = xmlData.get("data/resourceData.xml");
+            graphHorizontalOffset = flowchartDiv.getBoundingClientRect().x;
+            graphVerticalOffset = flowchartDiv.getBoundingClientRect().y;
+            render(resource, getRenderViewsList());
+            resolve();
+        });
     });
 }
 function render(resourceToShow = "*", viewsToShow = ["production"]) {
@@ -57,6 +61,14 @@ function render(resourceToShow = "*", viewsToShow = ["production"]) {
     resourceStages = new Map();
     grid = Array.from(Array(10), () => new Array(20).fill(-1));
     clearChildren(flowchartDiv);
+    //Set url
+    var urlInfo = new URL(window.location);
+    if (resourceToShow === "*") {
+        urlInfo.searchParams.delete("resource");
+    } else {
+        urlInfo.searchParams.set("resource", resourceToShow);
+    }
+    history.pushState(null, '', urlInfo);
     //If resource-specific, calculate filter
     if (resourceToShow !== "*") {
         let inOutData = calculateInputsOutputs(false);
@@ -95,112 +107,11 @@ function render(resourceToShow = "*", viewsToShow = ["production"]) {
         similarityScores[b] = new Array(b).fill(0);
     }
     //Calculate resource complexity
-    //Load in the base resources with complexity of 0
-    scanBuildings((building) => {
-        let outputData = getRowData("outputs", building);
-        if (outputData) {
-            for (let outputResource of outputData.childNodes.entries()) {
-                let outputObject = outputResource[1];
-                let resourceName = getRowData("name", outputObject).textContent;
-                resourceStages.set(resourceName, 0);
-            }
-        }
-    }, ["Mining", "Farming"], selectedBuildings, viewsToShow);
-    //Calculate the complexities for other resources based on buildings
     let pendingBuildings = [];
     scanBuildings((building) => {
         pendingBuildings.push(building);
     }, null, selectedBuildings, viewsToShow);
-    //Function recursively calculates the production complexity of each output.
-    //Will break and assign value of 0 to any leftover resources
-    function resourceClassifier() {
-        let changesOccured = false;
-        for (var b = 0; b < pendingBuildings.length; b++) {
-            let building = pendingBuildings[b];
-            let inputData = getRowData("inputs", building);
-            let outputData = getRowData("outputs", building);
-            //if inputs present (not a mine/farm)
-            if (inputData) {
-                var countedInputs = 0;
-                var complexities = [0];
-                //See how many input resources have a complexity assigned
-                for (let inputResource of inputData.childNodes.entries()) {
-                    inputResource = inputResource[1];
-                    let resourceName = getRowData("name", inputResource).textContent;
-                    //Only inputs used directly used (ignore fuel for farms, etc)
-                    if (getRowData("nonProductionResource", inputResource) === null) {
-                        if (resourceStages.has(resourceName)) {
-                            countedInputs++;
-                            complexities.push(resourceStages.get(resourceName) + 1);
-                        } else {
-                            //One resource has no complexity, no point in continuing
-                            break;
-                        }
-                    } else {
-                        //Increment counter as the input has been "considered"
-                        countedInputs++;
-                        //Don't count the complexity, but set it to 0 if not already known,
-                        //so that the resource is known
-                        if (!resourceStages.has(resourceName)) {
-                            resourceStages.set(resourceName, 0);
-                        }
-                    }
-                }
-                //Check if all inputs have a complexity
-                if (countedInputs === inputData.childNodes.length) {
-                    if (outputData) {
-                        outputsComplexity = Math.max(...complexities);
-                        //Loop ouputs and set their complexitiy
-                        for (let outputResource of outputData.childNodes.entries()) {
-                            outputResource = outputResource[1];
-                            let resourceName = getRowData("name", outputResource).textContent;
-                            resourceStages.set(resourceName, outputsComplexity);
-                        }
-                    }
-                    //No need to revisit building
-                    changesOccured = true;
-                    pendingBuildings.splice(b, 1);
-                    b--;
-                }
-            } else {
-                //No need to revisit building
-                changesOccured = true;
-                pendingBuildings.splice(b, 1);
-                b--;
-            }
-        }
-        if (pendingBuildings.length > 0 && changesOccured === true) {
-            resourceClassifier();
-        } else if (changesOccured === false) {
-            //Get all leftover resources and account for them
-            //These buildings must have outputs, or they would have been removed on round 1
-            for (var b = 0; b < pendingBuildings.length; b++) {
-                let building = pendingBuildings[b];
-                let inputData = getRowData("inputs", building);
-                for (let inputResource of inputData.childNodes.entries()) {
-                    inputResource = inputResource[1];
-                    let resourceName = getRowData("name", inputResource).textContent;
-                    if (!resourceStages.has(resourceName)) {
-                        console.log("Setting " + resourceName + " 0");
-                        resourceStages.set(resourceName, 0);
-                    }
-                }
-                //New: Outputs
-                let outputData = getRowData("outputs", building);
-                if (outputData) {
-                    for (let outputResource of outputData.childNodes.entries()) {
-                        outputResource = outputResource[1];
-                        let resourceName = getRowData("name", outputResource).textContent;
-                        if (!resourceStages.has(resourceName)) {
-                            console.log("Setting " + resourceName + " 1");
-                            resourceStages.set(resourceName, 1);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    resourceClassifier();
+    resourceStages = resourceClassifier(pendingBuildings, selectedBuildings, viewsToShow);
     if (resourceToShow === "*") {
         prepareMenuElements();
     }
@@ -768,6 +679,113 @@ function render(resourceToShow = "*", viewsToShow = ["production"]) {
     renderFlowchartResources();
 }
 
+//Function recursively calculates the production complexity of each output.
+//Will break and assign value of 0 to any leftover resources
+function resourceClassifier(buildingsToInclude, buildingIdsToInclude, viewsToShow) {
+    var stages = new Map();
+    //Load in the base resources with complexity of 0
+    scanBuildings((building) => {
+        let outputData = getRowData("outputs", building);
+        if (outputData) {
+            for (let outputResource of outputData.childNodes.entries()) {
+                let outputObject = outputResource[1];
+                let resourceName = getRowData("name", outputObject).textContent;
+                stages.set(resourceName, 0);
+            }
+        }
+    }, ["Mining", "Farming"], buildingIdsToInclude, viewsToShow);
+    //Classifier function
+    function classify() {
+        let changesOccured = false;
+        for (var b = 0; b < buildingsToInclude.length; b++) {
+            let building = buildingsToInclude[b];
+            let inputData = getRowData("inputs", building);
+            let outputData = getRowData("outputs", building);
+            //if inputs present (not a mine/farm)
+            if (inputData) {
+                var countedInputs = 0;
+                var complexities = [0];
+                //See how many input resources have a complexity assigned
+                for (let inputResource of inputData.childNodes.entries()) {
+                    inputResource = inputResource[1];
+                    let resourceName = getRowData("name", inputResource).textContent;
+                    //Only inputs used directly used (ignore fuel for farms, etc)
+                    if (getRowData("nonProductionResource", inputResource) === null) {
+                        if (stages.has(resourceName)) {
+                            countedInputs++;
+                            complexities.push(stages.get(resourceName) + 1);
+                        } else {
+                            //One resource has no complexity, no point in continuing
+                            break;
+                        }
+                    } else {
+                        //Increment counter as the input has been "considered"
+                        countedInputs++;
+                        //Don't count the complexity, but set it to 0 if not already known,
+                        //so that the resource is known
+                        if (!stages.has(resourceName)) {
+                            stages.set(resourceName, 0);
+                        }
+                    }
+                }
+                //Check if all inputs have a complexity
+                if (countedInputs === inputData.childNodes.length) {
+                    if (outputData) {
+                        outputsComplexity = Math.max(...complexities);
+                        //Loop ouputs and set their complexitiy
+                        for (let outputResource of outputData.childNodes.entries()) {
+                            outputResource = outputResource[1];
+                            let resourceName = getRowData("name", outputResource).textContent;
+                            stages.set(resourceName, outputsComplexity);
+                        }
+                    }
+                    //No need to revisit building
+                    changesOccured = true;
+                    buildingsToInclude.splice(b, 1);
+                    b--;
+                }
+            } else {
+                //No need to revisit building
+                changesOccured = true;
+                buildingsToInclude.splice(b, 1);
+                b--;
+            }
+        }
+        if (buildingsToInclude.length > 0 && changesOccured === true) {
+            classify();
+        } else if (changesOccured === false) {
+            //Get all leftover resources and account for them
+            //These buildings must have outputs, or they would have been removed on round 1
+            for (var b = 0; b < buildingsToInclude.length; b++) {
+                let building = buildingsToInclude[b];
+                let inputData = getRowData("inputs", building);
+                for (let inputResource of inputData.childNodes.entries()) {
+                    inputResource = inputResource[1];
+                    let resourceName = getRowData("name", inputResource).textContent;
+                    if (!stages.has(resourceName)) {
+                        console.log("Setting " + resourceName + " 0");
+                        stages.set(resourceName, 0);
+                    }
+                }
+                //New: Outputs
+                let outputData = getRowData("outputs", building);
+                if (outputData) {
+                    for (let outputResource of outputData.childNodes.entries()) {
+                        outputResource = outputResource[1];
+                        let resourceName = getRowData("name", outputResource).textContent;
+                        if (!stages.has(resourceName)) {
+                            console.log("Setting " + resourceName + " 1");
+                            stages.set(resourceName, 1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    classify();
+    return stages;
+}
+
 //finds a building ID by iterating types and categories
 //Calculates a running ID so as to not individually increment for each
 //building.
@@ -974,13 +992,13 @@ const resourceFilter = document.getElementById("resourceFilter");
 const calculator = document.getElementById("calculator");
 const calculatorTopSpan = document.getElementById("calculatorSpan");
 const calcPerDayInput = document.getElementById("calculatorPerDayInput");
-function prepareMenuElements() {
+function prepareMenuElements(resourceStageMap = resourceStages) {
     clearChildren(resourceFilter);
     let allOpt = createElement("span", resourceFilter, "", "");
     allOpt.setAttribute("value", "*");
     createElement("label", allOpt, "All Resources", "");
-    if (resourceStages) {
-        var sortedResources = new Map([...resourceStages.entries()].sort((a, b) => a[1] - b[1]));
+    if (resourceStageMap) {
+        var sortedResources = new Map([...resourceStageMap.entries()].sort((a, b) => a[1] - b[1]));
         sortedResources.forEach((stage, resource) => {
             if (stage > 0) {
                 let opt = createElement("span", resourceFilter, "", "");
@@ -1042,9 +1060,26 @@ function prepareMenuElements() {
 }
 
 function handleStart() {
-    document.fonts.ready.then(() => {
-        loadData();
-        prepareMenuElements();
+    document.fonts.ready.then(async () => {
+        var urlParams = new URL(window.location).searchParams;
+        let resourceToShow = "*";
+        if (urlParams.has("resource")) {
+            resourceToShow = urlParams.get("resource");
+        }
+        await loadData(resourceToShow);
+        //Calculate stages to show in dropdown
+        let buildingsToInclude = [];
+        let buildingIdsToInclude = [];
+        scanBuildings((building, i) => {
+            buildingsToInclude.push(building);
+            buildingIdsToInclude.push(i);
+        }, null, [], null);
+        let stages = resourceClassifier(buildingsToInclude, buildingIdsToInclude, []);
+        prepareMenuElements(stages);
+        resourceFilter.setAttribute("value",resourceToShow);
+        if(resourceToShow !=="*"){
+            calculatorTopSpan.style.display = "block";
+        }
     });
 }
 

@@ -40,6 +40,7 @@ class ImageSelect extends HTMLElement {
 
     //When value is changed programatically
     attributeChangedCallback(name, oldValue, newValue) {
+        console.log("Change", oldValue, newValue);
         if (name === "value") {
             this.value = newValue;
             this.renderSelected();
@@ -49,7 +50,7 @@ class ImageSelect extends HTMLElement {
     renderSelected() {
         clearChildren(this.selectionDisplay);
         var selectedOption = this.getOption(this.value);
-        if (this.value !== "" && selectedOption) {
+        if (this.value !== "" && selectedOption !== undefined) {
             this.selectionDisplay.appendChild(selectedOption.cloneNode(true));
         }
     }
@@ -88,6 +89,8 @@ class ImageSelect extends HTMLElement {
             this.value = "";
         } else if (this.value === "") {
             this.value = this.firstElementChild.getAttribute("value");
+            this.renderSelected();
+        } else {//Render if value was set prior to loading options in
             this.renderSelected();
         }
     }
@@ -147,7 +150,7 @@ class CheckboxSelect extends ImageSelect {
 
     checkboxUpdateListener(box) {
         if (this.checkboxFunction) {
-            box.addEventListener("change",this.checkboxFunction);
+            box.addEventListener("change", this.checkboxFunction);
         }
     }
 }
