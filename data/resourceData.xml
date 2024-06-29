@@ -1,0 +1,223 @@
+<resources>
+    <resource>
+        <name>Coal Ore</name>
+        <color>#6D6157</color>
+        <textColor>white</textColor>
+    </resource>
+    <resource>
+        <name>Coal</name>
+        <color>#1E1F1F</color>
+        <textColor>white</textColor>
+    </resource>
+    <resource>
+        <name>Iron Ore</name>
+        <color>#734D4A</color>
+    </resource>
+    <resource>
+        <name>Iron</name>
+        <color>#C26137</color>
+    </resource>
+    <resource>
+        <name>Steel</name>
+        <color>#B9C0B7</color>
+    </resource>
+    <resource>
+        <name>Mechanical Components</name>
+        <color>#938B91</color>
+    </resource>
+    <resource>
+        <name>Raw Bauxite</name>
+        <color>#A33823</color>
+    </resource>
+    <resource>
+        <name>Bauxite</name>
+        <color>#D57758</color>
+    </resource>
+    <resource>
+        <name>Aluminium Oxide</name>
+        <color>#CDD4D7</color>
+        <textColor>black</textColor>
+    </resource>
+    <resource>
+        <name>Quarried Stone</name>
+        <color>#C0C5BF</color>
+    </resource>
+    <resource>
+        <name>Gravel</name>
+        <color>#A2A1A2</color>
+    </resource>
+    <resource>
+        <name>Cement</name>
+        <color>#D00D21</color>
+    </resource>
+    <resource>
+        <name>Oil</name>
+        <color>#FD960F</color>
+    </resource>
+    <resource>
+        <name>Bitumen</name>
+        <color>#424449</color>
+        <textColor>white</textColor>
+    </resource>
+    <resource>
+        <name>Uranium Ore</name>
+        <color>#848A34</color>
+    </resource>
+    <resource>
+        <name>Uranium Oxide</name>
+        <color>#724D0B</color>
+        <textColor>white</textColor>
+    </resource>
+    <resource>
+        <name>UF6</name>
+        <color>#CCE73E</color>
+    </resource>
+    <resource>
+        <name>Wood</name>
+        <color>#49342B</color>
+        <textColor>white</textColor>
+    </resource>
+    <resource>
+        <name>Crops</name>
+        <color>#F7CB15</color>
+    </resource>
+    <resource>
+        <name>Livestock</name>
+        <color>#E0DBD4</color>
+    </resource>
+    <resource>
+        <name>Chemicals</name>
+        <color>#0B6CB9</color>
+        <textColor>white</textColor>
+    </resource>
+    <resource>
+        <name>Fabric</name>
+        <color>#C79A43</color>
+    </resource>
+    <resource>
+        <name>Plastics</name>
+        <color>#77C042</color>
+    </resource>
+    <resource>
+        <name>Electrical Components</name>
+        <color>#CB2227</color>
+    </resource>
+    <resource>
+        <name>Water</name>
+        <color>#2DCEFC</color>
+    </resource>
+    <resource>
+        <name>Sewage</name>
+        <color>#5B5037</color>
+        <textColor>lightgray</textColor>
+    </resource>
+    <resource>
+        <name>Mixed Waste</name>
+        <color>#5F4433</color>
+        <textColor>lightgray</textColor>
+    </resource>
+    <resource>
+        <name>Mixed Waste (Ash)</name>
+        <color>#5F4433</color>
+        <textColor>lightgray</textColor>
+    </resource>
+    <resource>
+        <name>Hazardous Waste</name>
+        <color>#5F9260</color>
+    </resource>
+    <resource>
+        <name>Bricks</name>
+        <color>#F9934C</color>
+    </resource>
+    <resource>
+        <name>Prefab Panels</name>
+        <color>#9F9D91</color>
+    </resource>
+    <resource>
+        <name>Aluminium</name>
+        <color>#C8C8C8</color>
+    </resource>
+    <resource>
+        <name>Concrete</name>
+        <color>#CAC4BC</color>
+    </resource>
+    <resource>
+        <name>Fuel</name>
+        <color>#F32C37</color>
+    </resource>
+    <resource>
+        <name>Asphalt</name>
+        <color>#3B3C41</color>
+        <textColor>white</textColor>
+    </resource>
+    <resource>
+        <name>Electronics</name>
+        <color>#313131</color>
+        <textColor>white</textColor>
+    </resource>
+    <resource>
+        <name>Nuclear Fuel</name>
+        <color>#A9A9A9</color>
+    </resource>
+    <resource>
+        <name>Boards</name>
+        <color>#B3834C</color>
+    </resource>
+    <resource>
+        <name>Explosives</name>
+        <color>#D52F34</color>
+    </resource>
+    <resource>
+        <name>Food</name>
+        <color>#E8A86F</color>
+    </resource>
+    <resource>
+        <name>Fertilizer</name>
+        <color>#483600</color>
+        <textColor>lightgray</textColor>
+    </resource>
+    <resource>
+        <name>Liquid Fertilizer</name>
+        <color>#327F2F</color>
+    </resource>
+    <resource>
+        <name>Alcohol</name>
+        <color>#F78D04</color>
+    </resource>
+    <resource>
+        <name>Meat</name>
+        <color>#BC322D</color>
+    </resource>
+    <resource>
+        <name>Clothes</name>
+        <color>#7E85AA</color>
+    </resource>
+    <resource>
+        <name>Biological Waste</name>
+        <color>#BEA347</color>
+    </resource>
+    <resource>
+        <name>Nuclear Waste</name>
+        <color>#7E7E7E</color>
+    </resource>
+    <resource>
+        <name>Construction Waste</name>
+        <color>#9B8781</color>
+    </resource>
+    <resource>
+        <name>Metal Scrap</name>
+        <color>#CB9D65</color>
+    </resource>
+    <resource>
+        <name>Plastic Waste</name>
+        <color>#69B3F1</color>
+    </resource>
+    <resource>
+        <name>Aluminium Scrap</name>
+        <color>#AEC8F0</color>
+    </resource>
+    <resource>
+        <name></name>
+        <color>#</color>
+    </resource>
+</resources>
