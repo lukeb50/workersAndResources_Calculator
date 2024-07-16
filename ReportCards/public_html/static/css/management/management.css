@@ -1,0 +1,173 @@
+body{
+    margin:0px;
+    font-family: 'Roboto', sans-serif;
+    overflow: hidden;
+    height: 100%;
+}
+
+#loadblocker{
+    display: none;
+}
+
+#main{
+    flex: 1 1 0;
+    flex-direction: column;
+    display: flex;
+    overflow: hidden;
+}
+
+#management-topbar{
+    flex: 0 0 35px;
+    border-bottom: 2px solid var(--color-primary-dark);
+    box-sizing: border-box;
+    background: var(--color-primary-light)
+}
+
+#management-topbar *{
+    margin-left: 5px;
+    border:none;
+    height: 35px;
+}
+
+#management-topbar button{
+    border-left: 1px solid var(--color-primary-dark);
+    border-right: 1px solid var(--color-primary-dark);
+    background:transparent;
+    transition: 0.5s;
+    display: inline-block;
+}
+
+#management-topbar button:hover{
+    background:var(--color-primary-light);
+}
+
+#management-topbar select{
+    height: 80%;
+    top:11%;
+    border-radius: 5px;
+    border:1px solid var(--color-primary-dark);
+    background:white;
+}
+
+#management-subbar{
+    flex: 0 0 35px;
+    border-bottom: 2px solid var(--color-primary-dark);
+    box-sizing: border-box;
+    background: var(--color-primary-mostly-transparent);
+}
+
+#management-subbar button{
+    height: 100%;
+    border:none;
+    background:transparent;
+    float:left;
+    display: inline-block;
+    border-right: 1px solid var(--color-primary-dark);
+}
+
+#advancedsettings{
+    width:100%;
+    border:none;
+}
+
+#single-settings-div, #organization-div{
+    padding-left: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+#single-settings-div div{
+    margin-top:5px;
+}
+
+input[type=text]{
+    border:1px solid grey;
+    border-radius: 5px;
+    margin-left:5px;
+}
+
+.btn{
+    border:1px solid grey;
+    border-radius: 5px;
+    margin-left: 5px;
+    background: transparent;
+    transition: 0.5s;
+}
+
+#organization-div span{
+    display: block;
+    margin-bottom: 5px;
+}
+
+#delete-org-btn{
+    background: rgba(255,100,100,0.3);
+    font-weight: bold;  
+    margin-left: 0;
+}
+
+#delete-org-btn:hover{
+    background:rgba(255,100,100,0.5);
+}
+
+#user-list-div span{
+    display: block;
+    padding-left: 5px;
+    padding-top: 2px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid lightgrey;
+}
+
+#new-user-btn{
+    margin: 3px;
+    margin-top: 5px;
+    border-radius: 5px;
+}
+
+#user-list-div span *{
+    display: block;
+}
+
+#user-list-div span button{
+    margin-top: 5px;
+    border-radius: 5px;
+}
+
+#user-list-div span label select{
+    margin-left: 5px;
+    display:inline-block;
+    border-radius: 5px;
+}
+
+#general-billing-settings b:nth-child(1){
+    background:rgba(155,155,155,0.25);
+    padding:5px;
+    display: block;
+    border-top: 2px solid grey;
+}
+
+#general-billing-settings *{
+    padding-left: 5px;
+}
+
+#general-billing-settings{
+    padding-bottom: 5px;
+}
+
+#set-organization-btn{
+    border-radius: 5px;
+    margin-left: 5px;
+}
+
+#delete-org-btn{
+    border-color: var(--color-red-mild);
+    border-radius:5px;
+}
+
+#delete-org-btn:hover{
+    background:var(--color-red-light-half-transparent)!important;
+}
+
+#single-settings-div, #user-list-div, #organization-div,#advancedsettings, #general-billing-settings{
+    display: none;
+    flex: 1;
+}

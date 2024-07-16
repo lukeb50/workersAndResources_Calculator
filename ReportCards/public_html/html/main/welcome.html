@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Welcome-Report Cards</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../static/css/main/welcome.css" type="text/css"/>
+        <link rel="stylesheet" href="../../static/css/main/index.css" type="text/css"/>
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+        <link rel="apple-touch-icon" sizes="120x120" href="../../static/icos/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="../../static/icos/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="../../static/icos/favicon-16x16.png">
+        <link rel="manifest" href="../../static/icos/site.webmanifest">
+        <link rel="mask-icon" href="../../static/icos/safari-pinned-tab.svg">
+        <meta name="msapplication-TileColor" content="#00aba9">
+        <meta name="theme-color" content="#ffffff">
+    </head>
+    <body>
+        <div class="blocker" id="loadblocker">
+            <div class="load" id="loadspinner"></div>
+        </div>
+        <div id="account-panel">
+            <div id="primary-panel">
+                <div id="sign-div">
+                    <div id="logindiv">
+                        <h1>Log In</h1>
+                        <div><label>Email:</label><input type="email" id="signin-email"></div>
+                        <div><label>Password:</label><input autocomplete="current-password" type="password" id="signin-password"></div>
+                        <button id="signin-btn" class="mainround">Log In</button>
+                        <a id="signin-error"></a>
+                        <div class="or-seperator"><hr><label>Or</label><hr></div>
+                        <div class="gbutton" id="GoogleLogInBtn"><img class="glogo" src="../../static/images/768px-Google__G__Logo.png" alt="Google logo"><label class="gprompt">Log in with Google</label></div>
+                        <div class="mbutton" id="MicrosoftLogInBtn"><img class="mlogo" src="../../static/images/microsoft-logo.png" alt="Microsoft logo"><label class="mprompt">Log in with Microsoft</label></div>
+                        <div class="password-seperator"><hr class="password-seperator"></div>
+                        <button id="forgotbtn" class="forgotbtn">Forgot Password</button>
+                    </div>
+                </div>
+            </div>
+            <div id="secondary-panel">
+                <p id="secondary-panel-message">Please select an organization to continue</p>
+                <select id="org-selector" size="14"></select>
+                <div id="secondary-panel-buttons">
+                    <button id="secondary-back" class="mainround">Back</button>
+                    <button id="secondary-accept" class="mainround">Continue</button>
+                </div>
+            </div>
+            <div id="loginemail-panel">
+                <p id="loginemail-panel-message">Enter your email address to continue</p>
+                <div id="loginemail-email-input-holder"><input placeholder="email@example.com" id="loginemail-email-input" type="email"></div>
+                <button id="newlinkbtn">Generate new link</button>
+                <button id="loginemail-confirmemail-btn" class="mainround">Next Step</button>
+            </div>
+            <div id="loginemail-provider-panel">
+                <p>Choose a method to login with</p>
+                <div id="PasswordLinkEmailBtn" class="loginemail-provideroption"><img class="glogo logo" src="../../static/icos/android-chrome-96x96.png" alt="Password login"><label class="gprompt">Login with a password</label></div>
+                <div id="PasswordLinkEmailExpanded">
+                    <div><label>Your Name:</label><input type="text" placeholder="John Doe" id="loginemail-name"></div>
+                    <div><label>Password:</label><input autocomplete="new-password" type="password" id="loginemail-password"></div>
+                    <div><label>Confirm Password:</label><input autocomplete="new-password" type="password" id="loginemail-password-confirm"></div>
+                    <label id="PasswordLinkEmailErrorMsg"></label>
+                    <button id="loginemail-password-btn" class="mainround">Confirm</button>
+                </div>
+                <div id="GoogleLoginEmailBtn" class="loginemail-provideroption"><img class="glogo logo" src="../../static/images/768px-Google__G__Logo.png" alt="Google logo"><label class="gprompt">Login with your Google account</label></div>
+                <div id="MicrosoftLoginEmailBtn" class="loginemail-provideroption"><img class="mlogo logo" src="../../static/images/microsoft-logo.png" alt="Microsoft logo"><label class="mprompt">Login with your Microsoft account</label></div>
+                <p>You can change your login method at any time</p>
+            </div>
+        </div>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-database.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-auth.js"></script>
+        <script src="../../static/javascript/utility/http_controller.js"></script>
+        <script src="../../static/javascript/main/welcome.js"></script>
+    </body>
+</html>
