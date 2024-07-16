@@ -116,7 +116,6 @@ function displaySchedule(Time) {
         var currentElement = lessonElements[e];
         currentElement.style.height = maxRowHeight + "px";
     }
-    
 
     function bindScheduleNoteChange(input, person) {
         input.onchange = function () {
