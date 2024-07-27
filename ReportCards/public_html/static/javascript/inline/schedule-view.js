@@ -20,6 +20,7 @@ var SheetModifiers = [];
 var Facilities = {};
 var Timeblocks = {};
 var currentTime;
+var changeData = [];
 
 var editMode = true;
 const scheduleContainer = document.getElementById("main-schedule-holder");
@@ -648,6 +649,7 @@ function closeMenuBind() {
 close_mainmenu.onclick = closeMenuBind;
 
 const view_change_table = document.getElementById("view-change-table");
+const view_change_button = document.getElementById("viewChangeButton");
 window.onload = function () {
     resetloader(true, null, null, false);
     firebase.auth().onAuthStateChanged(function (user) {
@@ -836,6 +838,7 @@ window.onload = function () {
             clearChildren(searchDiv);
             controlSection.style.flexGrow = 1;
         }
+        searchBar.focus();
     };
 
     const searchDiv = document.getElementById("controlSearchResults");
@@ -1029,7 +1032,7 @@ window.onload = function () {
         resetloader(true, null, null, false);
         HandleSpeadsheetUpload(document.getElementById("excelUpdateUpload")).then((cData) => {
             //Update all data
-            var changeData = [];
+            changeData = [];
             for (var p = 0; p < People.length; p++) {
                 changeData.push([]);
                 for (var s = 0; s < scheduleData[p].length; s++) {
@@ -1080,6 +1083,7 @@ window.onload = function () {
                     }
                 }
             }
+            view_change_button.disabled = changeData.flat().length === 0 ? true : false;
 
             function createRow(parent, instructorName, changeDataEntry, personName, changeType) {
                 var row = createElement("tr", parent, null, null);
@@ -1364,3 +1368,7 @@ function determineLevelId(LevelName) {
     }
     return null;
 }
+
+window.onbeforeunload = function () {
+    return "";
+};

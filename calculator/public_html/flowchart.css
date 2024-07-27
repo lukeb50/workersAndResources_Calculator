@@ -1,0 +1,344 @@
+html,body{
+    margin: 0;
+    font-family: "Roboto";
+    height: 100%;
+}
+
+*.hidden{
+    display: none;
+}
+
+#mainContainer{
+    width:100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#topbar{
+    height: 40px;
+    box-sizing: border-box;
+    background:rgba(255,0,0,0.05);
+    border-bottom: 2px solid rgba(255,0,0,0.4);
+    display: flex;
+}
+
+#topbar span{
+    display: block;
+    width:fit-content;
+    height: 100%;
+    align-content: center;
+    padding-left: 5px;
+    margin-right: 5px;
+    border-left: 1px solid rgba(255,0,0,0.4);
+}
+
+#topbar input{
+    height: 50%;
+    max-height: 40px;
+    border-radius: 5px;
+}
+
+
+#topbar span label{
+    height: 100%!important;
+    display: inline-flex;
+    align-items: center;
+}
+
+#topbar select-image,#topbar select-checkbox, #topbar button{
+    height: 75%!important;
+    border-radius: 5px;
+    background: rgba(255,255,255,1);
+    vertical-align: middle;
+    border: 1px solid lightgray;
+    font-size: 1em;
+}
+
+#topbar select-image:hover,#topbar select-checkbox:hover, #topbar button:hover{
+    background: rgba(255,255,255,.7);
+    transition: 0.3s;
+}
+
+#graph{
+    flex-grow: 1;
+    position: sticky;
+    overflow: scroll;
+    z-index: 20;
+}
+
+#graph div.containerBox{
+    position: absolute;
+    background:rgba(200,200,200,0.2);
+    border: 2px solid gray;
+    border-radius: 10px 10px 10px 10px;
+    width:125px;
+    height: fit-content;
+    box-shadow: 2px 2px 4px gray;
+    z-index: 3;
+}
+
+#graph div.compressedBuilding{
+    position: relative;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+#graph div.compressedBuilding:not(:nth-last-child(1)){
+    border-bottom: 2px solid black;
+    box-shadow: 0px 1px 2px gray;
+}
+
+#graph div.compressedBuilding div:not(:nth-child(1)):not(:nth-last-child(1)),
+#graph div.subContainerBox div:not(:nth-child(1)):not(:nth-last-child(1)){
+    border-bottom: 1px dashed gray;
+}
+
+#graph div.compressedBuilding div div,
+#graph div.subContainerBox div div{
+    border-bottom: none!important;
+}
+
+#graph div.containerBox div.calcCount{
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    right: -10px;
+    top: -10px;
+    border: 2px solid gray;
+    border-radius: 50%;
+    background:rgb(255,150,150);
+    align-content: center;
+    text-align: center;
+    font-size: 10px;
+}
+
+#graph div.subContainerBox{
+    padding: 5px;
+}
+
+#graph div.containerBox label.title{
+    width:100%;
+    font-weight: bold;
+    display: block;
+    text-align: center;
+}
+
+#graph div.containerBox label.smallTitle{
+    font-weight: bold;
+    display: block;
+    text-align: left;
+    font-size: 0.75em;
+}
+
+#graph div.containerBox img{
+    height:4em;
+    width:4em;
+    display: block;
+}
+
+#graph div.containerBox span{
+    display: flex;
+    flex: 1;
+}
+
+#graph div.containerBox span img{
+    height: 1em;
+    width: 1em;
+    margin:0;
+    display:inline-block;
+}
+
+#graph div.containerBox span label{
+    min-height:1em;
+    font-size: 0.9em;
+    display:inline-block;
+}
+
+#graph div.containerBox div.imageAreaContainer{
+    display: flex;
+    flex-direction: row-reverse;
+    flex-grow: 1;
+    font-size: 0.8em;
+}
+
+#graph div.containerBox div.imageAreaContainer div:nth-child(1){
+    padding-top: 2px;
+    flex:1;
+}
+
+#graph div div.compressedTitleContainer{
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+#graph div div.compressedTitleContainer img{
+    height: 2em;
+    width: 2em;
+}
+
+#graph div.compressedBuilding div.compressedInfo, #graph div.compressedBuilding div.connectionContainer{
+    font-size: 0.8em;
+}
+
+#graph div.containerBox div.inOutContainer{
+    display: flex;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+#graph div.containerBox div.inContainer,#graph div.containerBox div.outContainer{
+    flex:1;
+}
+
+#graph div.containerBox div.outContainer{
+    border-left: 1px dashed gray;
+}
+
+#graph div.containerBox div.sanitationContainer{
+    display: flex;
+}
+
+
+#graph div.containerBox div.connectionContainer{
+    margin-top: 2px;
+    padding-top: 2px;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+}
+
+#graph div.containerBox div.connectionContainer span{
+    flex:1;
+    min-width: 30px;
+    justify-content: center;
+}
+
+#graph div.multiBuildingContainer{
+    height:20px;
+    border-top: 2px solid gray;
+    display: flex;
+}
+
+#graph div.multiBuildingContainer span{
+    display: flex;
+    box-sizing: content-box;
+    flex:1;
+    transition: 0.5s;
+}
+
+#graph div.multiBuildingContainer span:not(:nth-child(1)){
+    border-left:2px solid gray;
+}
+
+#graph div.multiBuildingContainer span:hover{
+    background:rgba(155,155,155,0.2);
+}
+
+#graph div.multiBuildingContainer span.selected{
+    background:rgba(155,155,155,0.3);
+}
+
+#graph div.multiBuildingContainer span img{
+    height: 20px;
+    width:20px;
+    margin: auto;
+}
+
+#graph div.line{
+    position: absolute;
+    border:2px solid black;
+    z-index: 1;
+    white-space: nowrap;
+}
+
+#graph div.spineLine{
+    position: absolute;
+    writing-mode: vertical-lr;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 5px;
+    white-space: nowrap;
+}
+
+#graph div.spineSubLine{
+    position: absolute;
+    z-index: 2;
+    text-align: center;
+    font-size: 10px;
+    align-content: center;
+    white-space: nowrap;
+}
+
+#graph div.spineSubLine.left{
+    text-align: left;
+    padding-left: 5px;
+    mask: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 5px, rgba(255,255,255,1) 100%);
+}
+
+#graph div.spineSubLine.right{
+    text-align: right;
+    padding-right: 5px;
+    mask: linear-gradient(90deg, rgba(255,255,255,1) 0px, rgba(255,255,255,1) calc(100% - 5px), rgba(255,255,255,0) 100%);
+}
+
+#graph div.spineSubLine.stub{
+    font-size: 7px;
+    mask: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,1) 5px, rgba(255,255,255,1) calc(100% - 5px), rgba(255,255,255,0) 100%);
+}
+
+#mainGraphContainer{
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    overflow-x: hidden;
+}
+
+#calculator{
+    max-width: min(20em, 30vw);
+    background:rgba(255,0,0,0.05);
+    border-left: 2px solid rgba(255,0,0,0.4);
+    width:0px;
+    flex: 1;
+    transition: 0s;
+    padding:4px;
+    display: none;
+}
+
+#calculator h1, #calculator h3{
+    margin-top: 5px;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+#calculator h3{
+    font-weight: normal;
+}
+
+#calculator span{
+    display: block;
+    margin-bottom: 4px;
+    align-items: center;
+    display: flex;
+}
+
+#calculator span input[type="number"]{
+    border: 1px solid gray;
+    border-radius: 5px;
+    margin-right: 2px;
+    margin-left: 2px;
+}
+
+#calculator span button{
+    font-weight: bold;
+    border-radius: 10px;
+    border: 2px solid lightcoral;
+    background: white;
+    margin-left: 2px;
+
+}
+
+#calculator span img{
+    margin-right: 2px;
+    max-height: 1.5em;
+}
