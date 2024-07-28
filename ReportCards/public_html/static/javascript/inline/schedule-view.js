@@ -43,9 +43,10 @@ function displaySchedule(Time) {
     //Create instructors
     for (var p = 0; p < People.length; p++) {
         var instHeader = document.createElement("th");
-        instHeader.textContent = People[p].Name;
+        var instHolder = createElement("div", instHeader, "", "");
+        let instLbl = createElement("label", instHolder, People[p].Name, "");
         if (editMode === true) {
-            bindAddClassClick(instHeader, p);
+            bindChangeInstName(instLbl, p);
         }
         headerRow.appendChild(instHeader);
         //note row
@@ -56,6 +57,25 @@ function displaySchedule(Time) {
         bindScheduleNoteChange(instNoteInput, People[p]);
         instNote.appendChild(instNoteInput);
         noteRow.appendChild(instNote);
+        if (editMode === true) {
+            //New Class Button
+            let newClassBtn = createElement("button", instHolder, "add", "material-symbols-outlined");
+            newClassBtn.title = "Create New Class";
+            bindAddClassClick(newClassBtn, p);
+        }
+    }
+    //Create add instructor button
+    if (editMode) {
+        let addHeader = createElement("th", headerRow, "person_add", "material-symbols-outlined newinstholder");
+        addHeader.onclick = function () {
+            var name = prompt("Enter Person Name");
+            if (name) {
+                scheduleData.push([]);
+                People.push({Name: name, Uid: genUid(), UserInformation: {Corrections: 0, ScheduleNote: ""}});
+                displaySchedule(true);
+            }
+        };
+        createElement("input", createElement("td", noteRow, "", null), null, null).disabled = true;
     }
     //append row to table
     scheduleTable.appendChild(headerRow);
@@ -76,7 +96,7 @@ function displaySchedule(Time) {
         timeLbl.id = "time-" + t;
         timeLbl.className = "lessonTime";
         timerow.appendChild(timeLbl);
-        //Handle any times to display
+        //Handle any times to display, by instructor
         for (var i = 0; i < scheduleData.length; i++) {
             var isLesson = false;
             for (var s = 0; s < scheduleData[i].length; s++) {
@@ -109,6 +129,10 @@ function displaySchedule(Time) {
                 timerow.appendChild(blockBreak);
             }
         }
+        //Add extra spacing for new person column
+        if (editMode === true) {
+            createElement("td", timerow, "", "lessonSpacer faint");
+        }
     }
     //Handle heights
     var lessonElements = scheduleTable.querySelectorAll(".lesson, .lessonSpacer, .lessonTime");
@@ -130,8 +154,8 @@ function displaySchedule(Time) {
 
     var currentTime = new Date();
     clearInterval(timeIntervalId);
-    //waitMinute(); TODO: Fix
-    //updateCurrentTime();
+    waitMinute(); //TODO: Fix
+    updateCurrentTime();
     function waitMinute() {
         var current = new Date();
         var timeToNextMinute = (60 - current.getSeconds()) * 1000 - current.getMilliseconds();
@@ -146,23 +170,15 @@ function displaySchedule(Time) {
         var timeStamp = (currentTime.getHours() * 60) + currentTime.getMinutes();
         if (timeStamp >= tableInformation.firstStart && timeStamp < tableInformation.lastEnd) {
             //Time exists inside table range
-            var timeEl = document.getElementById("time-" + roundDown5(timeStamp));
-            var topPos = timeEl.offsetTop;
-            var minuteSize = timeEl.getBoundingClientRect().height / tableInformation.increment;
-            var minutePos = topPos + (minuteSize * (timeStamp - roundDown5(timeStamp))) - 1;
-            if (!document.getElementById("timeLine")) {
-                var timeLine = document.createElement("div");
-                timeLine.id = "timeLine";
-                scheduleContainer.appendChild(timeLine);
-            }
-            var timeLine = document.getElementById("timeLine");
-            timeLine.style.top = minutePos + "px";
-            timeLine.style.width = "calc(" + (scheduleTable.offsetWidth - 4) + "px - 8ch)";
-            timeLine.style.left = (timeEl.offsetLeft + timeEl.getBoundingClientRect().width + 1) + "px";
+            var timeEl = document.getElementById("time-" + roundDownTo(timeStamp, tableInformation.increment));
+            Array.from(document.getElementsByClassName("lessonTime activeTime")).forEach((el) => {
+                el.classList.remove("activeTime");
+            });
+            timeEl.classList.add("activeTime");
         }
 
-        function roundDown5(x) {
-            return Math.floor(x / 5) * 5;
+        function roundDownTo(x, inc) {
+            return Math.floor(x / inc) * inc;
         }
     }
 
@@ -291,6 +307,22 @@ function displaySchedule(Time) {
                     scheduleData[p].push({Level: lvl, Barcode: code, Names: [], TimeStart: start, Duration: parseInt(dur), TimeModifier: -1, SheetInformation: {Lead: {}, Instructor: {}}});
                     displaySchedule(true);
                 }
+            }
+        };
+    }
+
+    function bindChangeInstName(instLabel, p) {
+        instLabel.onclick = function () {
+            let newName = prompt("Enter new name, or leave blank to remove instructor", People[p].Name);
+            if (!newName) {
+                if (confirm("Are you sure you want to remove this instructor?")) {
+                    People.splice(p, 1);
+                    scheduleData.splice(p, 1);
+                    displaySchedule(true);
+                }
+            } else {
+                People[p].Name = newName;
+                instLabel.textContent = newName;
             }
         };
     }
@@ -1370,5 +1402,7 @@ function determineLevelId(LevelName) {
 }
 
 window.onbeforeunload = function () {
-    return "";
+    if (scheduleData && scheduleData.length > 0) {
+        //return "";
+    }
 };
