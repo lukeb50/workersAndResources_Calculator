@@ -411,6 +411,18 @@ function createSheetMenu(div, sheet, instructor, allsheets) {
                     }
                 };
             }
+            var swapBtn = createElement("button",titleEdits,"Swap","mainround");
+            swapBtn.disabled = true;
+            swapBtn.onclick = function(){
+                let swapWithCode = parseInt(prompt("Enter barcode of class to swap with"));
+                if(swapWithCode && !isNaN(swapWithCode) && swapWithCode !== sheet.Barcode){
+                    //find the class to swap with
+                    let p;
+                    let idx;
+                    displaySchedule(true);
+                    resetloader(false, null, null, false);
+                }
+            };
             var deleteEdits = createElement("button", titleEdits, "Delete", "mainround");
             deleteEdits.onclick = function () {
                 if (confirm("Delete this sheet?")) {
@@ -1403,6 +1415,6 @@ function determineLevelId(LevelName) {
 
 window.onbeforeunload = function () {
     if (scheduleData && scheduleData.length > 0) {
-        //return "";
+        return "";
     }
 };
